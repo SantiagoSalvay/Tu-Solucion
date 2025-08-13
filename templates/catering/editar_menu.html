@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">{{ title }}</h1>
+            <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-outline-primary">
+                <i class="bi bi-eye"></i> Ver Evento
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Información del evento -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> Información del Evento</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Cliente:</strong><br>
+                        {{ evento.id_cliente }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Tipo:</strong><br>
+                        {{ evento.get_tipo_evento_display }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Fecha:</strong><br>
+                        {{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Personas:</strong><br>
+                        {{ evento.cantidad_personas }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Formulario para agregar productos -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-plus-circle"></i> Agregar Producto</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    {{ form.id_tipo_producto|as_crispy_field }}
+                    {{ form.id_producto|as_crispy_field }}
+                    {{ form.cantidad_producto|as_crispy_field }}
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-plus"></i> Agregar al Menú
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Menú actual -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list-ul"></i> Menú Actual</h5>
+            </div>
+            <div class="card-body">
+                {% if menu_actual %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unit.</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in menu_actual %}
+                            <tr>
+                                <td>{{ item.id_tipo_producto }}</td>
+                                <td>{{ item.id_producto }}</td>
+                                <td>{{ item.cantidad_producto }}</td>
+                                <td>${{ item.precio_uni|floatformat:2 }}</td>
+                                <td>${{ item.precio_total|floatformat:2 }}</td>
+                                <td>
+                                    <a href="{% url 'catering:eliminar_producto_menu' item.id_menu %}" 
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('¿Estás seguro de que quieres eliminar este producto?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-info">
+                                <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                                <td><strong>${{ evento.precio_total|floatformat:2 }}</strong></td>
+                                <td></td>
+                            </tr>
+                            <tr class="table-success">
+                                <td colspan="4" class="text-end"><strong>Precio por persona:</strong></td>
+                                <td><strong>${{ evento.precio_por_persona|floatformat:2 }}</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-list-ul text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="text-muted mt-3">Menú vacío</h5>
+                    <p class="text-muted">Agrega productos al menú usando el formulario.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Cargar productos cuando cambie el tipo
+document.getElementById('id_id_tipo_producto').addEventListener('change', function() {
+    const tipoId = this.value;
+    if (tipoId) {
+        cargarProductos(tipoId);
+    }
+});
+</script>
+{% endblock %}

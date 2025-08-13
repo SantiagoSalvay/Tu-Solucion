@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Evento - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h5>¿Estás seguro de que quieres eliminar este evento?</h5>
+                    <p>Esta acción no se puede deshacer.</p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6>Información del Evento:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>ID:</strong> {{ evento.id_evento }}</li>
+                            <li><strong>Cliente:</strong> {{ evento.id_cliente }}</li>
+                            <li><strong>Tipo:</strong> {{ evento.get_tipo_evento_display }}</li>
+                            <li><strong>Fecha:</strong> {{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}</li>
+                            <li><strong>Ubicación:</strong> {{ evento.ubicacion }}</li>
+                            <li><strong>Estado:</strong> 
+                                <span class="badge bg-{% if evento.estado == 'SOLICITADO' %}warning{% elif evento.estado == 'CONFIRMADO' %}success{% elif evento.estado == 'EN_PROCESO' %}info{% elif evento.estado == 'FINALIZADO' %}secondary{% elif evento.estado == 'CANCELADO' %}danger{% else %}dark{% endif %}">
+                                    {{ evento.get_estado_display }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Eliminar Evento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

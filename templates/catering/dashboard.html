@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h3 mb-4">Dashboard</h1>
+    </div>
+</div>
+
+<!-- Estadísticas principales -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <i class="bi bi-calendar-event text-primary"></i>
+            <div class="number">{{ total_eventos }}</div>
+            <div class="label">Total Eventos</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <i class="bi bi-calendar-check text-success"></i>
+            <div class="number">{{ eventos_este_mes }}</div>
+            <div class="label">Eventos Este Mes</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <i class="bi bi-person-badge text-info"></i>
+            <div class="number">{{ personal_disponible }}</div>
+            <div class="label">Personal Disponible</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <i class="bi bi-graph-up text-warning"></i>
+            <div class="number">{{ eventos_proximos|length }}</div>
+            <div class="label">Eventos Próximos</div>
+        </div>
+    </div>
+</div>
+
+<!-- Eventos por estado -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-pie-chart"></i> Eventos por Estado</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Estado</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for estado in eventos_por_estado %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-{% if estado.estado == 'SOLICITADO' %}warning{% elif estado.estado == 'CONFIRMADO' %}success{% elif estado.estado == 'EN_PROCESO' %}info{% elif estado.estado == 'FINALIZADO' %}secondary{% elif estado.estado == 'CANCELADO' %}danger{% else %}dark{% endif %}">
+                                        {{ estado.estado }}
+                                    </span>
+                                </td>
+                                <td>{{ estado.count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-calendar-week"></i> Eventos Próximos (7 días)</h5>
+            </div>
+            <div class="card-body">
+                {% if eventos_proximos %}
+                <div class="list-group list-group-flush">
+                    {% for evento in eventos_proximos %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ evento.tipo_evento }}</h6>
+                            <small class="text-muted">
+                                {{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}<br>
+                                {{ evento.id_cliente }}
+                            </small>
+                        </div>
+                        <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-sm btn-outline-primary">
+                            Ver
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No hay eventos próximos</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones rápidas -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-lightning-charge"></i> Acciones Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{% url 'catering:cliente_create' %}" class="btn btn-primary w-100">
+                            <i class="bi bi-person-plus"></i> Nuevo Cliente
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{% url 'catering:evento_create' %}" class="btn btn-success w-100">
+                            <i class="bi bi-calendar-plus"></i> Nuevo Evento
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{% url 'catering:consulta_financiera' %}" class="btn btn-warning w-100">
+                            <i class="bi bi-graph-up"></i> Reporte Financiero
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{% url 'catering:consulta_barrios' %}" class="btn btn-info w-100">
+                            <i class="bi bi-geo-alt"></i> Análisis Barrios
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

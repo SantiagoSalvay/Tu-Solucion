@@ -1,0 +1,220 @@
+[
+    {
+        "model": "catering.tipoproducto",
+        "pk": 1,
+        "fields": {
+            "descripcion": "Bebidas"
+        }
+    },
+    {
+        "model": "catering.tipoproducto",
+        "pk": 2,
+        "fields": {
+            "descripcion": "Entradas"
+        }
+    },
+    {
+        "model": "catering.tipoproducto",
+        "pk": 3,
+        "fields": {
+            "descripcion": "Platos Principales"
+        }
+    },
+    {
+        "model": "catering.tipoproducto",
+        "pk": 4,
+        "fields": {
+            "descripcion": "Postres"
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 1,
+        "fields": {
+            "id_tipo_producto": 1,
+            "descripcion": "Agua Mineral",
+            "precio": "2.50",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 2,
+        "fields": {
+            "id_tipo_producto": 1,
+            "descripcion": "Gaseosa Cola",
+            "precio": "3.00",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 3,
+        "fields": {
+            "id_tipo_producto": 1,
+            "descripcion": "Vino Tinto",
+            "precio": "15.00",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 4,
+        "fields": {
+            "id_tipo_producto": 1,
+            "descripcion": "Champagne",
+            "precio": "25.00",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 5,
+        "fields": {
+            "id_tipo_producto": 2,
+            "descripcion": "Empanadas de Carne",
+            "precio": "8.00",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 6,
+        "fields": {
+            "id_tipo_producto": 2,
+            "descripcion": "Canapés Variados",
+            "precio": "12.00",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 7,
+        "fields": {
+            "id_tipo_producto": 3,
+            "descripcion": "Pollo a la Plancha",
+            "precio": "18.00",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 8,
+        "fields": {
+            "id_tipo_producto": 3,
+            "descripcion": "Bife de Chorizo",
+            "precio": "25.00",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 9,
+        "fields": {
+            "id_tipo_producto": 4,
+            "descripcion": "Torta de Chocolate",
+            "precio": "20.00",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.producto",
+        "pk": 10,
+        "fields": {
+            "id_tipo_producto": 4,
+            "descripcion": "Helado Artesanal",
+            "precio": "8.00",
+            "disponible": true
+        }
+    },
+    {
+        "model": "catering.responsable",
+        "pk": 1,
+        "fields": {
+            "nombre_apellido": "María González",
+            "telefono": "351-1234567",
+            "email": "maria.gonzalez@tusolucion.com"
+        }
+    },
+    {
+        "model": "catering.responsable",
+        "pk": 2,
+        "fields": {
+            "nombre_apellido": "Carlos Rodríguez",
+            "telefono": "351-9876543",
+            "email": "carlos.rodriguez@tusolucion.com"
+        }
+    },
+    {
+        "model": "catering.personal",
+        "pk": 1,
+        "fields": {
+            "tipo_personal": "MOZO",
+            "nombre_y_apellido": "Juan Pérez",
+            "telefono": "351-1111111",
+            "email": "juan.perez@tusolucion.com",
+            "estado": "ACTIVO"
+        }
+    },
+    {
+        "model": "catering.personal",
+        "pk": 2,
+        "fields": {
+            "tipo_personal": "COCINERO",
+            "nombre_y_apellido": "Ana Martínez",
+            "telefono": "351-2222222",
+            "email": "ana.martinez@tusolucion.com",
+            "estado": "ACTIVO"
+        }
+    },
+    {
+        "model": "catering.personal",
+        "pk": 3,
+        "fields": {
+            "tipo_personal": "ASISTENTE",
+            "nombre_y_apellido": "Luis Fernández",
+            "telefono": "351-3333333",
+            "email": "luis.fernandez@tusolucion.com",
+            "estado": "ACTIVO"
+        }
+    },
+    {
+        "model": "catering.cliente",
+        "pk": 1,
+        "fields": {
+            "nombre": "Roberto",
+            "apellido": "García",
+            "tipo_doc": "DNI",
+            "num_doc": "12345678",
+            "email": "roberto.garcia@email.com",
+            "domicilio": "Av. Colón 123, Centro, Córdoba",
+            "fecha_alta": "2024-01-15"
+        }
+    },
+    {
+        "model": "catering.cliente",
+        "pk": 2,
+        "fields": {
+            "nombre": "Elena",
+            "apellido": "López",
+            "tipo_doc": "DNI",
+            "num_doc": "87654321",
+            "email": "elena.lopez@email.com",
+            "domicilio": "Belgrano 456, Nueva Córdoba, Córdoba",
+            "fecha_alta": "2024-01-20"
+        }
+    },
+    {
+        "model": "catering.cliente",
+        "pk": 3,
+        "fields": {
+            "nombre": "Miguel",
+            "apellido": "Torres",
+            "tipo_doc": "DNI",
+            "num_doc": "11223344",
+            "email": "miguel.torres@email.com",
+            "domicilio": "San Martín 789, Alta Córdoba, Córdoba",
+            "fecha_alta": "2024-02-01"
+        }
+    }
+]

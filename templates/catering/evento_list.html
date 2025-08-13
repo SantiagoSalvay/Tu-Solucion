@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block title %}Eventos - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3">Eventos de Catering</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'catering:reserva_catering' %}" class="btn btn-primary">
+            <i class="bi bi-calendar-plus"></i> Nueva Reserva
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-2">
+                <label for="estado" class="form-label">Estado</label>
+                <select name="estado" id="estado" class="form-select">
+                    <option value="">Todos</option>
+                    {% for value, label in estados %}
+                    <option value="{{ value }}" {% if filtros.estado == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select name="tipo" id="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    {% for value, label in tipos %}
+                    <option value="{{ value }}" {% if filtros.tipo == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="fecha_desde" class="form-label">Desde</label>
+                <input type="date" name="fecha_desde" id="fecha_desde" class="form-control" value="{{ filtros.fecha_desde }}">
+            </div>
+            <div class="col-md-2">
+                <label for="fecha_hasta" class="form-label">Hasta</label>
+                <input type="date" name="fecha_hasta" id="fecha_hasta" class="form-control" value="{{ filtros.fecha_hasta }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+                <a href="{% url 'catering:evento_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de eventos -->
+<div class="card">
+    <div class="card-body">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Ubicación</th>
+                        <th>Estado</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for evento in page_obj %}
+                    <tr>
+                        <td>{{ evento.id_evento }}</td>
+                        <td>
+                            <strong>{{ evento.id_cliente.apellido }}, {{ evento.id_cliente.nombre }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ evento.get_tipo_evento_display }}</span>
+                        </td>
+                        <td>
+                            {{ evento.fecha|date:"d/m/Y" }}<br>
+                            <small class="text-muted">{{ evento.hora|time:"H:i" }}</small>
+                        </td>
+                        <td>
+                            <span class="text-truncate-2">{{ evento.ubicacion }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if evento.estado == 'SOLICITADO' %}warning{% elif evento.estado == 'CONFIRMADO' %}success{% elif evento.estado == 'EN_PROCESO' %}info{% elif evento.estado == 'FINALIZADO' %}secondary{% elif evento.estado == 'CANCELADO' %}danger{% else %}dark{% endif %}">
+                                {{ evento.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if evento.precio_total %}
+                            <strong>${{ evento.precio_total|floatformat:2 }}</strong><br>
+                            <small class="text-muted">${{ evento.precio_por_persona|floatformat:2 }}/pers.</small>
+                            {% else %}
+                            <span class="text-muted">Sin precio</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-sm btn-outline-primary" title="Ver">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'catering:evento_update' evento.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'catering:editar_menu' evento.pk %}" class="btn btn-sm btn-outline-info" title="Editar Menú">
+                                    <i class="bi bi-list-ul"></i>
+                                </a>
+                                <a href="{% url 'catering:evento_delete' evento.pk %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación de eventos">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} eventos
+            </small>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-calendar-event text-muted" style="font-size: 3rem;"></i>
+            <h4 class="text-muted mt-3">No se encontraron eventos</h4>
+            <p class="text-muted">
+                {% if filtros.estado or filtros.tipo or filtros.fecha_desde or filtros.fecha_hasta %}
+                No hay eventos que coincidan con los filtros aplicados
+                {% else %}
+                Aún no hay eventos registrados en el sistema
+                {% endif %}
+            </p>
+            <a href="{% url 'catering:reserva_catering' %}" class="btn btn-primary">
+                <i class="bi bi-calendar-plus"></i> Crear Primer Evento
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

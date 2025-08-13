@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3">Clientes</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'catering:cliente_create' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Nuevo Cliente
+        </a>
+    </div>
+</div>
+
+<!-- Formulario de búsqueda -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <input type="text" name="search" class="form-control" placeholder="Buscar por nombre, apellido, email o documento..." value="{{ search }}">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+                {% if search %}
+                <a href="{% url 'catering:cliente_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de clientes -->
+<div class="card">
+    <div class="card-body">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Documento</th>
+                        <th>Email</th>
+                        <th>Fecha Alta</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in page_obj %}
+                    <tr>
+                        <td>{{ cliente.id_cliente }}</td>
+                        <td>
+                            <strong>{{ cliente.apellido }}, {{ cliente.nombre }}</strong>
+                        </td>
+                        <td>{{ cliente.tipo_doc }}: {{ cliente.num_doc }}</td>
+                        <td>{{ cliente.email }}</td>
+                        <td>{{ cliente.fecha_alta|date:"d/m/Y" }}</td>
+                        <td>
+                            <a href="{% url 'catering:cliente_detail' cliente.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'catering:cliente_update' cliente.pk %}" class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación de clientes">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} clientes
+            </small>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+            <h4 class="text-muted mt-3">No se encontraron clientes</h4>
+            <p class="text-muted">
+                {% if search %}
+                No hay clientes que coincidan con tu búsqueda "{{ search }}"
+                {% else %}
+                Aún no hay clientes registrados en el sistema
+                {% endif %}
+            </p>
+            <a href="{% url 'catering:cliente_create' %}" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> Agregar Primer Cliente
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

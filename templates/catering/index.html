@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">Bienvenido a Tu Solución</h1>
+            <p class="lead">Sistema de Gestión de Catering</p>
+            <hr class="my-4">
+            <p>Gestiona eventos, clientes, personal y menús de manera eficiente.</p>
+            {% if user.is_authenticated %}
+                <a class="btn btn-primary btn-lg" href="{% url 'catering:dashboard' %}" role="button">
+                    <i class="bi bi-speedometer2"></i> Ir al Dashboard
+                </a>
+            {% else %}
+                <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">
+                    <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
+                <h5 class="card-title mt-2">Clientes</h5>
+                <p class="card-text display-6">{{ total_clientes }}</p>
+                <a href="{% url 'catering:cliente_list' %}" class="btn btn-outline-primary">Ver Clientes</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-calendar-event text-success" style="font-size: 2rem;"></i>
+                <h5 class="card-title mt-2">Eventos</h5>
+                <p class="card-text display-6">{{ total_eventos }}</p>
+                <a href="{% url 'catering:evento_list' %}" class="btn btn-outline-success">Ver Eventos</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-calendar-check text-warning" style="font-size: 2rem;"></i>
+                <h5 class="card-title mt-2">Eventos Hoy</h5>
+                <p class="card-text display-6">{{ eventos_hoy }}</p>
+                <a href="{% url 'catering:evento_list' %}" class="btn btn-outline-warning">Ver Eventos</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-person-badge text-info" style="font-size: 2rem;"></i>
+                <h5 class="card-title mt-2">Personal Activo</h5>
+                <p class="card-text display-6">{{ personal_activo }}</p>
+                <a href="{% url 'catering:personal_list' %}" class="btn btn-outline-info">Ver Personal</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-lightning-charge"></i> Acciones Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'catering:reserva_catering' %}" class="btn btn-primary">
+                        <i class="bi bi-calendar-plus"></i> Nueva Reserva de Catering
+                    </a>
+                    <a href="{% url 'catering:cliente_create' %}" class="btn btn-success">
+                        <i class="bi bi-person-plus"></i> Nuevo Cliente
+                    </a>
+                    <a href="{% url 'catering:evento_list' %}" class="btn btn-info">
+                        <i class="bi bi-calendar-event"></i> Ver Eventos
+                    </a>
+                    <a href="{% url 'catering:consulta_financiera' %}" class="btn btn-warning">
+                        <i class="bi bi-graph-up"></i> Consulta Financiera
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> Información del Sistema</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle text-success"></i> Gestión completa de clientes</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Control de eventos y disponibilidad</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Armado personalizado de menús</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Sistema de pagos y señas</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Asignación de personal</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Reportes y consultas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if eventos_pendientes > 0 %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>¡Atención!</strong> Tienes {{ eventos_pendientes }} eventos pendientes de confirmación.
+            <a href="{% url 'catering:evento_list' %}" class="alert-link">Ver eventos</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,105 @@
+erDiagram 
+
+    clientes {
+        int id_cliente PK
+        varchar nombre
+        varchar apellido
+        varchar tipo_doc
+        int num_doc
+        varchar email
+        varchar domicilio
+        date fecha_alta 
+    }
+
+    responsable {
+        int id_responsable PK
+        varchar nombre_apellido
+        int telefono
+        varchar email
+    }   
+
+    evento_solicitado {
+        int id_evento PK
+        int id_cliente FK
+        int id_responsable FK 
+        int id_menu FK
+        int id_comprobante FK 
+        int id_servicio FK 
+        varchar tipo_evento 
+        date fecha
+        time hora
+        varchar ubicacion
+        int cantidad_personas 
+    }
+
+    menu_x_tipo_producto {
+        int id_menu PK
+        int id_cliente FK
+        int id_tipo_producto FK 
+        int id_producto FK 
+        int cantidad_producto
+        int precio_uni
+        int precio_total
+    }
+
+
+    tipo_productos {
+        int id_tipo_producto PK
+        varchar descripcion 
+    }
+
+    productos_x_tipo {
+        int id_producto PK
+        int id_tipo_producto FK 
+        varchar descripcion
+        int precio
+    }
+
+
+
+    comprobante {
+        int id_comprobante PK
+        int id_cliente FK 
+        int id_evento FK 
+        date fecha_pedido
+        int importe_total_productos
+        int total_servicio
+        int precio_x_persona
+        date fecha_vigencia 
+    }
+
+    senia {
+        int id_senia PK 
+        int id_evento FK 
+        int monto 
+        varchar estado 
+    }
+
+    personal {
+        int id_personal PK
+        varchar tipo_personal 
+        varchar nombre_y_apellido
+        int telefono 
+        varchar email 
+        varchar estado 
+    }
+
+    servicios {
+        int id_servicio PK 
+        int id_evento FK 
+        int id_personal FK 
+        int cantidad_personal
+        varchar estado 
+    }
+
+
+    clientes ||--|{ evento_solicitado: tiene 
+    responsable ||--|{ evento_solicitado: tiene 
+    evento_solicitado ||--|{ menu_x_tipo_producto: tiene 
+    responsable ||--|{ comprobante: tiene 
+    clientes ||--|{ comprobante: tiene 
+    tipo_productos ||--|{ productos_x_tipo: tiene 
+    clientes ||--|{ senia: tiene 
+    servicios ||--|{ personal: tiene 
+    evento_solicitado ||--|{ servicios: tiene 
+    tipo_productos ||--|{ menu_x_tipo_producto: tiene
