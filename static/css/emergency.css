@@ -1,0 +1,169 @@
+/* ===== CSS DE EMERGENCIA PARA BOTONES ===== */
+/* Asegurar que todos los botones sean clickeables */
+
+.btn, 
+.btn-primary, 
+.btn-secondary, 
+.btn-success, 
+.btn-warning, 
+.btn-danger, 
+.btn-outline,
+.nav-link,
+.dropdown-item,
+.page-link,
+a {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Eliminar cualquier overlay que pueda estar bloqueando */
+#loading-screen {
+    pointer-events: none !important;
+    z-index: 9999 !important;
+}
+
+/* Asegurar que los formularios sean interactivos */
+input, 
+select, 
+textarea, 
+.form-control, 
+.form-select {
+    pointer-events: auto !important;
+    cursor: text !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Asegurar que las tablas sean interactivas */
+.table tbody tr {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que las cards sean interactivas */
+.card {
+    pointer-events: auto !important;
+    cursor: default !important;
+}
+
+/* Asegurar que los modales sean interactivos */
+.modal-content {
+    pointer-events: auto !important;
+    z-index: 1050 !important;
+}
+
+/* Asegurar que los dropdowns sean interactivos */
+.dropdown-menu {
+    pointer-events: auto !important;
+    z-index: 1000 !important;
+}
+
+/* Asegurar que los alerts sean interactivos */
+.alert {
+    pointer-events: auto !important;
+    z-index: 10 !important;
+}
+
+/* Asegurar que el navbar sea interactivo */
+.navbar {
+    pointer-events: auto !important;
+    z-index: 1000 !important;
+}
+
+/* Asegurar que el contenido principal sea interactivo */
+.main-content {
+    pointer-events: auto !important;
+    z-index: 1 !important;
+}
+
+/* Asegurar que el footer sea interactivo */
+.footer {
+    pointer-events: auto !important;
+    z-index: 1 !important;
+}
+
+/* Asegurar que el scroll to top sea interactivo */
+#scroll-to-top {
+    pointer-events: auto !important;
+    z-index: 1000 !important;
+    cursor: pointer !important;
+}
+
+/* Eliminar cualquier transformación que pueda estar causando problemas */
+.btn:hover,
+.card:hover,
+.nav-link:hover {
+    transform: none !important;
+}
+
+/* Asegurar que los enlaces funcionen */
+a[href] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que los botones de formulario funcionen */
+button[type="submit"],
+button[type="button"],
+input[type="submit"],
+input[type="button"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que los checkboxes y radios funcionen */
+input[type="checkbox"],
+input[type="radio"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que los tooltips funcionen */
+[data-bs-toggle="tooltip"] {
+    pointer-events: auto !important;
+    cursor: help !important;
+}
+
+/* Asegurar que los modales funcionen */
+[data-bs-toggle="modal"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que los dropdowns funcionen */
+[data-bs-toggle="dropdown"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que los collapse funcionen */
+[data-bs-toggle="collapse"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que los tabs funcionen */
+[data-bs-toggle="tab"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que los pills funcionen */
+[data-bs-toggle="pill"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que los popovers funcionen */
+[data-bs-toggle="popover"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Asegurar que los dismissibles funcionen */
+[data-bs-dismiss] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}

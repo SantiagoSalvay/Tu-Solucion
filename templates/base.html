@@ -4,23 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Tu Solución - Sistema de Catering{% endblock %}</title>
+    <title>{% block title %}Tu Solución - Sistema de Gestión de Catering{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <!-- Emergency CSS for button interactions -->
+    <link href="{% static 'css/emergency.css' %}" rel="stylesheet">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="{% static 'css/style.css' %}" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" as="style">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="position-fixed w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 9999;">
+        <div class="text-center text-white">
+            <div class="loading-spinner mb-3"></div>
+            <h4 class="animate-pulse">Tu Solución</h4>
+            <p class="text-white-50">Cargando sistema...</p>
+        </div>
+    </div>
+
+    <!-- Navbar Simplificado -->
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'catering:index' %}">
-                <i class="bi bi-cup-hot"></i> Tu Solución
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'catering:index' %}">
+                <i class="bi bi-cup-hot-fill me-2 animate-float"></i>
+                <span class="text-gradient fw-bold">Tu Solución</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -30,107 +48,185 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'catering:dashboard' %}">
-                            <i class="bi bi-speedometer2"></i> Dashboard
+                        <a class="nav-link hover-effect" href="{% url 'catering:index' %}">
+                            <i class="bi bi-house-door me-1"></i>Inicio
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link hover-effect" href="{% url 'catering:dashboard' %}">
+                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-people"></i> Gestión
+                        <a class="nav-link dropdown-toggle hover-effect" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-calendar-event me-1"></i>Eventos
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'catering:cliente_list' %}">Clientes</a></li>
-                            <li><a class="dropdown-item" href="{% url 'catering:evento_list' %}">Eventos</a></li>
-                            <li><a class="dropdown-item" href="{% url 'catering:personal_list' %}">Personal</a></li>
-                            <li><a class="dropdown-item" href="{% url 'catering:productos_list' %}">Productos</a></li>
+                        <ul class="dropdown-menu glass-effect">
+                            <li><a class="dropdown-item" href="{% url 'catering:reserva_catering' %}">
+                                <i class="bi bi-plus-circle me-2"></i>Nueva Reserva
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'catering:evento_list' %}">
+                                <i class="bi bi-list-ul me-2"></i>Ver Eventos
+                            </a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-graph-up"></i> Consultas
+                        <a class="nav-link dropdown-toggle hover-effect" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-people me-1"></i>Gestión
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'catering:consulta_financiera' %}">Financiera</a></li>
-                            <li><a class="dropdown-item" href="{% url 'catering:consulta_barrios' %}">Barrios</a></li>
-                            <li><a class="dropdown-item" href="{% url 'catering:consulta_cumpleanos' %}">Cumpleaños</a></li>
+                        <ul class="dropdown-menu glass-effect">
+                            <li><a class="dropdown-item" href="{% url 'catering:cliente_list' %}">
+                                <i class="bi bi-person me-2"></i>Clientes
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'catering:personal_list' %}">
+                                <i class="bi bi-person-badge me-2"></i>Personal
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'catering:productos_list' %}">
+                                <i class="bi bi-box me-2"></i>Productos
+                            </a></li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle hover-effect" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-graph-up me-1"></i>Reportes
+                        </a>
+                        <ul class="dropdown-menu glass-effect">
+                            <li><a class="dropdown-item" href="{% url 'catering:consulta_financiera' %}">
+                                <i class="bi bi-cash-stack me-2"></i>Consulta Financiera
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'catering:consulta_barrios' %}">
+                                <i class="bi bi-geo-alt me-2"></i>Análisis de Barrios
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'catering:consulta_cumpleanos' %}">
+                                <i class="bi bi-gift me-2"></i>Reporte de Cumpleaños
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
                 </ul>
                 
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> {{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'admin:index' %}">Administración</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a></li>
-                            </ul>
-                        </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle hover-effect" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-effect">
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">
+                                <i class="bi bi-gear me-2"></i>Administración
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">
+                                <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link hover-effect" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar Sesión
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="container mt-4">
-        <!-- Messages -->
-        {% if messages %}
-            {% for message in messages %}
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Breadcrumb -->
+            {% block breadcrumb %}
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb glass-effect">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'catering:index' %}" class="text-decoration-none">
+                            <i class="bi bi-house-door"></i> Inicio
+                        </a>
+                    </li>
+                    {% block breadcrumb_items %}{% endblock %}
+                </ol>
+            </nav>
+            {% endblock %}
+
+            <!-- Mensajes Flash -->
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% elif message.tags == 'danger' %}x-circle{% else %}info-circle{% endif %} me-2"></i>
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Page Header -->
-        {% block page_header %}
-            {% if page_title %}
-                <div class="row mb-4">
-                    <div class="col">
-                        <h1 class="h3">{{ page_title }}</h1>
-                        {% if page_subtitle %}
-                            <p class="text-muted">{{ page_subtitle }}</p>
-                        {% endif %}
-                    </div>
-                </div>
+                {% endfor %}
+            </div>
             {% endif %}
-        {% endblock %}
 
-        <!-- Content -->
-        {% block content %}{% endblock %}
+            <!-- Contenido de la página -->
+            {% block content %}{% endblock %}
+        </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-light mt-5 py-4">
+    <!-- Footer Simplificado -->
+    <footer class="footer mt-auto py-4">
         <div class="container">
-            <div class="row">
+            <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h5>Tu Solución</h5>
-                    <p class="text-muted">Sistema de Gestión de Catering</p>
+                    <p class="mb-0 text-center text-md-start">
+                        <i class="bi bi-cup-hot-fill me-2 animate-float"></i>
+                        <span class="text-gradient fw-semibold">Tu Solución</span> - Sistema de Gestión de Catering
+                    </p>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="text-muted">&copy; 2024 Tu Solución. Todos los derechos reservados.</p>
+                <div class="col-md-6">
+                    <p class="mb-0 text-center text-md-end text-muted">
+                        <i class="bi bi-code-slash me-1"></i>
+                        Desarrollado con <i class="bi bi-heart-fill text-danger animate-pulse"></i> y Django
+                    </p>
                 </div>
             </div>
         </div>
     </footer>
 
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle" style="width: 50px; height: 50px; z-index: 1000; opacity: 0; transition: opacity 0.3s;">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery (para AJAX) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Custom JS -->
     <script src="{% static 'js/main.js' %}"></script>
     
+    <!-- Scripts adicionales -->
     {% block extra_js %}{% endblock %}
+
+    <!-- Script de inicialización -->
+    <script>
+        // Ocultar pantalla de carga inmediatamente para evitar problemas
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 300);
+                }, 100);
+            }
+        });
+        
+        // También ocultar cuando la página esté completamente cargada
+        window.addEventListener('load', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,120 @@
+graph TB
+    subgraph "Sistema de Gestión de Catering - Tu Solución"
+        subgraph "Actores"
+            Cliente[Cliente]
+            Responsable[Responsable de Servicios]
+            Cobro[Responsable de Cobro]
+            Compras[Encargado de Compras]
+            Admin[Administrador]
+        end
+        
+        subgraph "Casos de Uso - Gestión de Clientes"
+            UC1[Registrar Cliente]
+            UC2[Consultar Cliente]
+            UC3[Actualizar Cliente]
+            UC4[Eliminar Cliente]
+        end
+        
+        subgraph "Casos de Uso - Reserva de Catering"
+            UC5[Consultar Disponibilidad]
+            UC6[Crear Reserva]
+            UC7[Armar Menú]
+            UC8[Calcular Precios]
+            UC9[Generar Comprobante]
+        end
+        
+        subgraph "Casos de Uso - Gestión de Eventos"
+            UC10[Ver Eventos]
+            UC11[Editar Evento]
+            UC12[Eliminar Evento]
+            UC13[Cambiar Estado]
+        end
+        
+        subgraph "Casos de Uso - Gestión de Menús"
+            UC14[Agregar Producto]
+            UC15[Eliminar Producto]
+            UC16[Modificar Cantidades]
+            UC17[Recalcular Precios]
+        end
+        
+        subgraph "Casos de Uso - Pagos"
+            UC18[Registrar Seña]
+            UC19[Generar Recibo]
+            UC20[Procesar Pago Final]
+            UC21[Generar Factura]
+        end
+        
+        subgraph "Casos de Uso - Personal"
+            UC22[Asignar Personal]
+            UC23[Consultar Disponibilidad]
+            UC24[Notificar Asignación]
+        end
+        
+        subgraph "Casos de Uso - Consultas"
+            UC25[Consulta Financiera]
+            UC26[Análisis de Barrios]
+            UC27[Reporte de Cumpleaños]
+        end
+        
+        subgraph "Casos de Uso - Sistema"
+            UC28[Iniciar Sesión]
+            UC29[Gestionar Usuarios]
+            UC30[Configurar Sistema]
+        end
+    end
+    
+    %% Relaciones Cliente
+    Cliente --> UC5
+    Cliente --> UC6
+    Cliente --> UC7
+    Cliente --> UC18
+    Cliente --> UC20
+    
+    %% Relaciones Responsable
+    Responsable --> UC1
+    Responsable --> UC2
+    Responsable --> UC3
+    Responsable --> UC5
+    Responsable --> UC6
+    Responsable --> UC7
+    Responsable --> UC8
+    Responsable --> UC9
+    Responsable --> UC10
+    Responsable --> UC11
+    Responsable --> UC12
+    Responsable --> UC13
+    Responsable --> UC14
+    Responsable --> UC15
+    Responsable --> UC16
+    Responsable --> UC17
+    Responsable --> UC22
+    Responsable --> UC23
+    Responsable --> UC24
+    
+    %% Relaciones Cobro
+    Cobro --> UC18
+    Cobro --> UC19
+    Cobro --> UC20
+    Cobro --> UC21
+    
+    %% Relaciones Compras
+    Compras --> UC25
+    Compras --> UC26
+    
+    %% Relaciones Admin
+    Admin --> UC28
+    Admin --> UC29
+    Admin --> UC30
+    Admin --> UC27
+    
+    %% Incluye relaciones
+    UC6 -.->|incluye| UC5
+    UC6 -.->|incluye| UC1
+    UC6 -.->|incluye| UC7
+    UC7 -.->|incluye| UC14
+    UC7 -.->|incluye| UC17
+    UC9 -.->|incluye| UC8
+    UC18 -.->|incluye| UC19
+    UC20 -.->|incluye| UC21
+    UC22 -.->|incluye| UC23
+    UC22 -.->|incluye| UC24

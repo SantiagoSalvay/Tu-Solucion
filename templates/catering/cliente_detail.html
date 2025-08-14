@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ cliente }} - Detalles{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:cliente_list' %}">Clientes</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ cliente }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Información del Cliente -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Información del Cliente
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Nombre:</strong> {{ cliente.nombre }}</p>
+                        <p><strong>Apellido:</strong> {{ cliente.apellido }}</p>
+                        <p><strong>Tipo de Documento:</strong> {{ cliente.get_tipo_doc_display }}</p>
+                        <p><strong>Número de Documento:</strong> {{ cliente.num_doc }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Email:</strong> 
+                            {% if cliente.email %}
+                                <a href="mailto:{{ cliente.email }}">{{ cliente.email }}</a>
+                            {% else %}
+                                <span class="text-muted">No especificado</span>
+                            {% endif %}
+                        </p>
+                        <p><strong>Domicilio:</strong> {{ cliente.domicilio }}</p>
+                        <p><strong>Fecha de Alta:</strong> {{ cliente.fecha_alta|date:"d/m/Y" }}</p>
+                        <p><strong>Edad:</strong> {{ cliente.get_edad }} años</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'catering:cliente_update' cliente.pk %}" class="btn btn-primary">
+                        <i class="bi bi-pencil me-1"></i>Editar
+                    </a>
+                    <a href="{% url 'catering:cliente_delete' cliente.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Eliminar
+                    </a>
+                    <a href="{% url 'catering:cliente_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Eventos del Cliente -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Eventos del Cliente
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if eventos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Ubicación</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for evento in eventos %}
+                                <tr>
+                                    <td>{{ evento.fecha|date:"d/m/Y" }}</td>
+                                    <td>{{ evento.get_tipo_evento_display }}</td>
+                                    <td>{{ evento.ubicacion }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ evento.get_estado_color }}">
+                                            {{ evento.get_estado_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Este cliente no tiene eventos registrados</p>
+                        <a href="{% url 'catering:reserva_catering' %}?cliente={{ cliente.pk }}" class="btn btn-primary">
+                            <i class="bi bi-calendar-plus me-1"></i>Crear Evento
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Estadísticas del Cliente -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>
+                    Estadísticas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="stats-number">{{ total_eventos }}</div>
+                        <div class="stats-label">Total Eventos</div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="stats-number">{{ eventos_completados }}</div>
+                        <div class="stats-label">Completados</div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="stats-number">{{ eventos_pendientes }}</div>
+                        <div class="stats-label">Pendientes</div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="stats-number">${{ total_facturado|floatformat:0 }}</div>
+                        <div class="stats-label">Total Facturado</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning-charge me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'catering:reserva_catering' %}?cliente={{ cliente.pk }}" class="btn btn-primary">
+                        <i class="bi bi-calendar-plus me-1"></i>Nuevo Evento
+                    </a>
+                    <a href="{% url 'catering:cliente_update' cliente.pk %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil me-1"></i>Editar Cliente
+                    </a>
+                    <a href="{% url 'catering:cliente_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Volver a Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

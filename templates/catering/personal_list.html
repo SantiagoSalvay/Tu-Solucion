@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Personal - Lista{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">Personal</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-funnel me-2"></i>
+                    Filtros
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="tipo" class="form-label">Tipo de Personal</label>
+                        <select name="tipo" id="tipo" class="form-select">
+                            <option value="">Todos los tipos</option>
+                            {% for tipo in tipos %}
+                                <option value="{{ tipo.0 }}" {% if filtros.tipo == tipo.0 %}selected{% endif %}>
+                                    {{ tipo.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select name="estado" id="estado" class="form-select">
+                            <option value="">Todos los estados</option>
+                            {% for estado in estados %}
+                                <option value="{{ estado.0 }}" {% if filtros.estado == estado.0 %}selected{% endif %}>
+                                    {{ estado.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search me-1"></i>Filtrar
+                        </button>
+                        <a href="{% url 'catering:personal_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Personal -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-people me-2"></i>
+                    Personal ({{ personal.count }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if personal %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre y Apellido</th>
+                                    <th>Tipo</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for persona in personal %}
+                                <tr>
+                                    <td>{{ persona.id_personal }}</td>
+                                    <td>
+                                        <strong>{{ persona.nombre_y_apellido }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ persona.get_tipo_personal_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if persona.telefono %}
+                                            <a href="tel:{{ persona.telefono }}" class="text-decoration-none">
+                                                {{ persona.telefono }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">No especificado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if persona.email %}
+                                            <a href="mailto:{{ persona.email }}" class="text-decoration-none">
+                                                {{ persona.email }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">No especificado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if persona.estado == 'ACTIVO' %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% elif persona.estado == 'INACTIVO' %}
+                                            <span class="badge bg-danger">Inactivo</span>
+                                        {% elif persona.estado == 'VACACIONES' %}
+                                            <span class="badge bg-warning">Vacaciones</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ persona.get_estado_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Ver detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Estadísticas -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Total Personal</h6>
+                                    <h3 class="text-primary">{{ personal.count }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Activos</h6>
+                                    <h3 class="text-success">{{ personal|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Mozos</h6>
+                                    <h3 class="text-info">{{ personal|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Cocineros</h6>
+                                    <h3 class="text-warning">{{ personal|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-people" style="font-size: 3rem;"></i>
+                        <p class="mt-3">No se encontró personal</p>
+                        <p class="text-muted">Aún no hay personal registrado en el sistema</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

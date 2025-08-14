@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Cliente - {{ cliente }}{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:cliente_list' %}">Clientes</a></li>
+<li class="breadcrumb-item"><a href="{% url 'catering:cliente_detail' cliente.pk %}">{{ cliente }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Eliminar</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ¡Atención!
+                    </h6>
+                    <p class="mb-0">
+                        Estás a punto de eliminar al cliente <strong>{{ cliente }}</strong>. 
+                        Esta acción no se puede deshacer.
+                    </p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Nombre:</strong> {{ cliente.nombre }}</p>
+                        <p><strong>Apellido:</strong> {{ cliente.apellido }}</p>
+                        <p><strong>Documento:</strong> {{ cliente.get_tipo_doc_display }} {{ cliente.num_doc }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Email:</strong> {{ cliente.email|default:"No especificado" }}</p>
+                        <p><strong>Domicilio:</strong> {{ cliente.domicilio }}</p>
+                        <p><strong>Fecha de Alta:</strong> {{ cliente.fecha_alta|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Restricciones
+                    </h6>
+                    <p class="mb-0">
+                        Solo se puede eliminar un cliente si no tiene eventos asociados. 
+                        Si el cliente tiene eventos, primero debes eliminar o transferir esos eventos.
+                    </p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i>
+                            Sí, Eliminar Cliente
+                        </button>
+                        <a href="{% url 'catering:cliente_detail' cliente.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

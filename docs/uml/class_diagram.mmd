@@ -1,0 +1,129 @@
+classDiagram
+    class Cliente {
+        +int id_cliente
+        +string nombre
+        +string apellido
+        +string tipo_doc
+        +string num_doc
+        +string email
+        +string domicilio
+        +date fecha_alta
+        +date fecha_nacimiento
+        +get_edad()
+        +tiene_vocal_segunda_letra()
+    }
+
+    class Responsable {
+        +int id_responsable
+        +string nombre_apellido
+        +string telefono
+        +string email
+    }
+
+    class TipoProducto {
+        +int id_tipo_producto
+        +string descripcion
+    }
+
+    class Producto {
+        +int id_producto
+        +TipoProducto id_tipo_producto
+        +string descripcion
+        +decimal precio
+        +boolean disponible
+    }
+
+    class EventoSolicitado {
+        +int id_evento
+        +Cliente id_cliente
+        +Responsable id_responsable
+        +Comprobante id_comprobante
+        +string tipo_evento
+        +date fecha
+        +time hora
+        +string ubicacion
+        +int cantidad_personas
+        +string estado
+        +decimal precio_total
+        +decimal precio_por_persona
+    }
+
+    class Comprobante {
+        +int id_comprobante
+        +Cliente id_cliente
+        +EventoSolicitado id_evento
+        +date fecha_pedido
+        +decimal importe_total_productos
+        +decimal total_servicio
+        +decimal precio_x_persona
+        +date fecha_vigencia
+    }
+
+    class MenuXTipoProducto {
+        +int id_menu
+        +EventoSolicitado id_evento
+        +TipoProducto id_tipo_producto
+        +Producto id_producto
+        +int cantidad_producto
+        +decimal precio_uni
+        +decimal precio_total
+    }
+
+    class Senia {
+        +int id_senia
+        +EventoSolicitado id_evento
+        +decimal monto
+        +string estado
+        +date fecha_pago
+    }
+
+    class Personal {
+        +int id_personal
+        +string tipo_personal
+        +string nombre_y_apellido
+        +string telefono
+        +string email
+        +string estado
+    }
+
+    class Servicio {
+        +int id_servicio
+        +EventoSolicitado id_evento
+        +Personal id_personal
+        +int cantidad_personal
+        +string estado
+    }
+
+    class User {
+        +int id
+        +string username
+        +string password
+        +string email
+        +string first_name
+        +string last_name
+        +boolean is_staff
+        +boolean is_active
+        +datetime date_joined
+        +datetime last_login
+    }
+
+    %% Relaciones
+    Cliente ||--o{ EventoSolicitado : tiene
+    Responsable ||--o{ EventoSolicitado : gestiona
+    EventoSolicitado ||--|| Comprobante : genera
+    EventoSolicitado ||--o{ MenuXTipoProducto : contiene
+    EventoSolicitado ||--o{ Senia : tiene
+    EventoSolicitado ||--o{ Servicio : requiere
+    TipoProducto ||--o{ Producto : categoriza
+    TipoProducto ||--o{ MenuXTipoProducto : agrupa
+    Producto ||--o{ MenuXTipoProducto : incluye
+    Personal ||--o{ Servicio : participa
+    User ||--o{ EventoSolicitado : crea
+
+    %% Notas
+    note for Cliente "Cliente del sistema de catering"
+    note for EventoSolicitado "Evento principal del sistema"
+    note for MenuXTipoProducto "Productos del menú por evento"
+    note for Comprobante "Documento de facturación"
+    note for Senia "Pago inicial (30% del total)"
+    note for Servicio "Asignación de personal por evento"

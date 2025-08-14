@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Consulta de Cumpleaños - Marketing{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active" aria-current="page">Consulta de Cumpleaños</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Información de la Consulta -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-gift me-2"></i>
+                    Clientes con Cumpleaños - Mes {{ mes_actual }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-0">
+                    Esta consulta muestra los clientes cuyo cumpleaños es en el mes actual, 
+                    con nombre que tiene vocal como segunda letra, ordenados por monto total cobrado.
+                </p>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-people me-2"></i>
+                    Clientes Cumpleañeros
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if clientes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Cliente</th>
+                                    <th>Nombre (2da letra)</th>
+                                    <th>Edad</th>
+                                    <th>Email</th>
+                                    <th>Monto Total Cobrado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cliente_data in clientes %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-primary">{{ forloop.counter }}</span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ cliente_data.cliente.apellido }}, {{ cliente_data.cliente.nombre }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ cliente_data.cliente.nombre.1|upper }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ cliente_data.edad }} años</span>
+                                    </td>
+                                    <td>
+                                        {% if cliente_data.cliente.email %}
+                                            <a href="mailto:{{ cliente_data.cliente.email }}" class="text-decoration-none">
+                                                {{ cliente_data.cliente.email }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">No especificado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>${{ cliente_data.monto_total|floatformat:0 }}</strong>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'catering:cliente_detail' cliente_data.cliente.id_cliente %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Ver detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'catering:reserva_catering' %}?cliente={{ cliente_data.cliente.id_cliente }}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Crear evento">
+                                                <i class="bi bi-calendar-plus"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Estadísticas -->
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Resumen</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Total de clientes:</strong> {{ clientes|length }}</p>
+                                    <p><strong>Monto total:</strong> 
+                                        {% with total_monto=0 %}
+                                            {% for cliente_data in clientes %}
+                                                {% with total_monto=total_monto|add:cliente_data.monto_total %}{% endwith %}
+                                            {% endfor %}
+                                            ${{ total_monto|floatformat:0 }}
+                                        {% endwith %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Cliente con mayor monto</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% if clientes %}
+                                        {% with primer_cliente=clientes.0 %}
+                                            <p><strong>{{ primer_cliente.cliente.nombre }} {{ primer_cliente.cliente.apellido }}</strong></p>
+                                            <p class="text-muted">${{ primer_cliente.monto_total|floatformat:0 }}</p>
+                                        {% endwith %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Promedio de edad</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% if clientes %}
+                                        {% with total_edad=0 %}
+                                            {% for cliente_data in clientes %}
+                                                {% with total_edad=total_edad|add:cliente_data.edad %}{% endwith %}
+                                            {% endfor %}
+                                            {% if clientes|length > 0 %}
+                                                {% with promedio=total_edad|floatformat:0 %}
+                                                    <p><strong>{{ promedio }} años</strong></p>
+                                                {% endwith %}
+                                            {% else %}
+                                                <p><strong>0 años</strong></p>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-gift" style="font-size: 3rem;"></i>
+                        <p class="mt-3">No se encontraron clientes cumpleañeros</p>
+                        <p class="text-muted">No hay clientes con cumpleaños en el mes {{ mes_actual }} que cumplan los criterios</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

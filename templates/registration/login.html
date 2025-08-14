@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">Iniciar Sesión</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card animate-fade-in-up">
+            <div class="card-header text-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Iniciar Sesión
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">
+                            <i class="bi bi-person me-1"></i>
+                            Usuario
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="id_username" 
+                               name="username" 
+                               required 
+                               placeholder="Ingresa tu usuario">
+                        <div class="invalid-feedback">
+                            Por favor ingresa tu usuario.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="id_password" class="form-label">
+                            <i class="bi bi-lock me-1"></i>
+                            Contraseña
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="id_password" 
+                               name="password" 
+                               required 
+                               placeholder="Ingresa tu contraseña">
+                        <div class="invalid-feedback">
+                            Por favor ingresa tu contraseña.
+                        </div>
+                    </div>
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger animate-slide-in-down">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Usuario o contraseña incorrectos. Por favor intenta de nuevo.
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg hover-effect">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Iniciar Sesión
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="text-muted mb-0">
+                        ¿No tienes una cuenta? 
+                        <a href="#" class="text-decoration-none text-primary">Contacta al administrador</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información adicional -->
+        <div class="card mt-3 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="card-body text-center">
+                <h6 class="card-title">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Información de Acceso
+                </h6>
+                <p class="card-text text-muted small">
+                    Usa las credenciales proporcionadas por el administrador del sistema.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación de formulario
+    const form = document.querySelector('.needs-validation');
+    
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+    
+    // Efectos de focus en los campos
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

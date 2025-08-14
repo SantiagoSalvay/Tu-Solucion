@@ -93,9 +93,23 @@ def cliente_detail(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     eventos = EventoSolicitado.objects.filter(id_cliente=cliente).order_by('-fecha')
     
+    # Estadísticas del cliente
+    total_eventos = eventos.count()
+    eventos_completados = eventos.filter(estado='FINALIZADO').count()
+    eventos_pendientes = eventos.filter(estado__in=['SOLICITADO', 'CONFIRMADO', 'EN_PROCESO']).count()
+    
+    # Calcular total facturado (suma de todos los eventos finalizados)
+    total_facturado = eventos.filter(estado='FINALIZADO').aggregate(
+        total=Sum('id_comprobante__total_servicio')
+    )['total'] or 0
+    
     context = {
         'cliente': cliente,
         'eventos': eventos,
+        'total_eventos': total_eventos,
+        'eventos_completados': eventos_completados,
+        'eventos_pendientes': eventos_pendientes,
+        'total_facturado': total_facturado,
     }
     return render(request, 'catering/cliente_detail.html', context)
 
@@ -108,7 +122,7 @@ def cliente_create(request):
         if form.is_valid():
             cliente = form.save()
             messages.success(request, f'Cliente {cliente} creado exitosamente.')
-            return redirect('cliente_detail', pk=cliente.pk)
+            return redirect('catering:cliente_detail', pk=cliente.pk)
     else:
         form = ClienteForm()
     
@@ -128,7 +142,7 @@ def cliente_update(request, pk):
         if form.is_valid():
             cliente = form.save()
             messages.success(request, f'Cliente {cliente} actualizado exitosamente.')
-            return redirect('cliente_detail', pk=cliente.pk)
+            return redirect('catering:cliente_detail', pk=cliente.pk)
     else:
         form = ClienteForm(instance=cliente)
     
@@ -138,6 +152,27 @@ def cliente_update(request, pk):
         'title': 'Editar Cliente',
     }
     return render(request, 'catering/cliente_form.html', context)
+
+
+@login_required
+def cliente_delete(request, pk):
+    """Eliminar cliente"""
+    cliente = get_object_or_404(Cliente, pk=pk)
+    
+    if request.method == 'POST':
+        # Verificar que no tenga eventos asociados
+        if EventoSolicitado.objects.filter(id_cliente=cliente).exists():
+            messages.error(request, 'No se puede eliminar un cliente que tiene eventos asociados.')
+            return redirect('catering:cliente_detail', pk=pk)
+        
+        cliente.delete()
+        messages.success(request, 'Cliente eliminado exitosamente.')
+        return redirect('catering:cliente_list')
+    
+    context = {
+        'cliente': cliente,
+    }
+    return render(request, 'catering/cliente_confirm_delete.html', context)
 
 
 # Vistas de Eventos

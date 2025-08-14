@@ -62,12 +62,17 @@
                         <td>{{ cliente.email }}</td>
                         <td>{{ cliente.fecha_alta|date:"d/m/Y" }}</td>
                         <td>
-                            <a href="{% url 'catering:cliente_detail' cliente.pk %}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="{% url 'catering:cliente_update' cliente.pk %}" class="btn btn-sm btn-outline-warning">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'catering:cliente_detail' cliente.pk %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Ver detalles">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'catering:cliente_update' cliente.pk %}" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'catering:cliente_delete' cliente.pk %}" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

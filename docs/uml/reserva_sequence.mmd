@@ -1,0 +1,58 @@
+sequenceDiagram
+    participant C as Cliente
+    participant R as Responsable
+    participant S as Sistema
+    participant DB as Base de Datos
+    participant M as Menú
+
+    C->>R: Solicita servicio de catering
+    R->>S: Consulta disponibilidad de fecha
+    S->>DB: Verifica eventos en la fecha
+    DB-->>S: Retorna cantidad de eventos
+    S-->>R: Confirma disponibilidad (máx 10/día)
+    
+    alt Disponible
+        R->>S: Registra datos del cliente
+        S->>DB: Verifica si cliente existe
+        DB-->>S: Retorna datos del cliente
+        
+        alt Cliente nuevo
+            S->>DB: Crea nuevo cliente
+            DB-->>S: Confirma creación
+        end
+        
+        R->>S: Ingresa detalles del evento
+        Note over S: Tipo, fecha, hora, ubicación, cantidad personas
+        S->>DB: Crea evento solicitado
+        DB-->>S: Confirma evento creado
+        
+        S->>DB: Crea comprobante temporal
+        DB-->>S: Confirma comprobante
+        
+        R->>M: Inicia armado del menú
+        M->>DB: Carga tipos de productos
+        DB-->>M: Retorna categorías (bebidas, entradas, etc.)
+        
+        loop Por cada tipo de producto
+            M->>DB: Carga productos del tipo
+            DB-->>M: Retorna productos disponibles
+            R->>M: Selecciona productos y cantidades
+            M->>DB: Guarda productos en menú
+            DB-->>M: Confirma guardado
+            M->>S: Actualiza precios del evento
+            S->>DB: Recalcula totales
+            DB-->>S: Confirma actualización
+        end
+        
+        S->>DB: Actualiza comprobante final
+        DB-->>S: Confirma actualización
+        
+        S-->>R: Muestra comprobante final
+        R-->>C: Entrega comprobante al cliente
+        
+        Note over C,R: Cliente tiene 10 días para pagar seña (30%)
+        
+    else No disponible
+        S-->>R: Informa que no hay disponibilidad
+        R-->>C: Sugiere otras fechas
+    end
