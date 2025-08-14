@@ -3,54 +3,47 @@
 {% block title %}Dashboard - Tu Solución{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row mb-5">
     <div class="col-12">
-        <h1 class="h3 mb-4">Dashboard</h1>
+        <h1 class="text-gradient text-center mb-4">Dashboard</h1>
+        <p class="text-center text-muted">Bienvenido al panel de control de Tu Solución</p>
     </div>
 </div>
 
 <!-- Estadísticas principales -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="stats-card">
-            <i class="bi bi-calendar-event text-primary"></i>
-            <div class="number">{{ total_eventos }}</div>
-            <div class="label">Total Eventos</div>
-        </div>
+<div class="stats-grid mb-5">
+    <div class="stats-card">
+        <i class="bi bi-calendar-event stats-icon"></i>
+        <div class="stats-number">{{ total_eventos }}</div>
+        <div class="stats-label">Total Eventos</div>
     </div>
-    <div class="col-md-3">
-        <div class="stats-card">
-            <i class="bi bi-calendar-check text-success"></i>
-            <div class="number">{{ eventos_este_mes }}</div>
-            <div class="label">Eventos Este Mes</div>
-        </div>
+    <div class="stats-card">
+        <i class="bi bi-calendar-check stats-icon"></i>
+        <div class="stats-number">{{ eventos_este_mes }}</div>
+        <div class="stats-label">Eventos Este Mes</div>
     </div>
-    <div class="col-md-3">
-        <div class="stats-card">
-            <i class="bi bi-person-badge text-info"></i>
-            <div class="number">{{ personal_disponible }}</div>
-            <div class="label">Personal Disponible</div>
-        </div>
+    <div class="stats-card">
+        <i class="bi bi-person-badge stats-icon"></i>
+        <div class="stats-number">{{ personal_disponible }}</div>
+        <div class="stats-label">Personal Disponible</div>
     </div>
-    <div class="col-md-3">
-        <div class="stats-card">
-            <i class="bi bi-graph-up text-warning"></i>
-            <div class="number">{{ eventos_proximos|length }}</div>
-            <div class="label">Eventos Próximos</div>
-        </div>
+    <div class="stats-card">
+        <i class="bi bi-graph-up stats-icon"></i>
+        <div class="stats-number">{{ eventos_proximos|length }}</div>
+        <div class="stats-label">Eventos Próximos</div>
     </div>
 </div>
 
 <!-- Eventos por estado -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card">
+<div class="row mb-5">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
             <div class="card-header">
-                <h5><i class="bi bi-pie-chart"></i> Eventos por Estado</h5>
+                <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i> Eventos por Estado</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-sm">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th>Estado</th>
@@ -65,7 +58,7 @@
                                         {{ estado.estado }}
                                     </span>
                                 </td>
-                                <td>{{ estado.count }}</td>
+                                <td><strong>{{ estado.count }}</strong></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -75,10 +68,10 @@
         </div>
     </div>
     
-    <div class="col-md-6">
-        <div class="card">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
             <div class="card-header">
-                <h5><i class="bi bi-calendar-week"></i> Eventos Próximos (7 días)</h5>
+                <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i> Eventos Próximos (7 días)</h5>
             </div>
             <div class="card-body">
                 {% if eventos_proximos %}
@@ -86,20 +79,24 @@
                     {% for evento in eventos_proximos %}
                     <div class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="mb-1">{{ evento.tipo_evento }}</h6>
+                            <h6 class="mb-1 fw-bold">{{ evento.tipo_evento }}</h6>
                             <small class="text-muted">
-                                {{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}<br>
-                                {{ evento.id_cliente }}
+                                <i class="bi bi-calendar me-1"></i>{{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}<br>
+                                <i class="bi bi-person me-1"></i>{{ evento.id_cliente }}
                             </small>
                         </div>
                         <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-sm btn-outline-primary">
-                            Ver
+                            <i class="bi bi-eye me-1"></i>Ver
                         </a>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-muted text-center">No hay eventos próximos</p>
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x"></i>
+                    <h4>No hay eventos próximos</h4>
+                    <p>No tienes eventos programados para los próximos 7 días</p>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -111,30 +108,26 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5><i class="bi bi-lightning-charge"></i> Acciones Rápidas</h5>
+                <h5 class="mb-0"><i class="bi bi-lightning-charge me-2"></i> Acciones Rápidas</h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-2">
-                        <a href="{% url 'catering:cliente_create' %}" class="btn btn-primary w-100">
-                            <i class="bi bi-person-plus"></i> Nuevo Cliente
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <a href="{% url 'catering:evento_create' %}" class="btn btn-success w-100">
-                            <i class="bi bi-calendar-plus"></i> Nuevo Evento
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <a href="{% url 'catering:consulta_financiera' %}" class="btn btn-warning w-100">
-                            <i class="bi bi-graph-up"></i> Reporte Financiero
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <a href="{% url 'catering:consulta_barrios' %}" class="btn btn-info w-100">
-                            <i class="bi bi-geo-alt"></i> Análisis Barrios
-                        </a>
-                    </div>
+                <div class="quick-actions">
+                    <a href="{% url 'catering:cliente_create' %}" class="quick-action-btn">
+                        <i class="bi bi-person-plus"></i>
+                        <span class="fw-bold">Nuevo Cliente</span>
+                    </a>
+                    <a href="{% url 'catering:evento_create' %}" class="quick-action-btn">
+                        <i class="bi bi-calendar-plus"></i>
+                        <span class="fw-bold">Nuevo Evento</span>
+                    </a>
+                    <a href="{% url 'catering:consulta_financiera' %}" class="quick-action-btn">
+                        <i class="bi bi-graph-up"></i>
+                        <span class="fw-bold">Reporte Financiero</span>
+                    </a>
+                    <a href="{% url 'catering:consulta_barrios' %}" class="quick-action-btn">
+                        <i class="bi bi-geo-alt"></i>
+                        <span class="fw-bold">Análisis Barrios</span>
+                    </a>
                 </div>
             </div>
         </div>
