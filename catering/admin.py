@@ -1,10 +1,12 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
-    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio
+    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio, PerfilUsuario
 )
 
 
@@ -216,6 +218,80 @@ class ServicioAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+# Configuración para extender el admin de User
+class PerfilUsuarioInline(admin.StackedInline):
+    model = PerfilUsuario
+    can_delete = False
+    verbose_name_plural = 'Perfil de Usuario'
+    fk_name = 'usuario'
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (PerfilUsuarioInline,)
+    list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'get_tipo_usuario', 'get_estado', 'date_joined']
+    list_filter = ['is_staff', 'is_superuser', 'is_active', 'date_joined', 'perfilusuario__tipo_usuario', 'perfilusuario__estado']
+    search_fields = ['username', 'first_name', 'last_name', 'email']
+    ordering = ['username']
+    
+    def get_tipo_usuario(self, obj):
+        try:
+            return obj.perfilusuario.get_tipo_usuario_display()
+        except:
+            return 'Sin perfil'
+    get_tipo_usuario.short_description = 'Tipo de Usuario'
+    
+    def get_estado(self, obj):
+        try:
+            estado = obj.perfilusuario.get_estado_display()
+            if obj.perfilusuario.estado == 'ACTIVO':
+                return format_html('<span style="color: green;">{}</span>', estado)
+            elif obj.perfilusuario.estado == 'INACTIVO':
+                return format_html('<span style="color: red;">{}</span>', estado)
+            else:
+                return format_html('<span style="color: orange;">{}</span>', estado)
+        except:
+            return 'Sin perfil'
+    get_estado.short_description = 'Estado'
+
+
+@admin.register(PerfilUsuario)
+class PerfilUsuarioAdmin(admin.ModelAdmin):
+    list_display = ['usuario', 'tipo_usuario', 'estado', 'telefono', 'fecha_creacion', 'fecha_ultimo_acceso', 'get_edad']
+    list_filter = ['tipo_usuario', 'estado', 'fecha_creacion']
+    search_fields = ['usuario__username', 'usuario__first_name', 'usuario__last_name', 'usuario__email']
+    readonly_fields = ['fecha_creacion', 'fecha_ultimo_acceso']
+    list_editable = ['tipo_usuario', 'estado']
+    ordering = ['usuario__username']
+    
+    fieldsets = (
+        ('Información del Usuario', {
+            'fields': ('usuario', 'tipo_usuario', 'estado')
+        }),
+        ('Información Personal', {
+            'fields': ('telefono', 'fecha_nacimiento', 'direccion')
+        }),
+        ('Sistema', {
+            'fields': ('fecha_creacion', 'fecha_ultimo_acceso', 'notas'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_edad(self, obj):
+        edad = obj.get_edad()
+        if edad:
+            return f"{edad} años"
+        return "No especificada"
+    get_edad.short_description = 'Edad'
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('usuario')
+
+
+# Reemplazar el admin de User con el personalizado
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 
 
 # Configuración del sitio de administración

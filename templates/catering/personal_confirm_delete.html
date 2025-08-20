@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Personal{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:personal_list' %}">Personal</a></li>
+<li class="breadcrumb-item"><a href="{% url 'catering:personal_detail' personal.pk %}">{{ personal.nombre_y_apellido }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Eliminar</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">¡Atención!</h6>
+                    <p class="mb-0">Está a punto de eliminar al siguiente miembro del personal:</p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>ID:</strong></div>
+                            <div class="col-8">{{ personal.id_personal }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Nombre:</strong></div>
+                            <div class="col-8">{{ personal.nombre_y_apellido }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Tipo:</strong></div>
+                            <div class="col-8">{{ personal.get_tipo_personal_display }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Estado:</strong></div>
+                            <div class="col-8">{{ personal.get_estado_display }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-danger">
+                    <h6 class="alert-heading">Esta acción no se puede deshacer</h6>
+                    <p class="mb-0">Una vez eliminado, no podrá recuperar la información de este miembro del personal.</p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'catering:personal_detail' personal.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Eliminar Definitivamente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

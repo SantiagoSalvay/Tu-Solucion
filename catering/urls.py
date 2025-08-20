@@ -24,6 +24,10 @@ urlpatterns = [
     
     # URLs de Personal
     path('personal/', views.personal_list, name='personal_list'),
+    path('personal/nuevo/', views.personal_create, name='personal_create'),
+    path('personal/<int:pk>/', views.personal_detail, name='personal_detail'),
+    path('personal/<int:pk>/editar/', views.personal_update, name='personal_update'),
+    path('personal/<int:pk>/eliminar/', views.personal_delete, name='personal_delete'),
     
     # URLs de Productos
     path('productos/', views.productos_list, name='productos_list'),

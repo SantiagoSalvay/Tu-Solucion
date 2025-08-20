@@ -131,7 +131,7 @@ CREATE TABLE usuarios (
     is_active BOOLEAN DEFAULT TRUE,
     date_joined DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_login DATETIME NULL
-);
+);	
 
 -- Índices para mejorar rendimiento
 CREATE INDEX idx_evento_fecha ON evento_solicitado(fecha);

@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ personal.nombre_y_apellido }} - Detalle{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:personal_list' %}">Personal</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ personal.nombre_y_apellido }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <!-- Información del Personal -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-person me-2"></i>
+                    Información Personal
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-4"><strong>ID:</strong></div>
+                    <div class="col-8">{{ personal.id_personal }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Nombre:</strong></div>
+                    <div class="col-8">{{ personal.nombre_y_apellido }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Tipo:</strong></div>
+                    <div class="col-8">
+                        <span class="badge bg-primary">{{ personal.get_tipo_personal_display }}</span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Teléfono:</strong></div>
+                    <div class="col-8">
+                        {% if personal.telefono %}
+                            <a href="tel:{{ personal.telefono }}" class="text-decoration-none">
+                                {{ personal.telefono }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">No especificado</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Email:</strong></div>
+                    <div class="col-8">
+                        {% if personal.email %}
+                            <a href="mailto:{{ personal.email }}" class="text-decoration-none">
+                                {{ personal.email }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">No especificado</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Estado:</strong></div>
+                    <div class="col-8">
+                        {% if personal.estado == 'ACTIVO' %}
+                            <span class="badge bg-success">Activo</span>
+                        {% elif personal.estado == 'INACTIVO' %}
+                            <span class="badge bg-danger">Inactivo</span>
+                        {% elif personal.estado == 'VACACIONES' %}
+                            <span class="badge bg-warning">Vacaciones</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ personal.get_estado_display }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group w-100" role="group">
+                    <a href="{% url 'catering:personal_update' personal.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil me-1"></i>Editar
+                    </a>
+                    <a href="{% url 'catering:personal_delete' personal.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Eliminar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>
+                    Estadísticas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h4 class="text-primary">{{ total_servicios }}</h4>
+                        <small class="text-muted">Total Servicios</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-success">{{ servicios_completados }}</h4>
+                        <small class="text-muted">Completados</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-warning">{{ servicios_pendientes }}</h4>
+                        <small class="text-muted">Pendientes</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <!-- Historial de Servicios -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Historial de Servicios
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if servicios %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Evento</th>
+                                    <th>Cliente</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for servicio in servicios %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ servicio.id_evento.tipo_evento }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ servicio.id_evento.fecha }}</small>
+                                    </td>
+                                    <td>
+                                        {{ servicio.id_evento.id_cliente.apellido }}, {{ servicio.id_evento.id_cliente.nombre }}
+                                    </td>
+                                    <td>{{ servicio.fecha_asignacion }}</td>
+                                    <td>
+                                        {% if servicio.estado == 'ASIGNADO' %}
+                                            <span class="badge bg-info">Asignado</span>
+                                        {% elif servicio.estado == 'EN_SERVICIO' %}
+                                            <span class="badge bg-warning">En Servicio</span>
+                                        {% elif servicio.estado == 'COMPLETADO' %}
+                                            <span class="badge bg-success">Completado</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ servicio.get_estado_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'catering:evento_detail' servicio.id_evento.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
+                        <p class="mt-3">No hay servicios registrados</p>
+                        <p class="text-muted">Este miembro del personal aún no ha sido asignado a ningún evento</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

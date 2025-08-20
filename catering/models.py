@@ -255,25 +255,75 @@ class Personal(models.Model):
 
 
 class Servicio(models.Model):
-    """Modelo para gestionar los servicios asignados a eventos"""
-    ESTADO_CHOICES = [
-        ('ASIGNADO', 'Asignado'),
-        ('EN_PROCESO', 'En Proceso'),
-        ('COMPLETADO', 'Completado'),
-        ('CANCELADO', 'Cancelado'),
-    ]
-    
+    """Modelo para gestionar los servicios de personal asignados a eventos"""
     id_servicio = models.AutoField(primary_key=True)
     id_evento = models.ForeignKey(EventoSolicitado, on_delete=models.CASCADE, verbose_name="Evento")
     id_personal = models.ForeignKey(Personal, on_delete=models.CASCADE, verbose_name="Personal")
-    cantidad_personal = models.PositiveIntegerField(default=1, verbose_name="Cantidad de Personal")
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ASIGNADO', verbose_name="Estado")
-    fecha_asignacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Asignación")
+    cantidad_personal = models.IntegerField(verbose_name="Cantidad de Personal", default=1)
+    estado = models.CharField(max_length=20, verbose_name="Estado",
+                          choices=[('ASIGNADO', 'Asignado'), ('EN_SERVICIO', 'En Servicio'), ('COMPLETADO', 'Completado'), ('CANCELADO', 'Cancelado')])
+    fecha_asignacion = models.DateField(auto_now_add=True, verbose_name="Fecha de Asignación")
     
     class Meta:
         verbose_name = "Servicio"
         verbose_name_plural = "Servicios"
-        unique_together = ['id_evento', 'id_personal']
+        ordering = ['-fecha_asignacion']
     
     def __str__(self):
-        return f"Servicio {self.id_servicio} - {self.id_evento} - {self.id_personal}"
+        return f"{self.id_personal} - {self.id_evento}"
+
+
+class PerfilUsuario(models.Model):
+    """Modelo para extender el usuario de Django con información adicional"""
+    TIPO_USUARIO_CHOICES = [
+        ('ADMIN', 'Administrador'),
+        ('EMPLEADO', 'Empleado'),
+        ('RESPONSABLE', 'Responsable'),
+        ('CLIENTE', 'Cliente'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('ACTIVO', 'Activo'),
+        ('INACTIVO', 'Inactivo'),
+        ('SUSPENDIDO', 'Suspendido'),
+    ]
+    
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Usuario")
+    tipo_usuario = models.CharField(max_length=20, choices=TIPO_USUARIO_CHOICES, default='EMPLEADO', verbose_name="Tipo de Usuario")
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ACTIVO', verbose_name="Estado")
+    telefono = models.CharField(max_length=20, blank=True, null=True, verbose_name="Teléfono")
+    fecha_nacimiento = models.DateField(blank=True, null=True, verbose_name="Fecha de Nacimiento")
+    direccion = models.CharField(max_length=200, blank=True, null=True, verbose_name="Dirección")
+    fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
+    fecha_ultimo_acceso = models.DateTimeField(blank=True, null=True, verbose_name="Último Acceso")
+    notas = models.TextField(blank=True, null=True, verbose_name="Notas")
+    
+    class Meta:
+        verbose_name = "Perfil de Usuario"
+        verbose_name_plural = "Perfiles de Usuario"
+        ordering = ['usuario__username']
+    
+    def __str__(self):
+        return f"{self.usuario.username} - {self.get_tipo_usuario_display()}"
+    
+    def get_edad(self):
+        """Calcula la edad del usuario"""
+        if self.fecha_nacimiento:
+            return (timezone.now().date() - self.fecha_nacimiento).days // 365
+        return None
+    
+    def es_admin(self):
+        """Verifica si el usuario es administrador"""
+        return self.tipo_usuario == 'ADMIN' or self.usuario.is_superuser
+    
+    def es_empleado(self):
+        """Verifica si el usuario es empleado"""
+        return self.tipo_usuario == 'EMPLEADO'
+    
+    def es_responsable(self):
+        """Verifica si el usuario es responsable"""
+        return self.tipo_usuario == 'RESPONSABLE'
+    
+    def esta_activo(self):
+        """Verifica si el usuario está activo"""
+        return self.estado == 'ACTIVO' and self.usuario.is_active

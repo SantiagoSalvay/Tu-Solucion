@@ -60,6 +60,9 @@
                     <i class="bi bi-people me-2"></i>
                     Personal ({{ personal.count }})
                 </h5>
+                <a href="{% url 'catering:personal_create' %}" class="btn btn-primary">
+                    <i class="bi bi-person-plus me-1"></i>Nuevo Personal
+                </a>
             </div>
             <div class="card-body">
                 {% if personal %}
@@ -117,15 +120,15 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Ver detalles">
+                                            <a href="{% url 'catering:personal_detail' persona.pk %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Ver detalles">
                                                 <i class="bi bi-eye"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Editar">
+                                            </a>
+                                            <a href="{% url 'catering:personal_update' persona.pk %}" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Editar">
                                                 <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar">
+                                            </a>
+                                            <a href="{% url 'catering:personal_delete' persona.pk %}" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar">
                                                 <i class="bi bi-trash"></i>
-                                            </button>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -140,7 +143,7 @@
                             <div class="card">
                                 <div class="card-body text-center">
                                     <h6 class="card-title">Total Personal</h6>
-                                    <h3 class="text-primary">{{ personal.count }}</h3>
+                                    <h3 class="text-primary">{{ estadisticas.total }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -148,7 +151,7 @@
                             <div class="card">
                                 <div class="card-body text-center">
                                     <h6 class="card-title">Activos</h6>
-                                    <h3 class="text-success">{{ personal|length }}</h3>
+                                    <h3 class="text-success">{{ estadisticas.activos }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -156,7 +159,7 @@
                             <div class="card">
                                 <div class="card-body text-center">
                                     <h6 class="card-title">Mozos</h6>
-                                    <h3 class="text-info">{{ personal|length }}</h3>
+                                    <h3 class="text-info">{{ estadisticas.mozos }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -164,7 +167,7 @@
                             <div class="card">
                                 <div class="card-body text-center">
                                     <h6 class="card-title">Cocineros</h6>
-                                    <h3 class="text-warning">{{ personal|length }}</h3>
+                                    <h3 class="text-warning">{{ estadisticas.cocineros }}</h3>
                                 </div>
                             </div>
                         </div>

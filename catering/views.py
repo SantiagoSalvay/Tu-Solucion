@@ -10,7 +10,7 @@ from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
     EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio
 )
-from .forms import ClienteForm, EventoForm, MenuForm
+from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm
 
 
 def index(request):
@@ -427,6 +427,12 @@ def personal_list(request):
     if estado:
         personal = personal.filter(estado=estado)
     
+    # Estadísticas
+    total_personal = Personal.objects.count()
+    personal_activo = Personal.objects.filter(estado='ACTIVO').count()
+    mozos = Personal.objects.filter(tipo_personal='MOZO').count()
+    cocineros = Personal.objects.filter(tipo_personal='COCINERO').count()
+    
     context = {
         'personal': personal,
         'tipos': Personal.TIPO_PERSONAL_CHOICES,
@@ -434,9 +440,97 @@ def personal_list(request):
         'filtros': {
             'tipo': tipo,
             'estado': estado,
+        },
+        'estadisticas': {
+            'total': total_personal,
+            'activos': personal_activo,
+            'mozos': mozos,
+            'cocineros': cocineros,
         }
     }
     return render(request, 'catering/personal_list.html', context)
+
+
+@login_required
+def personal_detail(request, pk):
+    """Detalle de un miembro del personal"""
+    personal = get_object_or_404(Personal, pk=pk)
+    servicios = Servicio.objects.filter(id_personal=personal).select_related('id_evento', 'id_evento__id_cliente').order_by('-fecha_asignacion')
+    
+    # Estadísticas del personal
+    total_servicios = servicios.count()
+    servicios_completados = servicios.filter(estado='COMPLETADO').count()
+    servicios_pendientes = servicios.filter(estado__in=['ASIGNADO', 'EN_SERVICIO']).count()
+    
+    context = {
+        'personal': personal,
+        'servicios': servicios,
+        'total_servicios': total_servicios,
+        'servicios_completados': servicios_completados,
+        'servicios_pendientes': servicios_pendientes,
+    }
+    return render(request, 'catering/personal_detail.html', context)
+
+
+@login_required
+def personal_create(request):
+    """Crear nuevo miembro del personal"""
+    if request.method == 'POST':
+        form = PersonalForm(request.POST)
+        if form.is_valid():
+            personal = form.save()
+            messages.success(request, f'Personal {personal} creado exitosamente.')
+            return redirect('catering:personal_detail', pk=personal.pk)
+    else:
+        form = PersonalForm()
+    
+    context = {
+        'form': form,
+        'title': 'Nuevo Personal',
+    }
+    return render(request, 'catering/personal_form.html', context)
+
+
+@login_required
+def personal_update(request, pk):
+    """Actualizar miembro del personal"""
+    personal = get_object_or_404(Personal, pk=pk)
+    if request.method == 'POST':
+        form = PersonalForm(request.POST, instance=personal)
+        if form.is_valid():
+            personal = form.save()
+            messages.success(request, f'Personal {personal} actualizado exitosamente.')
+            return redirect('catering:personal_detail', pk=personal.pk)
+    else:
+        form = PersonalForm(instance=personal)
+    
+    context = {
+        'form': form,
+        'personal': personal,
+        'title': 'Editar Personal',
+    }
+    return render(request, 'catering/personal_form.html', context)
+
+
+@login_required
+def personal_delete(request, pk):
+    """Eliminar miembro del personal"""
+    personal = get_object_or_404(Personal, pk=pk)
+    
+    if request.method == 'POST':
+        # Verificar que no tenga servicios asociados
+        if Servicio.objects.filter(id_personal=personal).exists():
+            messages.error(request, 'No se puede eliminar un miembro del personal que tiene servicios asociados.')
+            return redirect('catering:personal_detail', pk=pk)
+        
+        personal.delete()
+        messages.success(request, 'Personal eliminado exitosamente.')
+        return redirect('catering:personal_list')
+    
+    context = {
+        'personal': personal,
+    }
+    return render(request, 'catering/personal_confirm_delete.html', context)
 
 
 @login_required

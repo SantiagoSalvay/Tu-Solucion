@@ -171,6 +171,32 @@ class PersonalForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@email.com'}),
             'estado': forms.Select(attrs={'class': 'form-select'}),
         }
+    
+    def clean_nombre_y_apellido(self):
+        """Validar que el nombre y apellido no esté vacío"""
+        nombre = self.cleaned_data['nombre_y_apellido']
+        if not nombre or len(nombre.strip()) < 3:
+            raise ValidationError('El nombre y apellido debe tener al menos 3 caracteres.')
+        return nombre.strip()
+    
+    def clean_telefono(self):
+        """Validar formato de teléfono"""
+        telefono = self.cleaned_data['telefono']
+        if telefono:
+            # Remover espacios y caracteres especiales
+            telefono_limpio = ''.join(filter(str.isdigit, telefono))
+            if len(telefono_limpio) < 8:
+                raise ValidationError('El teléfono debe tener al menos 8 dígitos.')
+        return telefono
+    
+    def clean_email(self):
+        """Validar formato de email"""
+        email = self.cleaned_data['email']
+        if email:
+            # Verificar que no exista otro personal con el mismo email
+            if Personal.objects.filter(email=email).exclude(pk=self.instance.pk if self.instance else None).exists():
+                raise ValidationError('Ya existe un miembro del personal con este email.')
+        return email
 
 
 class ServicioForm(forms.ModelForm):
