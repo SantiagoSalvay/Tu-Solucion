@@ -72,10 +72,15 @@ Este sistema de información permite gestionar el alquiler y realización del se
 - ⏰ Control de plazos y vencimientos
 
 #### 8. **Gestión de Personal**
-- 👨‍🍳 Asignación de personal por evento (mozos, cocineros, asistentes)
-- 📅 Control de disponibilidad y estados
-- 🔔 Notificaciones de asignación
-- 📊 Gestión de horarios y roles
+- 👨‍🍳 **CRUD Completo**: Crear, ver, editar y eliminar personal
+- 👤 **Tipos de Personal**: Mozos, cocineros, asistentes, supervisores
+- 📊 **Estados de Personal**: Activo, inactivo, vacaciones, licencia
+- 📋 **Información Completa**: Nombre, teléfono, email, tipo y estado
+- 🔍 **Búsqueda y Filtros**: Por tipo de personal y estado
+- 📈 **Estadísticas**: Total, activos, mozos, cocineros
+- 📅 **Historial de Servicios**: Eventos asignados y completados
+- ✅ **Validaciones**: Email único, teléfono válido, datos obligatorios
+- 🛡️ **Seguridad**: Verificación de dependencias antes de eliminar
 
 #### 9. **Consultas Administrativas Específicas**
 - 💰 **Consulta Financiera**: Costo total de productos por servicio (últimos 3 meses, cantidad entre 200-500)
@@ -163,6 +168,9 @@ tu_solucion/
 │   │   ├── 📄 editar_menu.html     # Edición de menús
 │   │   ├── 📄 productos_list.html  # Lista de productos
 │   │   ├── 📄 personal_list.html   # Lista de personal
+│   │   ├── 📄 personal_detail.html # Detalle de personal
+│   │   ├── 📄 personal_form.html   # Formulario de personal
+│   │   ├── 📄 personal_confirm_delete.html # Confirmación de eliminación
 │   │   ├── 📄 consulta_financiera.html # Consulta financiera
 │   │   ├── 📄 consulta_barrios.html # Análisis de barrios
 │   │   └── 📄 consulta_cumpleanos.html # Reporte de cumpleaños
@@ -330,7 +338,19 @@ EMAIL_HOST_PASSWORD=tu-password-de-app
 - ✅ **Búsqueda Avanzada**: Filtros y búsqueda por múltiples campos
 - ✅ **Validaciones**: Documentos únicos y datos obligatorios
 
-### 6. **Consultas Administrativas Específicas**
+### 6. **Gestión de Personal**
+- ✅ **URL**: `/personal/`
+- ✅ **CRUD Completo**: Crear, Leer, Actualizar, Eliminar personal
+- ✅ **Tipos de Personal**: Mozos, cocineros, asistentes, supervisores
+- ✅ **Estados de Personal**: Activo, inactivo, vacaciones, licencia
+- ✅ **Información Completa**: Nombre, teléfono, email, tipo y estado
+- ✅ **Búsqueda y Filtros**: Por tipo de personal y estado
+- ✅ **Estadísticas en Tiempo Real**: Total, activos, mozos, cocineros
+- ✅ **Historial de Servicios**: Eventos asignados y completados
+- ✅ **Validaciones**: Email único, teléfono válido, datos obligatorios
+- ✅ **Seguridad**: Verificación de dependencias antes de eliminar
+
+### 7. **Consultas Administrativas Específicas**
 - ✅ **Consulta Financiera**: `/consultas/financiera/`
   - Costo total de productos por servicio
   - Filtros: últimos 3 meses, cantidad 200-500
@@ -347,6 +367,13 @@ EMAIL_HOST_PASSWORD=tu-password-de-app
 - ✅ **Validación en Tiempo Real**: Formularios con feedback
 - ✅ **Alertas Automáticas**: Sistema de notificaciones
 - ✅ **Tooltips**: Información contextual
+
+### 8. **URLs del Personal**
+- ✅ **Lista de Personal**: `/personal/`
+- ✅ **Nuevo Personal**: `/personal/nuevo/`
+- ✅ **Detalle de Personal**: `/personal/<id>/`
+- ✅ **Editar Personal**: `/personal/<id>/editar/`
+- ✅ **Eliminar Personal**: `/personal/<id>/eliminar/`
 
 ## 👥 Roles de Usuario
 
@@ -455,12 +482,12 @@ graph LR
 
 #### **Personal**
 ```python
-- nombre: CharField
-- apellido: CharField
-- rol: CharField (choices)
+- id_personal: AutoField (primary key)
+- tipo_personal: CharField (choices: MOZO, COCINERO, ASISTENTE, SUPERVISOR)
+- nombre_y_apellido: CharField
 - telefono: CharField
 - email: EmailField
-- disponible: BooleanField
+- estado: CharField (choices: ACTIVO, INACTIVO, VACACIONES, LICENCIA)
 ```
 
 #### **Pagos**
@@ -518,6 +545,15 @@ PUT    /api/menus/{id}/         # Actualizar menú
 GET    /api/productos/          # Listar productos
 GET    /api/productos/{id}/     # Obtener producto específico
 GET    /api/productos/tipo/{tipo}/ # Productos por tipo
+```
+
+### Personal
+```http
+GET    /api/personal/           # Listar personal
+POST   /api/personal/           # Crear personal
+GET    /api/personal/{id}/      # Obtener personal específico
+PUT    /api/personal/{id}/      # Actualizar personal
+DELETE /api/personal/{id}/      # Eliminar personal
 ```
 
 ## 🔒 Seguridad
@@ -797,6 +833,17 @@ SOFTWARE.
 - ✅ Información detallada de precios y estados
 - ✅ Paginación y búsqueda
 
+#### 👥 **Gestión de Personal**
+- ✅ CRUD completo: Crear, ver, editar y eliminar personal
+- ✅ Tipos de personal: Mozos, cocineros, asistentes, supervisores
+- ✅ Estados de personal: Activo, inactivo, vacaciones, licencia
+- ✅ Información completa: Nombre, teléfono, email, tipo y estado
+- ✅ Búsqueda y filtros por tipo y estado
+- ✅ Estadísticas en tiempo real: Total, activos, mozos, cocineros
+- ✅ Historial de servicios: Eventos asignados y completados
+- ✅ Validaciones: Email único, teléfono válido, datos obligatorios
+- ✅ Seguridad: Verificación de dependencias antes de eliminar
+
 #### 📊 **Consultas Administrativas**
 - ✅ Consulta financiera implementada
 - ✅ Análisis de barrios implementado
@@ -821,11 +868,14 @@ SOFTWARE.
 - 🔄 Integración con pasarelas de pago
 
 #### 👨‍🍳 **Gestión de Personal**
-- 🔄 Asignación de personal por evento
-- 🔄 Control de disponibilidad
-- 🔄 Notificaciones de asignación
-- 🔄 Gestión de estados del personal
-- 🔄 Calendario de disponibilidad
+- ✅ **CRUD Completo**: Crear, ver, editar y eliminar personal
+- ✅ **Tipos y Estados**: Gestión completa de tipos y estados
+- ✅ **Validaciones**: Email único, teléfono válido, datos obligatorios
+- ✅ **Estadísticas**: Dashboard con métricas en tiempo real
+- ✅ **Historial**: Seguimiento de servicios asignados
+- 🔄 **Asignación Avanzada**: Asignación de personal por evento
+- 🔄 **Notificaciones**: Sistema de notificaciones automáticas
+- 🔄 **Calendario**: Vista de disponibilidad por fecha
 
 #### 🛒 **Sistema de Compras**
 - 🔄 Consulta de servicios confirmados
@@ -845,7 +895,7 @@ SOFTWARE.
 
 #### 🎯 **Prioridad Alta**
 1. Implementar sistema completo de pagos y señas
-2. Desarrollar gestión de personal y asignaciones
+2. Desarrollar asignación avanzada de personal por evento
 3. Crear sistema de compras e inventario
 4. Implementar validaciones de seguridad adicionales
 
@@ -862,6 +912,17 @@ SOFTWARE.
 4. Integración con redes sociales
 
 ## 📝 Changelog
+
+### v1.3.0 (2024-01-XX) - Gestión Completa de Personal
+- ✨ **Nuevo**: CRUD completo para gestión de personal
+- ✨ **Nuevo**: Tipos de personal (Mozos, cocineros, asistentes, supervisores)
+- ✨ **Nuevo**: Estados de personal (Activo, inactivo, vacaciones, licencia)
+- ✨ **Nuevo**: Vista detallada de personal con historial de servicios
+- ✨ **Nuevo**: Formularios con validaciones avanzadas
+- ✨ **Nuevo**: Estadísticas en tiempo real del personal
+- ✨ **Nuevo**: Búsqueda y filtros por tipo y estado
+- 🛡️ **Seguridad**: Verificación de dependencias antes de eliminar
+- 🎨 **UI/UX**: Interfaz moderna y responsiva para gestión de personal
 
 ### v1.2.0 (2024-01-XX) - Mejoras de UI/UX
 - ✨ **Nuevo**: Interfaz completamente rediseñada con diseño claro
