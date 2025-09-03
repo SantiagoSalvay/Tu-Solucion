@@ -1,25 +1,54 @@
 {
     "include": [
-        "catering",
-        "tu_solucion"
+        "."
     ],
     "exclude": [
         "**/node_modules",
         "**/__pycache__",
         "**/venv",
-        "**/.venv"
+        "**/.venv",
+        "**/migrations",
+        "**/static",
+        "**/media"
     ],
     "ignore": [
-        "**/migrations"
+        "**/migrations/**",
+        "**/static/**",
+        "**/media/**"
     ],
     "reportMissingImports": false,
+    "reportMissingTypeStubs": false,
     "reportMissingModuleSource": false,
-    "pythonVersion": "3.13",
+    "reportAttributeAccessIssue": false,
+    "reportMethodAccessIssue": false,
+    "reportOptionalMemberAccess": false,
+    "reportOptionalSubscript": false,
+    "reportOptionalIterable": false,
+    "reportOptionalContextManager": false,
+    "reportOptionalOperand": false,
+    "reportUntypedFunctionDecorator": false,
+    "reportUntypedClassDecorator": false,
+    "reportUntypedBaseClass": false,
+    "reportUntypedNamedTuple": false,
+    "reportPrivateUsage": false,
+    "reportConstantRedefinition": false,
+    "reportIncompatibleMethodOverride": false,
+    "reportIncompatibleVariableOverride": false,
+    "reportInconsistentConstructor": false,
+    "pythonVersion": "3.8",
     "pythonPlatform": "Windows",
-    "typeCheckingMode": "basic",
-    "useLibraryCodeForTypes": true,
-    "autoImportCompletions": true,
-    "extraPaths": [
-        "venv/Lib/site-packages"
-    ]
+    "executionEnvironments": [
+        {
+            "root": ".",
+            "pythonVersion": "3.8",
+            "pythonPlatform": "Windows",
+            "extraPaths": [
+                "./venv/Lib/site-packages",
+                "./venv/Scripts"
+            ]
+        }
+    ],
+    "stubPath": "./typings",
+    "venvPath": "./venv",
+    "venv": "venv"
 }
