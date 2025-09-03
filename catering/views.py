@@ -6,11 +6,12 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta
+from decimal import Decimal
 from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
     EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio
 )
-from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm
+from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm, AsignarPersonalForm, CambiarEstadoEventoForm
 
 
 def index(request):
@@ -173,6 +174,52 @@ def cliente_delete(request, pk):
         'cliente': cliente,
     }
     return render(request, 'catering/cliente_confirm_delete.html', context)
+
+
+@login_required
+def cliente_eventos(request):
+    """Vista para que los clientes vean sus eventos"""
+    if not hasattr(request.user, 'cliente'):
+        messages.error(request, 'Acceso denegado. Solo clientes pueden acceder a esta vista.')
+        return redirect('catering:index')
+    
+    cliente = request.user.cliente
+    eventos = EventoSolicitado.objects.filter(id_cliente=cliente).order_by('-fecha')
+    
+    context = {
+        'eventos': eventos,
+        'cliente': cliente,
+        'title': 'Mis Eventos'
+    }
+    return render(request, 'catering/cliente_eventos.html', context)
+
+
+@login_required
+def cliente_evento_detail(request, pk):
+    """Vista para que los clientes vean el detalle de su evento"""
+    if not hasattr(request.user, 'cliente'):
+        messages.error(request, 'Acceso denegado. Solo clientes pueden acceder a esta vista.')
+        return redirect('catering:index')
+    
+    cliente = request.user.cliente
+    evento = get_object_or_404(EventoSolicitado, pk=pk, id_cliente=cliente)
+    menu_items = MenuXTipoProducto.objects.filter(id_evento=evento).select_related('id_producto', 'id_tipo_producto')
+    servicios = Servicio.objects.filter(id_evento=evento).select_related('id_personal')
+    
+    try:
+        senia = Senia.objects.get(id_evento=evento)
+    except Senia.DoesNotExist:
+        senia = None
+    
+    context = {
+        'evento': evento,
+        'menu_items': menu_items,
+        'servicios': servicios,
+        'senia': senia,
+        'cliente': cliente,
+        'title': f'Mi Evento - {evento.tipo_evento}'
+    }
+    return render(request, 'catering/cliente_evento_detail.html', context)
 
 
 # Vistas de Eventos
@@ -535,43 +582,72 @@ def personal_delete(request, pk):
 
 @login_required
 def asignar_personal(request, evento_id):
-    """Asignar personal a un evento"""
-    evento = get_object_or_404(EventoSolicitado, pk=evento_id)
+    """Vista para asignar personal a un evento"""
+    evento = get_object_or_404(EventoSolicitado, id_evento=evento_id)
     
     if request.method == 'POST':
-        personal_ids = request.POST.getlist('personal')
-        cantidad = request.POST.getlist('cantidad')
-        
-        # Eliminar asignaciones existentes
-        Servicio.objects.filter(id_evento=evento).delete()
-        
-        # Crear nuevas asignaciones
-        for i, personal_id in enumerate(personal_ids):
-            if personal_id and cantidad[i]:
-                personal = get_object_or_404(Personal, pk=personal_id)
-                Servicio.objects.create(
-                    id_evento=evento,
-                    id_personal=personal,
-                    cantidad_personal=int(cantidad[i])
-                )
-        
-        # Actualizar estado del evento
-        evento.estado = 'CONFIRMADO'
-        evento.save()
-        
-        messages.success(request, 'Personal asignado exitosamente.')
-        return redirect('evento_detail', pk=evento.pk)
+        form = AsignarPersonalForm(request.POST)
+        if form.is_valid():
+            servicio = form.save(commit=False)
+            servicio.id_evento = evento
+            servicio.save()
+            
+            messages.success(request, f'Personal {servicio.id_personal.nombre_y_apellido} asignado exitosamente.')
+            return redirect('catering:evento_detail', pk=evento_id)
+    else:
+        form = AsignarPersonalForm()
     
-    # Obtener personal disponible
-    personal_disponible = Personal.objects.filter(estado='ACTIVO')
-    servicios_actuales = Servicio.objects.filter(id_evento=evento)
+    # Obtener personal ya asignado
+    personal_asignado = Servicio.objects.filter(id_evento=evento).select_related('id_personal')
     
     context = {
         'evento': evento,
-        'personal_disponible': personal_disponible,
-        'servicios_actuales': servicios_actuales,
+        'form': form,
+        'personal_asignado': personal_asignado,
+        'title': f'Asignar Personal - Evento {evento.id_evento}'
     }
     return render(request, 'catering/asignar_personal.html', context)
+
+
+@login_required
+def cambiar_estado_evento(request, evento_id):
+    """Vista para cambiar el estado de un evento"""
+    evento = get_object_or_404(EventoSolicitado, id_evento=evento_id)
+    
+    if request.method == 'POST':
+        form = CambiarEstadoEventoForm(request.POST, instance=evento)
+        if form.is_valid():
+            evento = form.save()
+            messages.success(request, f'Estado del evento cambiado a: {evento.get_estado_display()}')
+            return redirect('catering:evento_detail', pk=evento_id)
+    else:
+        form = CambiarEstadoEventoForm(instance=evento)
+    
+    context = {
+        'evento': evento,
+        'form': form,
+        'title': f'Cambiar Estado - Evento {evento.id_evento}'
+    }
+    return render(request, 'catering/cambiar_estado_evento.html', context)
+
+
+@login_required
+def eliminar_personal_asignado(request, servicio_id):
+    """Eliminar personal asignado a un evento"""
+    servicio = get_object_or_404(Servicio, id_servicio=servicio_id)
+    evento_id = servicio.id_evento.id_evento
+    
+    if request.method == 'POST':
+        nombre_personal = servicio.id_personal.nombre_y_apellido
+        servicio.delete()
+        messages.success(request, f'Personal {nombre_personal} eliminado del evento exitosamente.')
+        return redirect('catering:asignar_personal', evento_id=evento_id)
+    
+    context = {
+        'servicio': servicio,
+        'title': 'Eliminar Personal Asignado'
+    }
+    return render(request, 'catering/eliminar_personal_asignado.html', context)
 
 
 # Vistas de Productos
@@ -630,11 +706,14 @@ def obtener_productos_por_tipo(request):
     """Obtener productos por tipo para el armado de menús"""
     tipo_id = request.GET.get('tipo_id')
     if tipo_id:
-        productos = Producto.objects.filter(
-            id_tipo_producto_id=tipo_id,
-            disponible=True
-        ).values('id_producto', 'descripcion', 'precio')
-        return JsonResponse({'productos': list(productos)})
+        try:
+            productos = Producto.objects.filter(
+                id_tipo_producto_id=tipo_id,
+                disponible=True
+            ).values('id_producto', 'descripcion', 'precio').order_by('descripcion')
+            return JsonResponse({'productos': list(productos)})
+        except Exception as e:
+            return JsonResponse({'error': f'Error al obtener productos: {str(e)}'}, status=400)
     
     return JsonResponse({'error': 'Tipo de producto requerido'}, status=400)
 
@@ -683,16 +762,30 @@ def editar_menu(request, evento_id):
     if request.method == 'POST':
         form = MenuForm(request.POST)
         if form.is_valid():
-            menu_item = form.save(commit=False)
-            menu_item.id_evento = evento
-            menu_item.precio_uni = menu_item.id_producto.precio
-            menu_item.precio_total = menu_item.precio_uni * menu_item.cantidad_producto
-            menu_item.save()
+            # Verificar si ya existe un producto del mismo tipo para este evento
+            producto_existente = MenuXTipoProducto.objects.filter(
+                id_evento=evento,
+                id_tipo_producto=form.cleaned_data['id_tipo_producto'],
+                id_producto=form.cleaned_data['id_producto']
+            ).first()
+            
+            if producto_existente:
+                # Si existe, actualizar la cantidad
+                producto_existente.cantidad_producto += form.cleaned_data['cantidad_producto']
+                producto_existente.precio_total = producto_existente.precio_uni * producto_existente.cantidad_producto
+                producto_existente.save()
+                messages.success(request, 'Cantidad del producto actualizada exitosamente.')
+            else:
+                # Si no existe, crear uno nuevo
+                menu_item = form.save(commit=False)
+                menu_item.id_evento = evento
+                menu_item.precio_uni = menu_item.id_producto.precio
+                menu_item.precio_total = menu_item.precio_uni * menu_item.cantidad_producto
+                menu_item.save()
+                messages.success(request, 'Producto agregado al menú exitosamente.')
             
             # Actualizar comprobante
             actualizar_comprobante(evento)
-            
-            messages.success(request, 'Producto agregado al menú exitosamente.')
             return redirect('catering:editar_menu', evento_id=evento_id)
     else:
         form = MenuForm()
@@ -757,7 +850,7 @@ def actualizar_comprobante(evento):
     
     comprobante = evento.id_comprobante
     comprobante.importe_total_productos = total_productos
-    comprobante.total_servicio = total_productos * 1.3  # 30% de ganancia
+    comprobante.total_servicio = total_productos * Decimal('1.3')  # 30% de ganancia
     comprobante.precio_x_persona = comprobante.total_servicio / evento.cantidad_personas if evento.cantidad_personas > 0 else 0
     comprobante.save()
     

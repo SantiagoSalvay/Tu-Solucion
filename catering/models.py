@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from datetime import datetime, timedelta
+from decimal import Decimal
 import re
 
 
@@ -18,6 +19,7 @@ class Cliente(models.Model):
     domicilio = models.CharField(max_length=200, verbose_name="Domicilio")
     fecha_alta = models.DateField(auto_now_add=True, verbose_name="Fecha de Alta")
     fecha_nacimiento = models.DateField(null=True, blank=True, verbose_name="Fecha de Nacimiento")
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Usuario")
     
     class Meta:
         verbose_name = "Cliente"
@@ -38,6 +40,43 @@ class Cliente(models.Model):
         if len(self.nombre) >= 2:
             return self.nombre[1].lower() in 'aeiouáéíóú'
         return False
+    
+    def crear_usuario(self, username=None, password=None):
+        """Crea un usuario para el cliente"""
+        if self.usuario:
+            return self.usuario
+        
+        if not username:
+            username = f"cliente_{self.num_doc}"
+        
+        if not password:
+            password = f"cliente{self.num_doc}"
+        
+        # Crear usuario
+        user = User.objects.create_user(
+            username=username,
+            email=self.email,
+            password=password,
+            first_name=self.nombre,
+            last_name=self.apellido,
+            is_staff=False,
+            is_superuser=False
+        )
+        
+        # Crear perfil de usuario
+        PerfilUsuario.objects.create(
+            usuario=user,
+            tipo_usuario='CLIENTE',
+            estado='ACTIVO',
+            telefono='',
+            fecha_nacimiento=self.fecha_nacimiento,
+            direccion=self.domicilio
+        )
+        
+        self.usuario = user
+        self.save()
+        
+        return user
 
 
 class Responsable(models.Model):
@@ -140,6 +179,8 @@ class EventoSolicitado(models.Model):
     ubicacion = models.CharField(max_length=300, verbose_name="Ubicación")
     cantidad_personas = models.PositiveIntegerField(verbose_name="Cantidad de Personas")
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='SOLICITADO', verbose_name="Estado")
+    precio_total = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Precio Total", null=True, blank=True)
+    precio_por_persona = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio por Persona", null=True, blank=True)
     
     class Meta:
         verbose_name = "Evento Solicitado"
@@ -164,6 +205,21 @@ class EventoSolicitado(models.Model):
         if ',' in self.ubicacion:
             return self.ubicacion.split(',')[-1].strip()
         return self.ubicacion
+    
+    def calcular_precios(self):
+        """Calcula los precios totales basados en el menú"""
+        menu_items = MenuXTipoProducto.objects.filter(id_evento=self)
+        total_productos = sum(item.precio_total for item in menu_items)
+        
+        if hasattr(self, 'id_comprobante'):
+            self.id_comprobante.importe_total_productos = total_productos
+            self.id_comprobante.total_servicio = total_productos * Decimal('1.3')  # 30% de ganancia
+            self.id_comprobante.precio_x_persona = self.id_comprobante.total_servicio / self.cantidad_personas if self.cantidad_personas > 0 else 0
+            self.id_comprobante.save()
+            
+            self.precio_total = self.id_comprobante.total_servicio
+            self.precio_por_persona = self.id_comprobante.precio_x_persona
+            self.save()
 
 
 class MenuXTipoProducto(models.Model):
@@ -214,7 +270,7 @@ class Senia(models.Model):
     
     def calcular_monto(self):
         """Calcula el monto de la seña (30% del total del servicio)"""
-        return self.id_evento.id_comprobante.total_servicio * 0.30
+        return self.id_evento.id_comprobante.total_servicio * Decimal('0.30')
     
     def save(self, *args, **kwargs):
         if not self.monto:

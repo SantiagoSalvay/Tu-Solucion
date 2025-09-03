@@ -11,9 +11,31 @@ from .models import (
 class ClienteForm(forms.ModelForm):
     """Formulario para crear y editar clientes"""
     
+    # Campos para crear usuario
+    crear_usuario = forms.BooleanField(
+        required=False, 
+        initial=True,
+        label="Crear usuario para este cliente",
+        help_text="Marcar para crear automáticamente un usuario con rol CLIENTE"
+    )
+    username_personalizado = forms.CharField(
+        max_length=150,
+        required=False,
+        label="Nombre de usuario personalizado",
+        help_text="Dejar vacío para generar automáticamente",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dejar vacío para generar automáticamente'})
+    )
+    password_personalizada = forms.CharField(
+        max_length=128,
+        required=False,
+        label="Contraseña personalizada",
+        help_text="Dejar vacío para generar automáticamente",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Dejar vacío para generar automáticamente'})
+    )
+    
     class Meta:
         model = Cliente
-        fields = ['nombre', 'apellido', 'tipo_doc', 'num_doc', 'email', 'domicilio']
+        fields = ['nombre', 'apellido', 'tipo_doc', 'num_doc', 'email', 'domicilio', 'fecha_nacimiento']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre'}),
             'apellido': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el apellido'}),
@@ -21,6 +43,7 @@ class ClienteForm(forms.ModelForm):
             'num_doc': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el número de documento'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@email.com'}),
             'domicilio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el domicilio completo'}),
+            'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
     
     def clean_num_doc(self):
@@ -36,6 +59,40 @@ class ClienteForm(forms.ModelForm):
         if Cliente.objects.filter(email=email).exclude(pk=self.instance.pk if self.instance else None).exists():
             raise ValidationError('Ya existe un cliente con este email.')
         return email
+    
+    def clean_username_personalizado(self):
+        """Validar que el username sea único si se proporciona"""
+        username = self.cleaned_data['username_personalizado']
+        if username:
+            from django.contrib.auth.models import User
+            if User.objects.filter(username=username).exists():
+                raise ValidationError('Ya existe un usuario con este nombre de usuario.')
+        return username
+    
+    def save(self, commit=True):
+        cliente = super().save(commit=False)
+        
+        if commit:
+            cliente.save()
+            
+            # Crear usuario si se solicita
+            if self.cleaned_data.get('crear_usuario') and not cliente.usuario:
+                username = self.cleaned_data.get('username_personalizado')
+                password = self.cleaned_data.get('password_personalizada')
+                
+                if not username:
+                    username = f"cliente_{cliente.num_doc}"
+                
+                if not password:
+                    password = f"cliente{cliente.num_doc}"
+                
+                try:
+                    cliente.crear_usuario(username=username, password=password)
+                except Exception as e:
+                    # Si hay error al crear usuario, no fallar la creación del cliente
+                    pass
+        
+        return cliente
 
 
 class ResponsableForm(forms.ModelForm):
@@ -297,15 +354,15 @@ class MenuItemForm(forms.Form):
         super().__init__(*args, **kwargs)
         if 'tipo_producto' in self.data:
             try:
-                tipo_id = int(self.data.get('tipo_producto'))
-                self.fields['producto'].queryset = Producto.objects.filter(
-                    id_tipo_producto_id=tipo_id,
-                    disponible=True
-                )
+                tipo_id = self.data.get('tipo_producto')
+                if tipo_id:
+                    tipo_id = int(tipo_id)
+                    self.fields['producto'].queryset = Producto.objects.filter(
+                        id_tipo_producto_id=tipo_id,
+                        disponible=True
+                    )
             except (ValueError, TypeError):
                 pass
-        elif self.instance.pk and self.instance.id_tipo_producto:
-            self.fields['producto'].queryset = self.instance.id_tipo_producto.producto_set.filter(disponible=True)
 
 
 # Formularios para reportes
@@ -334,3 +391,32 @@ class ReporteForm(forms.Form):
             raise ValidationError('La fecha de inicio no puede ser posterior a la fecha de fin.')
         
         return cleaned_data
+
+
+class AsignarPersonalForm(forms.ModelForm):
+    """Formulario para asignar personal a eventos"""
+    
+    class Meta:
+        model = Servicio
+        fields = ['id_personal', 'cantidad_personal', 'estado']
+        widgets = {
+            'id_personal': forms.Select(attrs={'class': 'form-select'}),
+            'cantidad_personal': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '10'}),
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrar solo personal activo
+        self.fields['id_personal'].queryset = Personal.objects.filter(estado='ACTIVO')
+
+
+class CambiarEstadoEventoForm(forms.ModelForm):
+    """Formulario para cambiar el estado de un evento"""
+    
+    class Meta:
+        model = EventoSolicitado
+        fields = ['estado']
+        widgets = {
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+        }

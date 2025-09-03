@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:evento_list' %}">Eventos</a></li>
+<li class="breadcrumb-item"><a href="{% url 'catering:evento_detail' evento.pk %}">Evento {{ evento.id_evento }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Asignar Personal</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Formulario para asignar personal -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-people me-2"></i>
+                    Asignar Personal al Evento
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.id_personal|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.cantidad_personal|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.estado|as_crispy_field }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Volver al Evento
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Asignar Personal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Personal ya asignado -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-check me-2"></i>
+                    Personal Asignado
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if personal_asignado %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Personal</th>
+                                    <th>Tipo</th>
+                                    <th>Cantidad</th>
+                                    <th>Estado</th>
+                                    <th>Fecha de Asignación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for servicio in personal_asignado %}
+                                <tr>
+                                    <td>{{ servicio.id_personal.nombre_y_apellido }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ servicio.id_personal.get_tipo_personal_display }}</span>
+                                    </td>
+                                    <td>{{ servicio.cantidad_personal }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if servicio.estado == 'ASIGNADO' %}warning{% elif servicio.estado == 'EN_SERVICIO' %}info{% elif servicio.estado == 'COMPLETADO' %}success{% elif servicio.estado == 'CANCELADO' %}danger{% else %}dark{% endif %}">
+                                            {{ servicio.get_estado_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ servicio.fecha_asignacion|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'catering:eliminar_personal_asignado' servicio.id_servicio %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2">No hay personal asignado a este evento</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Información del Evento -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Información del Evento
+                </h6>
+            </div>
+            <div class="card-body">
+                <p><strong>ID:</strong> {{ evento.id_evento }}</p>
+                <p><strong>Tipo:</strong> {{ evento.get_tipo_evento_display }}</p>
+                <p><strong>Fecha:</strong> {{ evento.fecha|date:"d/m/Y" }}</p>
+                <p><strong>Hora:</strong> {{ evento.hora|time:"H:i" }}</p>
+                <p><strong>Estado:</strong> 
+                    <span class="badge bg-{% if evento.estado == 'SOLICITADO' %}warning{% elif evento.estado == 'CONFIRMADO' %}success{% elif evento.estado == 'EN_PROCESO' %}info{% elif evento.estado == 'FINALIZADO' %}secondary{% elif evento.estado == 'CANCELADO' %}danger{% else %}dark{% endif %}">
+                        {{ evento.get_estado_display }}
+                    </span>
+                </p>
+                <p><strong>Cliente:</strong> {{ evento.id_cliente.apellido }}, {{ evento.id_cliente.nombre }}</p>
+                <p><strong>Ubicación:</strong> {{ evento.ubicacion }}</p>
+                <p><strong>Personas:</strong> {{ evento.cantidad_personas }}</p>
+            </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightning me-2"></i>
+                    Acciones Rápidas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'catering:editar_menu' evento.id_evento %}" class="btn btn-outline-primary">
+                        <i class="bi bi-list-ul me-1"></i>Editar Menú
+                    </a>
+                    <a href="{% url 'catering:cambiar_estado_evento' evento.id_evento %}" class="btn btn-outline-warning">
+                        <i class="bi bi-arrow-repeat me-1"></i>Cambiar Estado
+                    </a>
+                    <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-outline-info">
+                        <i class="bi bi-eye me-1"></i>Ver Evento
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

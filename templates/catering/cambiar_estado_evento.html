@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:evento_list' %}">Eventos</a></li>
+<li class="breadcrumb-item"><a href="{% url 'catering:evento_detail' evento.pk %}">Evento {{ evento.id_evento }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Cambiar Estado</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Formulario para cambiar estado -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-arrow-repeat me-2"></i>
+                    Cambiar Estado del Evento
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.estado|as_crispy_field }}
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Estados disponibles:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>SOLICITADO:</strong> Evento recién creado, pendiente de confirmación</li>
+                            <li><strong>CONFIRMADO:</strong> Evento confirmado, se puede asignar personal</li>
+                            <li><strong>EN_PROCESO:</strong> Evento en ejecución</li>
+                            <li><strong>FINALIZADO:</strong> Evento completado exitosamente</li>
+                            <li><strong>CANCELADO:</strong> Evento cancelado por el cliente</li>
+                            <li><strong>VENCIDO:</strong> Evento que no se realizó en la fecha programada</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Volver al Evento
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-check-circle me-1"></i>Actualizar Estado
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Información del Evento -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Información del Evento
+                </h6>
+            </div>
+            <div class="card-body">
+                <p><strong>ID:</strong> {{ evento.id_evento }}</p>
+                <p><strong>Tipo:</strong> {{ evento.get_tipo_evento_display }}</p>
+                <p><strong>Fecha:</strong> {{ evento.fecha|date:"d/m/Y" }}</p>
+                <p><strong>Hora:</strong> {{ evento.hora|time:"H:i" }}</p>
+                <p><strong>Estado Actual:</strong> 
+                    <span class="badge bg-{% if evento.estado == 'SOLICITADO' %}warning{% elif evento.estado == 'CONFIRMADO' %}success{% elif evento.estado == 'EN_PROCESO' %}info{% elif evento.estado == 'FINALIZADO' %}secondary{% elif evento.estado == 'CANCELADO' %}danger{% else %}dark{% endif %}">
+                        {{ evento.get_estado_display }}
+                    </span>
+                </p>
+                <p><strong>Cliente:</strong> {{ evento.id_cliente.apellido }}, {{ evento.id_cliente.nombre }}</p>
+                <p><strong>Ubicación:</strong> {{ evento.ubicacion }}</p>
+                <p><strong>Personas:</strong> {{ evento.cantidad_personas }}</p>
+            </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightning me-2"></i>
+                    Acciones Rápidas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'catering:editar_menu' evento.id_evento %}" class="btn btn-outline-primary">
+                        <i class="bi bi-list-ul me-1"></i>Editar Menú
+                    </a>
+                    <a href="{% url 'catering:asignar_personal' evento.id_evento %}" class="btn btn-outline-success">
+                        <i class="bi bi-people me-1"></i>Asignar Personal
+                    </a>
+                    <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-outline-info">
+                        <i class="bi bi-eye me-1"></i>Ver Evento
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

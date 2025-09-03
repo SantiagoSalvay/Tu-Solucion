@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">Mis Eventos</li>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3">
+            <i class="bi bi-calendar-event me-2"></i>
+            Mis Eventos de Catering
+        </h1>
+        <p class="text-muted">Bienvenido {{ cliente.nombre }} {{ cliente.apellido }}, aquí puedes ver todos los eventos que has organizado con nosotros.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'catering:reserva_catering' %}" class="btn btn-primary">
+            <i class="bi bi-calendar-plus"></i> Nuevo Evento
+        </a>
+    </div>
+</div>
+
+<!-- Lista de eventos -->
+<div class="card">
+    <div class="card-body">
+        {% if eventos %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Ubicación</th>
+                        <th>Estado</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for evento in eventos %}
+                    <tr>
+                        <td>{{ evento.id_evento }}</td>
+                        <td>
+                            <span class="badge bg-info">{{ evento.get_tipo_evento_display }}</span>
+                        </td>
+                        <td>
+                            {{ evento.fecha|date:"d/m/Y" }}<br>
+                            <small class="text-muted">{{ evento.hora|time:"H:i" }}</small>
+                        </td>
+                        <td>
+                            <span class="text-truncate-2">{{ evento.ubicacion }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if evento.estado == 'SOLICITADO' %}warning{% elif evento.estado == 'CONFIRMADO' %}success{% elif evento.estado == 'EN_PROCESO' %}info{% elif evento.estado == 'FINALIZADO' %}secondary{% elif evento.estado == 'CANCELADO' %}danger{% else %}dark{% endif %}">
+                                {{ evento.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if evento.precio_total %}
+                                ${{ evento.precio_total|floatformat:2 }}
+                            {% else %}
+                                <span class="text-muted">Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'catering:cliente_evento_detail' evento.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Ver
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Estadísticas del cliente -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h4>{{ eventos.count }}</h4>
+                        <p class="mb-0">Total Eventos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h4>{{ eventos|dictsort:"estado"|length }}</h4>
+                        <p class="mb-0">Eventos Confirmados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h4>{{ eventos|dictsort:"estado"|length }}</h4>
+                        <p class="mb-0">En Proceso</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-secondary text-white">
+                    <div class="card-body text-center">
+                        <h4>{{ eventos|dictsort:"estado"|length }}</h4>
+                        <p class="mb-0">Completados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
+            <h4 class="text-muted mt-3">No tienes eventos organizados</h4>
+            <p class="text-muted">Comienza organizando tu primer evento de catering con nosotros.</p>
+            <a href="{% url 'catering:reserva_catering' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-calendar-plus me-2"></i>Organizar Mi Primer Evento
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Información del cliente -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-person-circle me-2"></i>
+            Mi Información
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Nombre:</strong> {{ cliente.nombre }} {{ cliente.apellido }}</p>
+                <p><strong>Email:</strong> {{ cliente.email }}</p>
+                <p><strong>Documento:</strong> {{ cliente.get_tipo_doc_display }} {{ cliente.num_doc }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Domicilio:</strong> {{ cliente.domicilio }}</p>
+                <p><strong>Fecha de Alta:</strong> {{ cliente.fecha_alta|date:"d/m/Y" }}</p>
+                <p><strong>Usuario:</strong> {{ cliente.usuario.username }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

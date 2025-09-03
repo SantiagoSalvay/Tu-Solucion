@@ -8,15 +8,18 @@ from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
     EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio, PerfilUsuario
 )
+from .forms import ClienteForm
 
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
-    list_display = ['id_cliente', 'apellido', 'nombre', 'tipo_doc', 'num_doc', 'email', 'fecha_alta']
-    list_filter = ['tipo_doc', 'fecha_alta']
-    search_fields = ['nombre', 'apellido', 'email', 'num_doc']
-    readonly_fields = ['id_cliente', 'fecha_alta']
+    form = ClienteForm
+    list_display = ['id_cliente', 'apellido', 'nombre', 'tipo_doc', 'num_doc', 'email', 'fecha_alta', 'get_usuario_info']
+    list_filter = ['tipo_doc', 'fecha_alta', 'usuario__is_active']
+    search_fields = ['nombre', 'apellido', 'email', 'num_doc', 'usuario__username']
+    readonly_fields = ['id_cliente', 'fecha_alta', 'get_usuario_info', 'get_credenciales']
     ordering = ['apellido', 'nombre']
+    actions = ['crear_usuario_cliente', 'resetear_password']
     
     fieldsets = (
         ('Información Personal', {
@@ -25,11 +28,81 @@ class ClienteAdmin(admin.ModelAdmin):
         ('Contacto', {
             'fields': ('email', 'domicilio')
         }),
+        ('Información Adicional', {
+            'fields': ('fecha_nacimiento',)
+        }),
+        ('Crear Usuario del Sistema', {
+            'fields': ('crear_usuario', 'username_personalizado', 'password_personalizada'),
+            'classes': ('collapse',),
+            'description': 'Configuración para crear automáticamente un usuario con rol CLIENTE'
+        }),
+        ('Usuario del Sistema', {
+            'fields': ('usuario', 'get_usuario_info', 'get_credenciales'),
+            'classes': ('collapse',),
+            'description': 'Información del usuario asociado (solo lectura)'
+        }),
         ('Sistema', {
             'fields': ('id_cliente', 'fecha_alta'),
             'classes': ('collapse',)
         }),
     )
+    
+    def get_usuario_info(self, obj):
+        """Muestra información del usuario asociado"""
+        if obj.usuario:
+            estado = "Activo" if obj.usuario.is_active else "Inactivo"
+            color = "green" if obj.usuario.is_active else "red"
+            return format_html(
+                '<span style="color: {};">Usuario: {} ({})</span>',
+                color, obj.usuario.username, estado
+            )
+        return format_html('<span style="color: orange;">Sin usuario</span>')
+    get_usuario_info.short_description = 'Usuario'
+    
+    def get_credenciales(self, obj):
+        """Muestra las credenciales del usuario"""
+        if obj.usuario:
+            return format_html(
+                '<strong>Usuario:</strong> {}<br>'
+                '<strong>Contraseña:</strong> {}<br>'
+                '<small class="text-muted">(Generada automáticamente)</small>',
+                obj.usuario.username,
+                f"cliente{obj.num_doc}"
+            )
+        return "No hay usuario creado"
+    get_credenciales.short_description = 'Credenciales'
+    
+    def crear_usuario_cliente(self, request, queryset):
+        """Acción para crear usuarios para clientes seleccionados"""
+        creados = 0
+        for cliente in queryset:
+            if not cliente.usuario:
+                try:
+                    cliente.crear_usuario()
+                    creados += 1
+                except Exception as e:
+                    self.message_user(request, f"Error al crear usuario para {cliente}: {str(e)}", level='ERROR')
+        
+        if creados > 0:
+            self.message_user(request, f"Se crearon {creados} usuarios exitosamente.")
+    crear_usuario_cliente.short_description = "Crear usuarios para clientes seleccionados"
+    
+    def resetear_password(self, request, queryset):
+        """Acción para resetear contraseñas de usuarios"""
+        reseteados = 0
+        for cliente in queryset:
+            if cliente.usuario:
+                try:
+                    nueva_password = f"cliente{cliente.num_doc}"
+                    cliente.usuario.set_password(nueva_password)
+                    cliente.usuario.save()
+                    reseteados += 1
+                except Exception as e:
+                    self.message_user(request, f"Error al resetear password para {cliente}: {str(e)}", level='ERROR')
+        
+        if reseteados > 0:
+            self.message_user(request, f"Se reseteó la contraseña de {reseteados} usuarios exitosamente.")
+    resetear_password.short_description = "Resetear contraseñas de usuarios"
 
 
 @admin.register(Responsable)

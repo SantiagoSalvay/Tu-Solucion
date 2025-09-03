@@ -1,0 +1,25 @@
+{
+    "include": [
+        "catering",
+        "tu_solucion"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/venv",
+        "**/.venv"
+    ],
+    "ignore": [
+        "**/migrations"
+    ],
+    "reportMissingImports": false,
+    "reportMissingModuleSource": false,
+    "pythonVersion": "3.13",
+    "pythonPlatform": "Windows",
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": true,
+    "autoImportCompletions": true,
+    "extraPaths": [
+        "venv/Lib/site-packages"
+    ]
+}
