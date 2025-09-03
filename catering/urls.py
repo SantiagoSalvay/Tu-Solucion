@@ -33,6 +33,16 @@ urlpatterns = [
     
     # URLs de Productos
     path('productos/', views.productos_list, name='productos_list'),
+    path('productos/crear/', views.producto_create, name='producto_create'),
+    path('productos/<int:pk>/', views.producto_detail, name='producto_detail'),
+    path('productos/<int:pk>/editar/', views.producto_update, name='producto_update'),
+    path('productos/<int:pk>/eliminar/', views.producto_delete, name='producto_delete'),
+    
+    # URLs de Tipos de Producto
+    path('tipos-producto/', views.tipos_producto_list, name='tipos_producto_list'),
+    path('tipos-producto/crear/', views.tipo_producto_create, name='tipo_producto_create'),
+    path('tipos-producto/<int:pk>/editar/', views.tipo_producto_update, name='tipo_producto_update'),
+    path('tipos-producto/<int:pk>/eliminar/', views.tipo_producto_delete, name='tipo_producto_delete'),
     
     # URLs para personal y eventos
     path('eventos/<int:evento_id>/asignar-personal/', views.asignar_personal, name='asignar_personal'),

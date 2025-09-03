@@ -420,3 +420,21 @@ class CambiarEstadoEventoForm(forms.ModelForm):
         widgets = {
             'estado': forms.Select(attrs={'class': 'form-select'}),
         }
+
+
+class TipoProductoForm(forms.ModelForm):
+    """Formulario para crear y editar tipos de productos"""
+    
+    class Meta:
+        model = TipoProducto
+        fields = ['descripcion']
+        widgets = {
+            'descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Descripción del tipo de producto'}),
+        }
+    
+    def clean_descripcion(self):
+        """Validar que la descripción no esté vacía"""
+        descripcion = self.cleaned_data['descripcion']
+        if not descripcion or len(descripcion.strip()) < 3:
+            raise ValidationError('La descripción debe tener al menos 3 caracteres.')
+        return descripcion.strip()

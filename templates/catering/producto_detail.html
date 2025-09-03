@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:productos_list' %}">Productos</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ producto.descripcion }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Información del Producto -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-box me-2"></i>
+                    Información del Producto
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>ID del Producto:</strong> {{ producto.id_producto }}</p>
+                        <p><strong>Descripción:</strong> {{ producto.descripcion }}</p>
+                        <p><strong>Tipo de Producto:</strong> 
+                            <span class="badge bg-info">{{ producto.id_tipo_producto.descripcion }}</span>
+                        </p>
+                        <p><strong>Estado:</strong> 
+                            <span class="badge bg-{% if producto.disponible %}success{% else %}danger{% endif %}">
+                                {% if producto.disponible %}Disponible{% else %}No Disponible{% endif %}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Precio:</strong> ${{ producto.precio|floatformat:2 }}</p>
+                        <p><strong>Categoría:</strong> {{ producto.id_tipo_producto.descripcion }}</p>
+                        <p><strong>Stock:</strong> 
+                            {% if producto.disponible %}
+                                <span class="text-success">En Stock</span>
+                            {% else %}
+                                <span class="text-danger">Sin Stock</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'catering:producto_update' producto.pk %}" class="btn btn-primary">
+                        <i class="bi bi-pencil me-1"></i>Editar
+                    </a>
+                    <a href="{% url 'catering:producto_delete' producto.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Eliminar
+                    </a>
+                    <a href="{% url 'catering:productos_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Eventos donde se usó este producto -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Eventos donde se usó este Producto
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if eventos_usados %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Evento</th>
+                                    <th>Cliente</th>
+                                    <th>Fecha</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for menu_item in eventos_usados %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'catering:evento_detail' menu_item.id_evento.pk %}">
+                                            Evento {{ menu_item.id_evento.id_evento }}
+                                        </a>
+                                    </td>
+                                    <td>{{ menu_item.id_evento.id_cliente.apellido }}, {{ menu_item.id_evento.id_cliente.nombre }}</td>
+                                    <td>{{ menu_item.id_evento.fecha|date:"d/m/Y" }}</td>
+                                    <td>{{ menu_item.cantidad_producto }}</td>
+                                    <td>${{ menu_item.precio_total|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2">Este producto no ha sido usado en ningún evento</p>
+                        <small class="text-muted">Cuando se use en menús de eventos, aparecerá aquí.</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Acciones rápidas -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightning me-2"></i>
+                    Acciones Rápidas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'catering:producto_update' producto.pk %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil me-1"></i>Editar Producto
+                    </a>
+                    <a href="{% url 'catering:producto_create' %}" class="btn btn-outline-success">
+                        <i class="bi bi-plus-circle me-1"></i>Crear Otro Producto
+                    </a>
+                    <a href="{% url 'catering:tipos_producto_list' %}" class="btn btn-outline-info">
+                        <i class="bi bi-tags me-1"></i>Gestionar Tipos
+                    </a>
+                    <a href="{% url 'catering:productos_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-list me-1"></i>Ver Todos los Productos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas del producto -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>
+                    Estadísticas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ eventos_usados.count }}</h4>
+                        <p class="mb-0 text-muted">Eventos</p>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">
+                            {% if producto.disponible %}Sí{% else %}No{% endif %}
+                        </h4>
+                        <p class="mb-0 text-muted">Disponible</p>
+                    </div>
+                </div>
+                <hr>
+                <p class="mb-1"><strong>Precio:</strong> ${{ producto.precio|floatformat:2 }}</p>
+                <p class="mb-0"><strong>Categoría:</strong> {{ producto.id_tipo_producto.descripcion }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

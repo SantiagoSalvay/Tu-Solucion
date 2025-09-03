@@ -11,7 +11,7 @@ from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
     EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio
 )
-from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm, AsignarPersonalForm, CambiarEstadoEventoForm
+from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm, AsignarPersonalForm, CambiarEstadoEventoForm, ProductoForm, TipoProductoForm
 
 
 def index(request):
@@ -653,29 +653,180 @@ def eliminar_personal_asignado(request, servicio_id):
 # Vistas de Productos
 @login_required
 def productos_list(request):
-    """Lista de productos"""
-    productos = Producto.objects.select_related('id_tipo_producto').all().order_by('id_tipo_producto', 'descripcion')
+    """Lista todos los productos disponibles"""
+    productos = Producto.objects.all().select_related('id_tipo_producto')
     
     # Filtros
-    tipo = request.GET.get('tipo')
-    disponible = request.GET.get('disponible')
+    tipo_filter = request.GET.get('tipo')
+    disponible_filter = request.GET.get('disponible')
     
-    if tipo:
-        productos = productos.filter(id_tipo_producto_id=tipo)
-    if disponible is not None:
-        productos = productos.filter(disponible=disponible == 'true')
+    if tipo_filter:
+        productos = productos.filter(id_tipo_producto_id=tipo_filter)
+    
+    if disponible_filter is not None:
+        productos = productos.filter(disponible=disponible_filter == 'true')
     
     tipos_producto = TipoProducto.objects.all()
     
     context = {
         'productos': productos,
         'tipos_producto': tipos_producto,
-        'filtros': {
-            'tipo': tipo,
-            'disponible': disponible,
-        }
+        'title': 'Lista de Productos'
     }
     return render(request, 'catering/productos_list.html', context)
+
+
+@login_required
+def producto_create(request):
+    """Crear un nuevo producto"""
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            producto = form.save()
+            messages.success(request, f'Producto "{producto.descripcion}" creado exitosamente.')
+            return redirect('catering:productos_list')
+    else:
+        form = ProductoForm()
+    
+    context = {
+        'form': form,
+        'title': 'Crear Nuevo Producto'
+    }
+    return render(request, 'catering/producto_form.html', context)
+
+
+@login_required
+def producto_update(request, pk):
+    """Editar un producto existente"""
+    producto = get_object_or_404(Producto, pk=pk)
+    
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, instance=producto)
+        if form.is_valid():
+            producto = form.save()
+            messages.success(request, f'Producto "{producto.descripcion}" actualizado exitosamente.')
+            return redirect('catering:productos_list')
+    else:
+        form = ProductoForm(instance=producto)
+    
+    context = {
+        'form': form,
+        'producto': producto,
+        'title': f'Editar Producto - {producto.descripcion}'
+    }
+    return render(request, 'catering/producto_form.html', context)
+
+
+@login_required
+def producto_delete(request, pk):
+    """Eliminar un producto"""
+    producto = get_object_or_404(Producto, pk=pk)
+    
+    if request.method == 'POST':
+        nombre_producto = producto.descripcion
+        producto.delete()
+        messages.success(request, f'Producto "{nombre_producto}" eliminado exitosamente.')
+        return redirect('catering:productos_list')
+    
+    context = {
+        'producto': producto,
+        'title': f'Eliminar Producto - {producto.descripcion}'
+    }
+    return render(request, 'catering/producto_confirm_delete.html', context)
+
+
+@login_required
+def producto_detail(request, pk):
+    """Ver detalles de un producto"""
+    producto = get_object_or_404(Producto, pk=pk)
+    
+    # Obtener eventos donde se usó este producto
+    eventos_usados = MenuXTipoProducto.objects.filter(
+        id_producto=producto
+    ).select_related('id_evento', 'id_evento__id_cliente')
+    
+    context = {
+        'producto': producto,
+        'eventos_usados': eventos_usados,
+        'title': f'Producto - {producto.descripcion}'
+    }
+    return render(request, 'catering/producto_detail.html', context)
+
+
+# Vistas de Tipos de Producto
+@login_required
+def tipos_producto_list(request):
+    """Lista todos los tipos de productos"""
+    tipos = TipoProducto.objects.all()
+    
+    context = {
+        'tipos': tipos,
+        'title': 'Tipos de Productos'
+    }
+    return render(request, 'catering/tipos_producto_list.html', context)
+
+
+@login_required
+def tipo_producto_create(request):
+    """Crear un nuevo tipo de producto"""
+    if request.method == 'POST':
+        form = TipoProductoForm(request.POST)
+        if form.is_valid():
+            tipo = form.save()
+            messages.success(request, f'Tipo de producto "{tipo.descripcion}" creado exitosamente.')
+            return redirect('catering:tipos_producto_list')
+    else:
+        form = TipoProductoForm()
+    
+    context = {
+        'form': form,
+        'title': 'Crear Nuevo Tipo de Producto'
+    }
+    return render(request, 'catering/tipo_producto_form.html', context)
+
+
+@login_required
+def tipo_producto_update(request, pk):
+    """Editar un tipo de producto existente"""
+    tipo = get_object_or_404(TipoProducto, pk=pk)
+    
+    if request.method == 'POST':
+        form = TipoProductoForm(request.POST, instance=tipo)
+        if form.is_valid():
+            tipo = form.save()
+            messages.success(request, f'Tipo de producto "{tipo.descripcion}" actualizado exitosamente.')
+            return redirect('catering:tipos_producto_list')
+    else:
+        form = TipoProductoForm(instance=tipo)
+    
+    context = {
+        'form': form,
+        'tipo': tipo,
+        'title': f'Editar Tipo de Producto - {tipo.descripcion}'
+    }
+    return render(request, 'catering/tipo_producto_form.html', context)
+
+
+@login_required
+def tipo_producto_delete(request, pk):
+    """Eliminar un tipo de producto"""
+    tipo = get_object_or_404(TipoProducto, pk=pk)
+    
+    # Verificar si hay productos asociados
+    productos_asociados = Producto.objects.filter(id_tipo_producto=tipo)
+    
+    if request.method == 'POST':
+        nombre_tipo = tipo.descripcion
+        tipo.delete()
+        messages.success(request, f'Tipo de producto "{nombre_tipo}" eliminado exitosamente.')
+        return redirect('catering:tipos_producto_list')
+    
+    context = {
+        'tipo': tipo,
+        'productos_asociados': productos_asociados,
+        'title': f'Eliminar Tipo de Producto - {tipo.descripcion}'
+    }
+    return render(request, 'catering/tipo_producto_confirm_delete.html', context)
 
 
 # API Views para AJAX

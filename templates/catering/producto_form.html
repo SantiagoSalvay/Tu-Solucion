@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:productos_list' %}">Productos</a></li>
+{% if producto %}
+<li class="breadcrumb-item"><a href="{% url 'catering:producto_detail' producto.pk %}">{{ producto.descripcion }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Editar</li>
+{% else %}
+<li class="breadcrumb-item active" aria-current="page">Crear Nuevo</li>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-box me-2"></i>
+                    {% if producto %}Editar Producto{% else %}Crear Nuevo Producto{% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.id_tipo_producto|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.descripcion|as_crispy_field }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.precio|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.disponible|as_crispy_field }}
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Información:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>El <strong>tipo de producto</strong> categoriza el producto (ej: bebidas, entradas, postres)</li>
+                            <li>La <strong>descripción</strong> debe ser clara y específica</li>
+                            <li>El <strong>precio</strong> se debe ingresar sin símbolos de moneda</li>
+                            <li>Marcar como <strong>disponible</strong> si el producto está en stock</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'catering:productos_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {% if producto %}Actualizar Producto{% else %}Crear Producto{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% if producto %}
+        <!-- Información del producto -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Información del Producto
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>ID:</strong> {{ producto.id_producto }}</p>
+                        <p><strong>Tipo:</strong> {{ producto.id_tipo_producto.descripcion }}</p>
+                        <p><strong>Estado:</strong> 
+                            <span class="badge bg-{% if producto.disponible %}success{% else %}danger{% endif %}">
+                                {% if producto.disponible %}Disponible{% else %}No Disponible{% endif %}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Precio:</strong> ${{ producto.precio|floatformat:2 }}</p>
+                        <p><strong>Fecha de Creación:</strong> {{ producto.id_producto|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

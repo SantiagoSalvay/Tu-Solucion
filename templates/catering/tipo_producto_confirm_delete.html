@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:tipos_producto_list' %}">Tipos de Productos</a></li>
+<li class="breadcrumb-item active" aria-current="page">Eliminar {{ tipo.descripcion }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>¿Estás seguro de que quieres eliminar este tipo de producto?</strong>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>ID:</strong> {{ tipo.id_tipo_producto }}</p>
+                        <p><strong>Descripción:</strong> {{ tipo.descripcion }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Productos Asociados:</strong> 
+                            {% with count=productos_asociados.count %}
+                                <span class="badge bg-{% if count > 0 %}warning{% else %}success{% endif %}">
+                                    {{ count }} producto{{ count|pluralize }}
+                                </span>
+                            {% endwith %}
+                        </p>
+                    </div>
+                </div>
+                
+                {% if productos_asociados %}
+                <div class="alert alert-danger">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ¡ADVERTENCIA CRÍTICA!
+                    </h6>
+                    <p class="mb-2">Este tipo de producto tiene <strong>{{ productos_asociados.count }} producto{{ productos_asociados.count|pluralize }}</strong> asociado{{ productos_asociados.count|pluralize }}.</p>
+                    
+                    <p class="mb-2"><strong>Si eliminas este tipo:</strong></p>
+                    <ul class="mb-2">
+                        <li>Los productos quedarán <strong>sin categoría</strong></li>
+                        <li>Puede causar <strong>errores en el sistema</strong></li>
+                        <li>Los <strong>menús de eventos</strong> pueden verse afectados</li>
+                    </ul>
+                    
+                    <p class="mb-0"><strong>Recomendación:</strong> Primero mueve o elimina todos los productos asociados.</p>
+                </div>
+                
+                <!-- Lista de productos asociados -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-box me-2"></i>
+                            Productos Asociados
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Descripción</th>
+                                        <th>Precio</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for producto in productos_asociados %}
+                                    <tr>
+                                        <td>{{ producto.id_producto }}</td>
+                                        <td>{{ producto.descripcion }}</td>
+                                        <td>${{ producto.precio|floatformat:2 }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if producto.disponible %}success{% else %}danger{% endif %}">
+                                                {% if producto.disponible %}Disponible{% else %}No Disponible{% endif %}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>Seguro para eliminar:</strong> Este tipo de producto no tiene productos asociados.
+                </div>
+                {% endif %}
+                
+                <div class="alert alert-info">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    <strong>Alternativas antes de eliminar:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li><strong>Renombrar:</strong> Cambia la descripción en lugar de eliminar</li>
+                        <li><strong>Mover productos:</strong> Asigna los productos a otro tipo</li>
+                        <li><strong>Desactivar:</strong> Marca como inactivo en lugar de eliminar</li>
+                    </ul>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'catering:tipos_producto_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger" {% if productos_asociados %}disabled{% endif %}>
+                            <i class="bi bi-trash me-1"></i>
+                            {% if productos_asociados %}
+                                No se puede eliminar
+                            {% else %}
+                                Eliminar Tipo de Producto
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+                
+                {% if productos_asociados %}
+                <div class="mt-3">
+                    <a href="{% url 'catering:tipo_producto_update' tipo.pk %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil me-1"></i>Editar en lugar de eliminar
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'catering:tipos_producto_list' %}">Tipos de Productos</a></li>
+{% if tipo %}
+<li class="breadcrumb-item active" aria-current="page">Editar {{ tipo.descripcion }}</li>
+{% else %}
+<li class="breadcrumb-item active" aria-current="page">Crear Nuevo</li>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-tag me-2"></i>
+                    {% if tipo %}Editar Tipo de Producto{% else %}Crear Nuevo Tipo de Producto{% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        {{ form.descripcion|as_crispy_field }}
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Información:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>La <strong>descripción</strong> debe ser clara y representativa</li>
+                            <li>Ejemplos: "Bebidas", "Entradas", "Platos Principales", "Postres"</li>
+                            <li>Una vez creado, este tipo se usará para categorizar productos</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'catering:tipos_producto_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {% if tipo %}Actualizar Tipo{% else %}Crear Tipo{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% if tipo %}
+        <!-- Información del tipo -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Información del Tipo
+                </h6>
+            </div>
+            <div class="card-body">
+                <p><strong>ID:</strong> {{ tipo.id_tipo_producto }}</p>
+                <p><strong>Descripción:</strong> {{ tipo.descripcion }}</p>
+                
+                {% with count=tipo.producto_set.count %}
+                <p><strong>Productos Asociados:</strong> 
+                    <span class="badge bg-{% if count > 0 %}info{% else %}light text-dark{% endif %}">
+                        {{ count }} producto{{ count|pluralize }}
+                    </span>
+                </p>
+                {% endwith %}
+                
+                {% if tipo.producto_set.all %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Nota:</strong> Este tipo tiene productos asociados. Si lo eliminas, los productos quedarán sin categoría.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-6">
+        <!-- Ejemplos de tipos de productos -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    Ejemplos de Tipos de Productos
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Bebidas</h6>
+                        <ul class="small text-muted">
+                            <li>Gaseosas</li>
+                            <li>Jugos</li>
+                            <li>Agua</li>
+                            <li>Cervezas</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-success">Alimentos</h6>
+                        <ul class="small text-muted">
+                            <li>Entradas</li>
+                            <li>Platos Principales</li>
+                            <li>Postres</li>
+                            <li>Aderezos</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h6 class="text-info">Consejos para Nombres:</h6>
+                <ul class="small text-muted">
+                    <li>Usa nombres <strong>singulares</strong> (ej: "Bebida" no "Bebidas")</li>
+                    <li>Mantén consistencia en el <strong>formato</strong></li>
+                    <li>Evita nombres <strong>muy largos</strong></li>
+                    <li>Usa <strong>mayúsculas</strong> para la primera letra</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Acciones rápidas -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightning me-2"></i>
+                    Acciones Rápidas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'catering:tipos_producto_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-list me-1"></i>Ver Todos los Tipos
+                    </a>
+                    <a href="{% url 'catering:producto_create' %}" class="btn btn-outline-success">
+                        <i class="bi bi-plus-circle me-1"></i>Crear Producto
+                    </a>
+                    <a href="{% url 'catering:productos_list' %}" class="btn btn-outline-info">
+                        <i class="bi bi-box me-1"></i>Ver Productos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">Tipos de Productos</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header con botón de crear -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="bi bi-tags me-2"></i>
+                Tipos de Productos
+            </h2>
+            <a href="{% url 'catering:tipo_producto_create' %}" class="btn btn-success">
+                <i class="bi bi-plus-circle me-1"></i>
+                Nuevo Tipo de Producto
+            </a>
+        </div>
+
+        <!-- Lista de tipos de productos -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-list me-2"></i>
+                    Categorías Disponibles
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if tipos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Descripción</th>
+                                    <th>Productos Asociados</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tipo in tipos %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ tipo.id_tipo_producto }}</span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ tipo.descripcion }}</strong>
+                                    </td>
+                                    <td>
+                                        {% with count=tipo.producto_set.count %}
+                                            <span class="badge bg-{% if count > 0 %}info{% else %}light text-dark{% endif %}">
+                                                {{ count }} producto{{ count|pluralize }}
+                                            </span>
+                                        {% endwith %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'catering:tipo_producto_update' tipo.pk %}" class="btn btn-outline-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'catering:tipo_producto_delete' tipo.pk %}" class="btn btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-tags text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="text-muted mt-3">No hay tipos de productos</h4>
+                        <p class="text-muted">Comienza creando el primer tipo de producto para organizar tu catálogo.</p>
+                        <a href="{% url 'catering:tipo_producto_create' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Crear Primer Tipo
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            ¿Qué son los Tipos de Productos?
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">Los tipos de productos son <strong>categorías</strong> que te permiten organizar tu catálogo de productos.</p>
+                        <p class="mb-0">Ejemplos comunes:</p>
+                        <ul class="mb-0">
+                            <li><strong>Bebidas:</strong> Gaseosas, jugos, agua, etc.</li>
+                            <li><strong>Entradas:</strong> Canapés, empanadas, etc.</li>
+                            <li><strong>Platos Principales:</strong> Carnes, pastas, etc.</li>
+                            <li><strong>Postres:</strong> Tortas, helados, etc.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-lightbulb me-2"></i>
+                            Consejos de Organización
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li>Usa nombres <strong>claros y descriptivos</strong></li>
+                            <li>Mantén una <strong>jerarquía lógica</strong></li>
+                            <li>No crees <strong>demasiadas categorías</strong></li>
+                            <li>Revisa y <strong>actualiza regularmente</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
