@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card glass-effect animate-fade-in-up">
+                <div class="card-header text-center">
+                    <h4 class="mb-0 text-primary">
+                        <i class="bi bi-people me-2"></i> {{ title }}
+                    </h4>
+                </div>
+                <div class="card-body p-5">
+                    <!-- Información del evento -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-info-circle me-2"></i>Información del Evento
+                        </h6>
+                        <p class="mb-1"><strong>Cliente:</strong> {{ evento.id_cliente }}</p>
+                        <p class="mb-1"><strong>Tipo:</strong> {{ evento.get_tipo_evento_display }}</p>
+                        <p class="mb-1"><strong>Fecha:</strong> {{ evento.fecha|date:"d/m/Y" }}</p>
+                        <p class="mb-0"><strong>Hora:</strong> {{ evento.hora|time:"H:i" }}</p>
+                    </div>
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.cantidad_personas.id_for_label }}" class="form-label">
+                                <i class="bi bi-people me-2"></i>{{ form.cantidad_personas.label }}
+                            </label>
+                            {{ form.cantidad_personas }}
+                            {% if form.cantidad_personas.help_text %}
+                                <div class="form-text">{{ form.cantidad_personas.help_text }}</div>
+                            {% endif %}
+                            {% if form.cantidad_personas.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.cantidad_personas.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'catering:responsable_evento_detail' evento.pk %}" class="btn btn-secondary hover-effect">
+                                <i class="bi bi-arrow-left me-2"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-primary hover-effect">
+                                <i class="bi bi-check-lg me-2"></i> Actualizar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Información adicional -->
+            <div class="card glass-effect mt-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+                <div class="card-body text-center p-4">
+                    <h6 class="card-title text-primary">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Información Importante
+                    </h6>
+                    <p class="card-text text-muted small mb-0">
+                        Como responsable, solo puedes modificar la cantidad de personal asignado al evento. 
+                        Para otros cambios, contacta al administrador.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación de formulario
+    const form = document.querySelector('.needs-validation');
+    
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+    
+    // Efectos de focus en los campos
+    const inputs = document.querySelectorAll('.form-control, .form-select');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

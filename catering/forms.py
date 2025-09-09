@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
-    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio
+    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio, PerfilUsuario
 )
 
 
@@ -144,6 +144,86 @@ class EventoForm(forms.ModelForm):
         if fecha < timezone.now().date():
             raise ValidationError('La fecha del evento no puede ser anterior a hoy.')
         return fecha
+
+
+class EventoResponsableForm(forms.ModelForm):
+    """Formulario específico para responsables - solo pueden editar cantidad de personal"""
+    
+    class Meta:
+        model = EventoSolicitado
+        fields = ['cantidad_personas']
+        widgets = {
+            'cantidad_personas': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'min': '1',
+                'placeholder': 'Ingrese la cantidad de personas'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['cantidad_personas'].label = 'Cantidad de Personas'
+        self.fields['cantidad_personas'].help_text = 'Número total de personas que asistirán al evento'
+
+
+class AsignarPersonalForm(forms.ModelForm):
+    """Formulario para asignar personal a un evento"""
+    
+    class Meta:
+        model = Servicio
+        fields = ['id_personal', 'cantidad_personal']
+        widgets = {
+            'id_personal': forms.Select(attrs={
+                'class': 'form-select',
+                'required': True
+            }),
+            'cantidad_personal': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'value': '1',
+                'required': True
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['id_personal'].label = 'Personal'
+        self.fields['id_personal'].empty_label = "Seleccione un miembro del personal"
+        self.fields['id_personal'].queryset = Personal.objects.filter(estado='ACTIVO')
+        self.fields['cantidad_personal'].label = 'Cantidad'
+        self.fields['cantidad_personal'].help_text = 'Número de personas de este personal asignadas'
+
+
+class TrabajadorEventoForm(forms.Form):
+    """Formulario para agregar trabajadores al evento durante la creación"""
+    
+    trabajador = forms.ModelChoiceField(
+        queryset=Personal.objects.filter(estado='ACTIVO'),
+        empty_label="Seleccione un trabajador",
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'required': True
+        }),
+        label='Trabajador'
+    )
+    
+    cantidad = forms.IntegerField(
+        min_value=1,
+        initial=1,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '1',
+            'value': '1',
+            'required': True
+        }),
+        label='Cantidad',
+        help_text='Número de personas de este trabajador asignadas'
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Actualizar el queryset para mostrar solo personal activo
+        self.fields['trabajador'].queryset = Personal.objects.filter(estado='ACTIVO')
     
     def clean_cantidad_personas(self):
         """Validar cantidad de personas"""
@@ -162,15 +242,32 @@ class MenuForm(forms.ModelForm):
         model = MenuXTipoProducto
         fields = ['id_tipo_producto', 'id_producto', 'cantidad_producto']
         widgets = {
-            'id_tipo_producto': forms.Select(attrs={'class': 'form-select', 'id': 'tipo-producto'}),
-            'id_producto': forms.Select(attrs={'class': 'form-select', 'id': 'producto'}),
-            'cantidad_producto': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'id_tipo_producto': forms.Select(attrs={
+                'class': 'form-select', 
+                'id': 'id_id_tipo_producto',
+                'required': True
+            }),
+            'id_producto': forms.Select(attrs={
+                'class': 'form-select', 
+                'id': 'id_id_producto',
+                'required': True,
+                'disabled': True
+            }),
+            'cantidad_producto': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'min': '1',
+                'value': '1',
+                'required': True
+            }),
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filtrar solo productos disponibles
-        self.fields['id_producto'].queryset = Producto.objects.filter(disponible=True)
+        # Configurar campos
+        self.fields['id_tipo_producto'].empty_label = "Seleccione un tipo de producto"
+        self.fields['id_producto'].empty_label = "Seleccione un tipo de producto primero"
+        self.fields['id_producto'].queryset = Producto.objects.none()  # Inicialmente vacío
+        self.fields['cantidad_producto'].initial = 1
 
 
 class ComprobanteForm(forms.ModelForm):
@@ -438,3 +535,239 @@ class TipoProductoForm(forms.ModelForm):
         if not descripcion or len(descripcion.strip()) < 3:
             raise ValidationError('La descripción debe tener al menos 3 caracteres.')
         return descripcion.strip()
+
+
+# Formularios para creación de usuarios
+class CrearUsuarioForm(forms.Form):
+    """Formulario para crear usuarios administrativos"""
+    
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}),
+        help_text='Requerido. 150 caracteres o menos. Solo letras, números y @/./+/-/_.'
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@email.com'})
+    )
+    password = forms.CharField(
+        min_length=8,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña'}),
+        help_text='Mínimo 8 caracteres.'
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirmar contraseña'})
+    )
+    first_name = forms.CharField(
+        max_length=30,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'})
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'})
+    )
+    tipo_usuario = forms.ChoiceField(
+        choices=PerfilUsuario.TIPO_USUARIO_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    estado = forms.ChoiceField(
+        choices=PerfilUsuario.ESTADO_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        initial='ACTIVO'
+    )
+    telefono = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono (opcional)'})
+    )
+    fecha_nacimiento = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    direccion = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección (opcional)'})
+    )
+    notas = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Notas adicionales (opcional)'})
+    )
+    
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        from django.contrib.auth.models import User
+        if User.objects.filter(username=username).exists():
+            raise ValidationError('Ya existe un usuario con este nombre de usuario.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        from django.contrib.auth.models import User
+        if User.objects.filter(email=email).exists():
+            raise ValidationError('Ya existe un usuario con este email.')
+        return email
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+        
+        if password and password_confirm and password != password_confirm:
+            raise ValidationError('Las contraseñas no coinciden.')
+        
+        return cleaned_data
+
+
+class CrearTrabajadorForm(forms.Form):
+    """Formulario para crear trabajadores"""
+    
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}),
+        help_text='Requerido. 150 caracteres o menos.'
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@email.com'})
+    )
+    password = forms.CharField(
+        min_length=8,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña'}),
+        help_text='Mínimo 8 caracteres.'
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirmar contraseña'})
+    )
+    nombre_y_apellido = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre y apellido completo'})
+    )
+    tipo_personal = forms.ChoiceField(
+        choices=Personal.TIPO_PERSONAL_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    telefono = forms.CharField(
+        max_length=20,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de teléfono'})
+    )
+    estado = forms.ChoiceField(
+        choices=Personal.ESTADO_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        initial='ACTIVO'
+    )
+    fecha_nacimiento = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    direccion = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección (opcional)'})
+    )
+    
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        from django.contrib.auth.models import User
+        if User.objects.filter(username=username).exists():
+            raise ValidationError('Ya existe un usuario con este nombre de usuario.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        from django.contrib.auth.models import User
+        if User.objects.filter(email=email).exists():
+            raise ValidationError('Ya existe un usuario con este email.')
+        if Personal.objects.filter(email=email).exists():
+            raise ValidationError('Ya existe un trabajador con este email.')
+        return email
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+        
+        if password and password_confirm and password != password_confirm:
+            raise ValidationError('Las contraseñas no coinciden.')
+        
+        return cleaned_data
+
+
+class CrearClienteForm(forms.Form):
+    """Formulario para crear clientes con cuenta de usuario"""
+    
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}),
+        help_text='Requerido. 150 caracteres o menos.'
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@email.com'})
+    )
+    password = forms.CharField(
+        min_length=8,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña'}),
+        help_text='Mínimo 8 caracteres.'
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirmar contraseña'})
+    )
+    nombre = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'})
+    )
+    apellido = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'})
+    )
+    tipo_doc = forms.ChoiceField(
+        choices=Cliente._meta.get_field('tipo_doc').choices,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    num_doc = forms.CharField(
+        max_length=20,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de documento'})
+    )
+    domicilio = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Domicilio completo'})
+    )
+    fecha_nacimiento = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    telefono = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono (opcional)'})
+    )
+    
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        from django.contrib.auth.models import User
+        if User.objects.filter(username=username).exists():
+            raise ValidationError('Ya existe un usuario con este nombre de usuario.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        from django.contrib.auth.models import User
+        if User.objects.filter(email=email).exists():
+            raise ValidationError('Ya existe un usuario con este email.')
+        if Cliente.objects.filter(email=email).exists():
+            raise ValidationError('Ya existe un cliente con este email.')
+        return email
+    
+    def clean_num_doc(self):
+        num_doc = self.cleaned_data['num_doc']
+        if Cliente.objects.filter(num_doc=num_doc).exists():
+            raise ValidationError('Ya existe un cliente con este número de documento.')
+        return num_doc
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+        
+        if password and password_confirm and password != password_confirm:
+            raise ValidationError('Las contraseñas no coinciden.')
+        
+        return cleaned_data

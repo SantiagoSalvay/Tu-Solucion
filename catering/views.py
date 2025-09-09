@@ -326,135 +326,294 @@ def evento_update(request, pk):
 # Vistas de Consultas
 @login_required
 def consulta_financiera(request):
-    """Consulta financiera - Costo total de productos por servicio"""
-    # Filtros
+    """Consulta financiera - Análisis financiero detallado"""
+    from django.db.models import Sum, Count, Avg
+    from decimal import Decimal
+    
+    # Filtros de fecha
     fecha_desde = request.GET.get('fecha_desde')
     fecha_hasta = request.GET.get('fecha_hasta')
     
-    # Consulta base
-    consulta = MenuXTipoProducto.objects.select_related(
-        'id_evento', 'id_evento__id_cliente', 'id_producto'
-    ).filter(
-        cantidad_producto__gte=200,
-        cantidad_producto__lte=500
-    )
+    eventos = EventoSolicitado.objects.all()
     
-    # Aplicar filtros de fecha
     if fecha_desde:
-        consulta = consulta.filter(id_evento__fecha__gte=fecha_desde)
+        eventos = eventos.filter(fecha__gte=fecha_desde)
     if fecha_hasta:
-        consulta = consulta.filter(id_evento__fecha__lte=fecha_hasta)
-    else:
-        # Por defecto, últimos 3 meses
-        tres_meses_atras = timezone.now().date() - timedelta(days=90)
-        consulta = consulta.filter(id_evento__fecha__gte=tres_meses_atras)
+        eventos = eventos.filter(fecha__lte=fecha_hasta)
     
-    # Agrupar por evento y calcular totales
-    resultados = consulta.values(
-        'id_evento__id_evento',
-        'id_evento__tipo_evento',
-        'id_evento__fecha',
-        'id_evento__id_cliente__nombre',
-        'id_evento__id_cliente__apellido'
-    ).annotate(
-        total_productos=Sum('cantidad_producto'),
-        costo_total=Sum('precio_total')
-    ).order_by('-costo_total')
+    # Estadísticas generales
+    total_eventos = eventos.count()
+    eventos_finalizados = eventos.filter(estado='FINALIZADO').count()
+    eventos_activos = eventos.filter(estado__in=['SOLICITADO', 'CONFIRMADO', 'EN_PROCESO']).count()
+    
+    # Cálculos financieros
+    eventos_con_ingresos = []
+    total_ingresos = Decimal('0')
+    total_ingresos_por_persona = Decimal('0')
+    
+    for evento in eventos:
+        if hasattr(evento, 'id_comprobante') and evento.id_comprobante:
+            ingreso_total = evento.id_comprobante.total_servicio or Decimal('0')
+            ingreso_por_persona = evento.id_comprobante.precio_x_persona or Decimal('0')
+            
+            eventos_con_ingresos.append({
+                'evento': evento,
+                'ingreso_total': ingreso_total,
+                'ingreso_por_persona': ingreso_por_persona,
+                'cantidad_personas': evento.cantidad_personas,
+                'estado': evento.get_estado_display()
+            })
+            
+            total_ingresos += ingreso_total
+            total_ingresos_por_persona += ingreso_por_persona
+    
+    # Promedios
+    promedio_por_evento = total_ingresos / len(eventos_con_ingresos) if eventos_con_ingresos else Decimal('0')
+    promedio_por_persona = total_ingresos_por_persona / len(eventos_con_ingresos) if eventos_con_ingresos else Decimal('0')
+    
+    # Análisis por tipo de evento
+    ingresos_por_tipo = {}
+    for evento_data in eventos_con_ingresos:
+        tipo = evento_data['evento'].tipo_evento
+        if tipo not in ingresos_por_tipo:
+            ingresos_por_tipo[tipo] = {
+                'total': Decimal('0'),
+                'cantidad': 0,
+                'promedio': Decimal('0')
+            }
+        ingresos_por_tipo[tipo]['total'] += evento_data['ingreso_total']
+        ingresos_por_tipo[tipo]['cantidad'] += 1
+    
+    # Calcular promedios por tipo
+    for tipo in ingresos_por_tipo:
+        if ingresos_por_tipo[tipo]['cantidad'] > 0:
+            ingresos_por_tipo[tipo]['promedio'] = ingresos_por_tipo[tipo]['total'] / ingresos_por_tipo[tipo]['cantidad']
+    
+    # Análisis por mes
+    ingresos_por_mes = {}
+    for evento_data in eventos_con_ingresos:
+        mes = evento_data['evento'].fecha.strftime('%Y-%m')
+        if mes not in ingresos_por_mes:
+            ingresos_por_mes[mes] = Decimal('0')
+        ingresos_por_mes[mes] += evento_data['ingreso_total']
     
     context = {
-        'resultados': resultados,
-        'fecha_desde': fecha_desde,
-        'fecha_hasta': fecha_hasta,
+        'eventos_con_ingresos': eventos_con_ingresos,
+        'total_ingresos': total_ingresos,
+        'total_eventos': total_eventos,
+        'eventos_finalizados': eventos_finalizados,
+        'eventos_activos': eventos_activos,
+        'promedio_por_evento': promedio_por_evento,
+        'promedio_por_persona': promedio_por_persona,
+        'ingresos_por_tipo': ingresos_por_tipo,
+        'ingresos_por_mes': ingresos_por_mes,
+        'filtros': {
+            'fecha_desde': fecha_desde,
+            'fecha_hasta': fecha_hasta,
+        }
     }
     return render(request, 'catering/consulta_financiera.html', context)
 
 
 @login_required
 def consulta_barrios(request):
-    """Consulta de marketing - Barrios más solicitados"""
-    # Filtrar solo eventos finalizados en Buenos Aires
-    eventos_finalizados = EventoSolicitado.objects.filter(
-        estado='FINALIZADO'
-    ).exclude(
+    """Consulta de marketing - Análisis de barrios más solicitados"""
+    from decimal import Decimal
+    
+    # Filtros
+    fecha_desde = request.GET.get('fecha_desde')
+    fecha_hasta = request.GET.get('fecha_hasta')
+    estado = request.GET.get('estado', 'FINALIZADO')
+    
+    # Filtrar eventos
+    eventos = EventoSolicitado.objects.exclude(
         ubicacion__isnull=True
     ).exclude(
         ubicacion__exact=''
     )
     
-    # Extraer barrios (implementación básica)
+    if estado:
+        eventos = eventos.filter(estado=estado)
+    if fecha_desde:
+        eventos = eventos.filter(fecha__gte=fecha_desde)
+    if fecha_hasta:
+        eventos = eventos.filter(fecha__lte=fecha_hasta)
+    
+    # Extraer y analizar barrios
     barrios_data = {}
-    for evento in eventos_finalizados:
+    total_eventos = 0
+    
+    for evento in eventos:
+        total_eventos += 1
         barrio = evento.get_barrio()
-        if barrio and 'buenos aires' in barrio.lower():
-            if barrio not in barrios_data:
-                barrios_data[barrio] = {
-                    'cantidad_servicios': 0,
-                    'servicio_mayor_costo': None,
-                    'costo_maximo': 0
+        
+        if barrio:
+            # Normalizar nombre del barrio
+            barrio_normalizado = barrio.strip().title()
+            
+            if barrio_normalizado not in barrios_data:
+                barrios_data[barrio_normalizado] = {
+                    'cantidad_eventos': 0,
+                    'cantidad_personas_total': 0,
+                    'ingresos_total': Decimal('0'),
+                    'eventos': [],
+                    'tipos_evento': {},
+                    'promedio_personas': 0,
+                    'promedio_ingresos': Decimal('0')
                 }
             
-            barrios_data[barrio]['cantidad_servicios'] += 1
+            # Actualizar estadísticas
+            barrios_data[barrio_normalizado]['cantidad_eventos'] += 1
+            barrios_data[barrio_normalizado]['cantidad_personas_total'] += evento.cantidad_personas
+            barrios_data[barrio_normalizado]['eventos'].append(evento)
             
-            # Calcular costo del servicio
-            costo_servicio = MenuXTipoProducto.objects.filter(
-                id_evento=evento
-            ).aggregate(
-                total=Sum('precio_total')
-            )['total'] or 0
+            # Contar tipos de evento
+            tipo = evento.get_tipo_evento_display()
+            if tipo not in barrios_data[barrio_normalizado]['tipos_evento']:
+                barrios_data[barrio_normalizado]['tipos_evento'][tipo] = 0
+            barrios_data[barrio_normalizado]['tipos_evento'][tipo] += 1
             
-            if costo_servicio > barrios_data[barrio]['costo_maximo']:
-                barrios_data[barrio]['costo_maximo'] = costo_servicio
-                barrios_data[barrio]['servicio_mayor_costo'] = evento
+            # Calcular ingresos si tiene comprobante
+            if hasattr(evento, 'id_comprobante') and evento.id_comprobante:
+                ingreso = evento.id_comprobante.total_servicio or Decimal('0')
+                barrios_data[barrio_normalizado]['ingresos_total'] += ingreso
     
-    # Ordenar por cantidad de servicios y tomar top 10
+    # Calcular promedios y ordenar
+    for barrio, data in barrios_data.items():
+        if data['cantidad_eventos'] > 0:
+            data['promedio_personas'] = data['cantidad_personas_total'] / data['cantidad_eventos']
+            data['promedio_ingresos'] = data['ingresos_total'] / data['cantidad_eventos']
+    
+    # Ordenar por cantidad de eventos
     barrios_ordenados = sorted(
         barrios_data.items(),
-        key=lambda x: x[1]['cantidad_servicios'],
+        key=lambda x: x[1]['cantidad_eventos'],
         reverse=True
-    )[:10]
+    )
+    
+    # Top 10 barrios
+    top_barrios = barrios_ordenados[:10]
+    
+    # Estadísticas generales
+    total_barrios = len(barrios_data)
+    barrio_mas_solicitado = top_barrios[0] if top_barrios else None
     
     context = {
-        'barrios': barrios_ordenados,
+        'barrios': top_barrios,
+        'total_eventos': total_eventos,
+        'total_barrios': total_barrios,
+        'barrio_mas_solicitado': barrio_mas_solicitado,
+        'filtros': {
+            'fecha_desde': fecha_desde,
+            'fecha_hasta': fecha_hasta,
+            'estado': estado,
+        }
     }
     return render(request, 'catering/consulta_barrios.html', context)
 
 
 @login_required
 def consulta_cumpleanos(request):
-    """Consulta de marketing - Clientes con cumpleaños en el mes actual"""
-    mes_actual = timezone.now().month
+    """Consulta de marketing - Reporte de cumpleaños para recordatorios"""
+    from decimal import Decimal
     
-    # Filtrar clientes con cumpleaños en el mes actual y nombre con vocal como segunda letra
+    # Filtros
+    mes = request.GET.get('mes', timezone.now().month)
+    incluir_vocal = request.GET.get('incluir_vocal', 'true') == 'true'
+    
+    try:
+        mes = int(mes)
+        if mes < 1 or mes > 12:
+            mes = timezone.now().month
+    except (ValueError, TypeError):
+        mes = timezone.now().month
+    
+    # Filtrar clientes con cumpleaños en el mes seleccionado
     clientes_cumpleanos = Cliente.objects.filter(
-        fecha_alta__month=mes_actual  # Usando fecha_alta como aproximación
-    )
+        fecha_nacimiento__month=mes
+    ).exclude(
+        fecha_nacimiento__isnull=True
+    ).order_by('fecha_nacimiento__day', 'apellido', 'nombre')
     
-    # Filtrar por vocal en segunda letra del nombre
+    # Filtrar por vocal en segunda letra del nombre si se solicita
     clientes_filtrados = []
-    for cliente in clientes_cumpleanos:
-        if cliente.tiene_vocal_segunda_letra():
-            # Calcular edad (aproximada)
-            edad = (timezone.now().date() - cliente.fecha_alta).days // 365
-            
-            # Calcular monto total cobrado
-            monto_total = Comprobante.objects.filter(
-                id_cliente=cliente
-            ).aggregate(
-                total=Sum('total_servicio')
-            )['total'] or 0
-            
-            clientes_filtrados.append({
-                'cliente': cliente,
-                'edad': edad,
-                'monto_total': monto_total
-            })
+    total_monto = Decimal('0')
     
-    # Ordenar por monto total
-    clientes_filtrados.sort(key=lambda x: x['monto_total'], reverse=True)
+    for cliente in clientes_cumpleanos:
+        # Aplicar filtro de vocal si está habilitado
+        if incluir_vocal and not cliente.tiene_vocal_segunda_letra():
+            continue
+        
+        # Calcular edad
+        edad = cliente.get_edad() if cliente.fecha_nacimiento else None
+        
+        # Calcular monto total cobrado
+        eventos_cliente = EventoSolicitado.objects.filter(id_cliente=cliente)
+        monto_total = Decimal('0')
+        cantidad_eventos = eventos_cliente.count()
+        
+        for evento in eventos_cliente:
+            if hasattr(evento, 'id_comprobante') and evento.id_comprobante:
+                monto_total += evento.id_comprobante.total_servicio or Decimal('0')
+        
+        # Obtener último evento
+        ultimo_evento = eventos_cliente.order_by('-fecha').first()
+        
+        clientes_filtrados.append({
+            'cliente': cliente,
+            'edad': edad,
+            'monto_total': monto_total,
+            'cantidad_eventos': cantidad_eventos,
+            'ultimo_evento': ultimo_evento,
+            'tiene_vocal_segunda_letra': cliente.tiene_vocal_segunda_letra()
+        })
+        
+        total_monto += monto_total
+    
+    # Estadísticas
+    total_clientes = len(clientes_filtrados)
+    promedio_monto = total_monto / total_clientes if total_clientes > 0 else Decimal('0')
+    
+    # Clientes por rango de edad
+    clientes_por_edad = {
+        '18-30': 0,
+        '31-50': 0,
+        '51-70': 0,
+        '70+': 0
+    }
+    
+    for cliente_data in clientes_filtrados:
+        edad = cliente_data['edad']
+        if edad:
+            if 18 <= edad <= 30:
+                clientes_por_edad['18-30'] += 1
+            elif 31 <= edad <= 50:
+                clientes_por_edad['31-50'] += 1
+            elif 51 <= edad <= 70:
+                clientes_por_edad['51-70'] += 1
+            else:
+                clientes_por_edad['70+'] += 1
+    
+    # Nombres de meses
+    meses = {
+        1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril',
+        5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto',
+        9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+    }
     
     context = {
         'clientes': clientes_filtrados,
-        'mes_actual': mes_actual,
+        'mes': mes,
+        'mes_nombre': meses.get(mes, ''),
+        'total_clientes': total_clientes,
+        'total_monto': total_monto,
+        'promedio_monto': promedio_monto,
+        'clientes_por_edad': clientes_por_edad,
+        'incluir_vocal': incluir_vocal,
+        'filtros': {
+            'mes': mes,
+            'incluir_vocal': incluir_vocal,
+        }
     }
     return render(request, 'catering/consulta_cumpleanos.html', context)
 

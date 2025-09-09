@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card glass-effect animate-fade-in-up">
+                <div class="card-header text-center">
+                    <h4 class="mb-0 text-primary">
+                        <i class="bi bi-calendar-plus me-2"></i> {{ title }}
+                    </h4>
+                </div>
+                <div class="card-body p-5">
+                    <!-- Información del responsable -->
+                    <div class="alert alert-success mb-4">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-person-check me-2"></i>Responsable del Evento
+                        </h6>
+                        <p class="mb-0"><strong>{{ user.get_full_name|default:user.username }}</strong></p>
+                        <small class="text-muted">{{ user.email }}</small>
+                    </div>
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.id_cliente.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person me-2"></i>Cliente *
+                                </label>
+                                {{ form.id_cliente }}
+                                {% if form.id_cliente.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.id_cliente.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.id_responsable.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person-badge me-2"></i>Responsable
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       value="{{ user.get_full_name|default:user.username }}" 
+                                       readonly 
+                                       style="background-color: #f8f9fa;">
+                                <div class="form-text">Este campo se llena automáticamente</div>
+                                <!-- Campo oculto para enviar el ID del responsable -->
+                                {{ form.id_responsable.as_hidden }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.tipo_evento.id_for_label }}" class="form-label">
+                                    <i class="bi bi-calendar-event me-2"></i>Tipo de Evento *
+                                </label>
+                                {{ form.tipo_evento }}
+                                {% if form.tipo_evento.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.tipo_evento.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.cantidad_personas.id_for_label }}" class="form-label">
+                                    <i class="bi bi-people me-2"></i>Cantidad de Personas *
+                                </label>
+                                {{ form.cantidad_personas }}
+                                {% if form.cantidad_personas.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.cantidad_personas.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.fecha.id_for_label }}" class="form-label">
+                                    <i class="bi bi-calendar-date me-2"></i>Fecha *
+                                </label>
+                                {{ form.fecha }}
+                                {% if form.fecha.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.fecha.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.hora.id_for_label }}" class="form-label">
+                                    <i class="bi bi-clock me-2"></i>Hora *
+                                </label>
+                                {{ form.hora }}
+                                {% if form.hora.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.hora.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <label for="{{ form.ubicacion.id_for_label }}" class="form-label">
+                                    <i class="bi bi-geo-alt me-2"></i>Ubicación *
+                                </label>
+                                {{ form.ubicacion }}
+                                {% if form.ubicacion.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.ubicacion.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Sección de Trabajadores -->
+                        <hr class="my-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="bi bi-people me-2"></i>Asignar Trabajadores
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ trabajador_form.trabajador.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person-badge me-2"></i>{{ trabajador_form.trabajador.label }}
+                                </label>
+                                {{ trabajador_form.trabajador }}
+                                {% if trabajador_form.trabajador.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ trabajador_form.trabajador.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ trabajador_form.cantidad.id_for_label }}" class="form-label">
+                                    <i class="bi bi-123 me-2"></i>{{ trabajador_form.cantidad.label }}
+                                </label>
+                                {{ trabajador_form.cantidad }}
+                                {% if trabajador_form.cantidad.help_text %}
+                                    <div class="form-text">{{ trabajador_form.cantidad.help_text }}</div>
+                                {% endif %}
+                                {% if trabajador_form.cantidad.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ trabajador_form.cantidad.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2 mb-3 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-primary hover-effect w-100" id="agregar-trabajador">
+                                    <i class="bi bi-plus-circle me-1"></i>Agregar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Lista de trabajadores asignados -->
+                        <div id="trabajadores-lista" class="mb-4">
+                            <h6 class="text-muted mb-3">Trabajadores Asignados:</h6>
+                            <div id="trabajadores-container">
+                                <p class="text-muted small">No hay trabajadores asignados aún.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'catering:responsable_eventos' %}" class="btn btn-secondary hover-effect">
+                                <i class="bi bi-arrow-left me-2"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-primary hover-effect">
+                                <i class="bi bi-check-lg me-2"></i> Crear Evento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Información adicional -->
+            <div class="card glass-effect mt-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+                <div class="card-body text-center p-4">
+                    <h6 class="card-title text-primary">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Información Importante
+                    </h6>
+                    <p class="card-text text-muted small mb-0">
+                        Una vez creado el evento, podrás asignar personal y gestionar todos los detalles del mismo.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación de formulario
+    const form = document.querySelector('.needs-validation');
+    
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+    
+    // Efectos de focus en los campos
+    const inputs = document.querySelectorAll('.form-control, .form-select');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+    });
+    
+    // El campo responsable ya está como campo oculto, no necesita JavaScript adicional
+    
+    // Manejo de trabajadores
+    let trabajadoresAsignados = [];
+    
+    document.getElementById('agregar-trabajador').addEventListener('click', function() {
+        const trabajadorSelect = document.getElementById('id_trabajador');
+        const cantidadInput = document.getElementById('id_cantidad');
+        
+        if (trabajadorSelect.value && cantidadInput.value) {
+            const trabajadorId = trabajadorSelect.value;
+            const trabajadorNombre = trabajadorSelect.options[trabajadorSelect.selectedIndex].text;
+            const cantidad = cantidadInput.value;
+            
+            // Verificar si ya está asignado
+            if (trabajadoresAsignados.find(t => t.id === trabajadorId)) {
+                alert('Este trabajador ya está asignado al evento.');
+                return;
+            }
+            
+            // Agregar a la lista
+            trabajadoresAsignados.push({
+                id: trabajadorId,
+                nombre: trabajadorNombre,
+                cantidad: cantidad
+            });
+            
+            // Actualizar la vista
+            actualizarListaTrabajadores();
+            
+            // Limpiar campos
+            trabajadorSelect.value = '';
+            cantidadInput.value = '1';
+        } else {
+            alert('Por favor selecciona un trabajador y especifica la cantidad.');
+        }
+    });
+    
+    function actualizarListaTrabajadores() {
+        const container = document.getElementById('trabajadores-container');
+        
+        if (trabajadoresAsignados.length === 0) {
+            container.innerHTML = '<p class="text-muted small">No hay trabajadores asignados aún.</p>';
+            return;
+        }
+        
+        let html = '<div class="table-responsive"><table class="table table-sm">';
+        html += '<thead><tr><th>Trabajador</th><th>Cantidad</th><th>Acciones</th></tr></thead><tbody>';
+        
+        trabajadoresAsignados.forEach((trabajador, index) => {
+            html += `
+                <tr>
+                    <td>${trabajador.nombre}</td>
+                    <td><span class="badge bg-primary">${trabajador.cantidad}</span></td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarTrabajador(${index})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    }
+    
+    // Función global para eliminar trabajador
+    window.eliminarTrabajador = function(index) {
+        trabajadoresAsignados.splice(index, 1);
+        actualizarListaTrabajadores();
+    };
+    
+    // Agregar campos ocultos al formulario antes de enviar
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Limpiar campos ocultos existentes
+        document.querySelectorAll('input[name="trabajadores"], input[name="cantidades"]').forEach(input => {
+            input.remove();
+        });
+        
+        // Agregar campos ocultos para cada trabajador asignado
+        trabajadoresAsignados.forEach(trabajador => {
+            const trabajadorInput = document.createElement('input');
+            trabajadorInput.type = 'hidden';
+            trabajadorInput.name = 'trabajadores';
+            trabajadorInput.value = trabajador.id;
+            this.appendChild(trabajadorInput);
+            
+            const cantidadInput = document.createElement('input');
+            cantidadInput.type = 'hidden';
+            cantidadInput.name = 'cantidades';
+            cantidadInput.value = trabajador.cantidad;
+            this.appendChild(cantidadInput);
+        });
+    });
+});
+</script>
+{% endblock %}

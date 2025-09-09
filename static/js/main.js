@@ -314,11 +314,57 @@ function verificarDisponibilidad(fecha) {
 }
 
 function cargarProductos(tipoProducto) {
+    console.log('🔍 Cargando productos para tipo:', tipoProducto);
     return new Promise((resolve, reject) => {
-        fetch(`/api/productos/?tipo=${tipoProducto}`)
-            .then(response => response.json())
-            .then(data => resolve(data))
-            .catch(error => reject(error));
+        const url = `/api/productos-por-tipo/?tipo_id=${tipoProducto}`;
+        console.log('📡 URL de la petición:', url);
+        
+        fetch(url)
+            .then(response => {
+                console.log('📥 Respuesta recibida:', response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 Datos recibidos:', data);
+                
+                // Actualizar el select de productos
+                const productoSelect = document.getElementById('id_id_producto');
+                if (productoSelect) {
+                    // Limpiar opciones existentes
+                    productoSelect.innerHTML = '<option value="">Seleccione un producto</option>';
+                    
+                    // Agregar nuevas opciones
+                    if (data.productos && data.productos.length > 0) {
+                        console.log('✅ Productos encontrados:', data.productos.length);
+                        data.productos.forEach(producto => {
+                            const option = document.createElement('option');
+                            option.value = producto.id_producto;
+                            option.textContent = `${producto.descripcion} - $${producto.precio}`;
+                            productoSelect.appendChild(option);
+                        });
+                    } else {
+                        console.log('⚠️ No hay productos disponibles');
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = 'No hay productos disponibles para este tipo';
+                        productoSelect.appendChild(option);
+                    }
+                } else {
+                    console.error('❌ No se encontró el elemento id_id_producto');
+                }
+                resolve(data);
+            })
+            .catch(error => {
+                console.error('❌ Error al cargar productos:', error);
+                const productoSelect = document.getElementById('id_id_producto');
+                if (productoSelect) {
+                    productoSelect.innerHTML = '<option value="">Error al cargar productos</option>';
+                }
+                reject(error);
+            });
     });
 }
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, views_clientes, views_trabajadores, views_admin, views_responsables
 
 app_name = 'catering'
 
@@ -67,4 +67,32 @@ urlpatterns = [
     path('eventos/<int:evento_id>/editar-menu/', views.editar_menu, name='editar_menu'),
     path('menu/<int:menu_id>/eliminar/', views.eliminar_producto_menu, name='eliminar_producto_menu'),
     path('eventos/<int:pk>/eliminar/', views.evento_delete, name='evento_delete'),
+    
+    # URLs para Clientes (vistas específicas)
+    path('cliente/dashboard/', views_clientes.cliente_dashboard, name='cliente_dashboard'),
+    path('cliente/eventos/', views_clientes.cliente_eventos, name='cliente_eventos'),
+    path('cliente/eventos/<int:pk>/', views_clientes.cliente_evento_detail, name='cliente_evento_detail'),
+    
+    # URLs para Trabajadores
+    path('trabajador/dashboard/', views_trabajadores.trabajador_dashboard, name='trabajador_dashboard'),
+    path('trabajador/servicios/', views_trabajadores.trabajador_servicios, name='trabajador_servicios'),
+    path('trabajador/servicios/<int:pk>/', views_trabajadores.trabajador_servicio_detail, name='trabajador_servicio_detail'),
+    path('trabajador/servicios/<int:pk>/actualizar-estado/', views_trabajadores.actualizar_estado_servicio, name='actualizar_estado_servicio'),
+    
+    # URLs para Administradores
+    path('admin/dashboard/', views_admin.admin_dashboard, name='admin_dashboard'),
+    path('admin/crear-usuario/', views_admin.crear_usuario_admin, name='crear_usuario_admin'),
+    path('admin/crear-trabajador/', views_admin.crear_trabajador, name='crear_trabajador'),
+    path('admin/crear-cliente/', views_admin.crear_cliente, name='crear_cliente'),
+    path('admin/gestion-usuarios/', views_admin.gestion_usuarios, name='gestion_usuarios'),
+    
+    # URLs para Responsables
+    path('responsable/dashboard/', views_responsables.responsable_dashboard, name='responsable_dashboard'),
+    path('responsable/eventos/', views_responsables.responsable_eventos, name='responsable_eventos'),
+    path('responsable/eventos/<int:pk>/', views_responsables.responsable_evento_detail, name='responsable_evento_detail'),
+    path('responsable/eventos/crear/', views_responsables.responsable_crear_evento, name='responsable_crear_evento'),
+    path('responsable/eventos/<int:pk>/editar/', views_responsables.responsable_editar_evento, name='responsable_editar_evento'),
+    path('responsable/eventos/<int:evento_id>/asignar-personal/', views_responsables.responsable_asignar_personal, name='responsable_asignar_personal'),
+    path('responsable/eventos/<int:evento_id>/cambiar-estado/', views_responsables.responsable_cambiar_estado_evento, name='responsable_cambiar_estado_evento'),
+    path('responsable/servicios/<int:servicio_id>/eliminar/', views_responsables.eliminar_personal_asignado, name='eliminar_personal_asignado'),
 ]
