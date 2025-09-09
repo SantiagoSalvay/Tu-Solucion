@@ -1,357 +1,499 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Inicio - Tu Solución{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/landing-page.css' %}" rel="stylesheet">
+{% endblock %}
 
 {% block breadcrumb_items %}
 <li class="breadcrumb-item active" aria-current="page">Inicio</li>
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section Mejorado -->
-<div class="hero-section text-center mb-5">
-    <div class="position-relative overflow-hidden rounded-3xl p-5" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);">
-        <div class="position-relative">
-            <h1 class="display-2 fw-bold text-gradient mb-4">
-                <i class="bi bi-cup-hot-fill me-4 animate-float"></i>
-                Tu Solución
-            </h1>
-            <p class="lead fs-3 text-muted mb-4">
-                Sistema de Gestión de Catering Profesional
-            </p>
-            <p class="text-muted mb-5 fs-5">
-                Gestiona eventos, clientes, personal y menús de manera eficiente y moderna
-            </p>
-            
-            <div class="d-flex justify-content-center gap-4 flex-wrap">
-                {% if user.is_authenticated %}
-                <a href="{% url 'catering:dashboard' %}" class="btn btn-primary btn-lg">
-                    <i class="bi bi-speedometer2 me-2"></i>
-                    Ir al Dashboard
-                </a>
-                {% else %}
-                <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>
-                    Iniciar Sesión
-                </a>
-                {% endif %}
-                <a href="{% url 'catering:reserva_catering' %}" class="btn btn-outline btn-lg">
-                    <i class="bi bi-calendar-plus me-2"></i>
-                    Nueva Reserva
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Estadísticas Rápidas con Animaciones -->
-<div class="row mb-5">
-    <div class="col-12">
-        <h2 class="h3 text-center mb-5">
-            <i class="bi bi-graph-up me-2"></i>
-            Estadísticas del Sistema
-        </h2>
+<!-- Hero Section Espectacular -->
+<section class="hero-section position-relative overflow-hidden">
+    <div class="hero-background position-absolute w-100 h-100">
+        <div class="hero-gradient position-absolute w-100 h-100"></div>
+        <div class="hero-pattern position-absolute w-100 h-100"></div>
     </div>
     
-    <div class="stats-grid">
-        <div class="stats-card">
-            <i class="bi bi-people-fill stats-icon"></i>
-            <div class="stats-number counter" data-target="{{ total_clientes }}">0</div>
-            <div class="stats-label">Total Clientes</div>
-        </div>
-        
-        <div class="stats-card">
-            <i class="bi bi-calendar-event-fill stats-icon"></i>
-            <div class="stats-number counter" data-target="{{ total_eventos }}">0</div>
-            <div class="stats-label">Total Eventos</div>
-        </div>
-        
-        <div class="stats-card">
-            <i class="bi bi-calendar-check-fill stats-icon"></i>
-            <div class="stats-number counter" data-target="{{ eventos_hoy }}">0</div>
-            <div class="stats-label">Eventos Hoy</div>
-        </div>
-        
-        <div class="stats-card">
-            <i class="bi bi-person-badge-fill stats-icon"></i>
-            <div class="stats-number counter" data-target="{{ personal_activo }}">0</div>
-            <div class="stats-label">Personal Activo</div>
-        </div>
-    </div>
-</div>
-
-<!-- Acciones Rápidas con Efectos -->
-<div class="row mb-5">
-    <div class="col-lg-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="bi bi-lightning-charge-fill me-2 text-warning"></i>
-                    Acciones Rápidas
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="quick-actions">
-                    <a href="{% url 'catering:reserva_catering' %}" class="quick-action-btn">
-                        <i class="bi bi-calendar-plus"></i>
-                        <span class="fw-bold">Nueva Reserva</span>
-                    </a>
-                    <a href="{% url 'catering:cliente_create' %}" class="quick-action-btn">
-                        <i class="bi bi-person-plus"></i>
-                        <span class="fw-bold">Nuevo Cliente</span>
-                    </a>
-                    <a href="{% url 'catering:evento_list' %}" class="quick-action-btn">
-                        <i class="bi bi-calendar-event"></i>
-                        <span class="fw-bold">Ver Eventos</span>
-                    </a>
-                    <a href="{% url 'catering:consulta_financiera' %}" class="quick-action-btn">
-                        <i class="bi bi-graph-up"></i>
-                        <span class="fw-bold">Reporte Financiero</span>
-                    </a>
+    <div class="container position-relative">
+        <div class="row min-vh-100 align-items-center">
+            <div class="col-lg-8 mx-auto text-center">
+                <!-- Badge de bienvenida -->
+                <div class="hero-badge mb-4 animate-fade-in-down">
+                    <span class="badge bg-primary bg-opacity-20 text-primary px-4 py-2 rounded-pill fs-6 fw-semibold">
+                        <i class="bi bi-star-fill me-2"></i>
+                        Sistema Profesional de Catering
+                    </span>
                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="bi bi-bar-chart-fill me-2 text-info"></i>
-                    Estado del Sistema
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-6 mb-4">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <i class="bi bi-circle-fill text-success" style="font-size: 1rem;"></i>
-                            </div>
-                            <div>
-                                <div class="fw-bold">Sistema</div>
-                                <small class="text-muted">Operativo</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 mb-4">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <i class="bi bi-circle-fill text-success" style="font-size: 1rem;"></i>
-                            </div>
-                            <div>
-                                <div class="fw-bold">Base de Datos</div>
-                                <small class="text-muted">Conectada</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 mb-4">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <i class="bi bi-circle-fill text-success" style="font-size: 1rem;"></i>
-                            </div>
-                            <div>
-                                <div class="fw-bold">Eventos</div>
-                                <small class="text-muted">{{ total_eventos }} activos</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 mb-4">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <i class="bi bi-circle-fill text-warning" style="font-size: 1rem;"></i>
-                            </div>
-                            <div>
-                                <div class="fw-bold">Pendientes</div>
-                                <small class="text-muted">{{ eventos_pendientes }} eventos</small>
-                            </div>
-                        </div>
+                
+                <!-- Título principal -->
+                <h1 class="hero-title mb-4 animate-fade-in-up">
+                    <span class="text-gradient display-1 fw-black">
+                        <i class="bi bi-cup-hot-fill me-3 animate-float"></i>
+                        Tu Solución
+                    </span>
+                </h1>
+                
+                <!-- Subtítulo -->
+                <p class="hero-subtitle mb-5 animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <span class="display-6 fw-bold text-white mb-3 d-block">
+                        Gestión Integral de Catering
+                    </span>
+                    <span class="fs-3 text-white-50 lh-lg">
+                        Transforma tu negocio de catering con nuestro sistema completo de gestión de eventos, 
+                        clientes, personal y menús personalizados
+                    </span>
+                </p>
+                
+                <!-- Botones de acción -->
+                <div class="hero-actions mb-5 animate-fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="d-flex flex-column flex-md-row gap-4 justify-content-center align-items-center">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'catering:dashboard' %}" class="btn btn-primary btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="bi bi-speedometer2 me-3 fs-4"></i>
+                            <span class="fs-4 fw-bold">Ir al Dashboard</span>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="bi bi-box-arrow-in-right me-3 fs-4"></i>
+                            <span class="fs-4 fw-bold">Iniciar Sesión</span>
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'catering:reserva_catering' %}" class="btn btn-outline-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="bi bi-calendar-plus me-3 fs-4"></i>
+                            <span class="fs-4 fw-bold">Nueva Reserva</span>
+                        </a>
                     </div>
                 </div>
                 
-                <!-- Barra de progreso de eventos del día -->
-                <div class="mt-4">
-                    <div class="d-flex justify-content-between mb-2">
-                        <small class="text-muted fw-bold">Eventos del día</small>
-                        <small class="text-muted fw-bold">{{ eventos_hoy }}/10</small>
+                <!-- Estadísticas rápidas -->
+                <div class="hero-stats row g-4 animate-fade-in-up" style="animation-delay: 0.6s;">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-item text-center">
+                            <div class="stat-number display-6 fw-bold text-white">{{ total_clientes }}</div>
+                            <div class="stat-label fs-5 text-white-50">Clientes</div>
+                        </div>
                     </div>
-                    <div class="progress" style="height: 12px; border-radius: 0.75rem;">
-                        <div class="progress-bar" role="progressbar" 
-                             style="width: {{ eventos_hoy|floatformat:0 }}0%; background: linear-gradient(135deg, #6366f1, #8b5cf6);" 
-                             aria-valuenow="{{ eventos_hoy }}" aria-valuemin="0" aria-valuemax="10">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-item text-center">
+                            <div class="stat-number display-6 fw-bold text-white">{{ total_eventos }}</div>
+                            <div class="stat-label fs-5 text-white-50">Eventos</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-item text-center">
+                            <div class="stat-number display-6 fw-bold text-white">{{ eventos_hoy }}</div>
+                            <div class="stat-label fs-5 text-white-50">Hoy</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-item text-center">
+                            <div class="stat-number display-6 fw-bold text-white">{{ personal_activo }}</div>
+                            <div class="stat-label fs-5 text-white-50">Personal</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator position-absolute bottom-0 start-50 translate-middle-x mb-4 animate-bounce">
+        <i class="bi bi-chevron-down text-white fs-2"></i>
+    </div>
+</section>
 
-<!-- Alertas y Notificaciones -->
-{% if eventos_pendientes > 0 %}
-<div class="row mb-5">
-    <div class="col-12">
-        <div class="alert alert-warning d-flex align-items-center" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
-            <div>
-                <strong>Atención:</strong> Tienes <strong>{{ eventos_pendientes }}</strong> eventos pendientes de confirmación. 
-                <a href="{% url 'catering:evento_list' %}?estado=SOLICITADO" class="alert-link ms-2 fw-bold">
-                    Revisar ahora
-                </a>
+<!-- Sección de Características Principales -->
+<section class="features-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <div class="section-badge mb-3">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-4 py-2 rounded-pill fs-6 fw-semibold">
+                        <i class="bi bi-star-fill me-2"></i>
+                        Características Principales
+                    </span>
+                </div>
+                <h2 class="display-4 fw-bold text-dark mb-4">
+                    Todo lo que necesitas para tu negocio de catering
+                </h2>
+                <p class="fs-4 text-muted lh-lg">
+                    Un sistema completo diseñado para optimizar cada aspecto de tu empresa de catering
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card h-100 p-4 rounded-4 shadow-sm border-0 bg-white hover-lift">
+                    <div class="feature-icon mb-4">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-calendar-check-fill text-primary fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="feature-title fs-3 fw-bold text-dark mb-3">
+                        Gestión de Eventos
+                    </h4>
+                    <p class="feature-description fs-5 text-muted lh-lg mb-4">
+                        Crea, edita y gestiona eventos de catering con un sistema intuitivo y eficiente. 
+                        Controla fechas, horarios y disponibilidad en tiempo real.
+                    </p>
+                    <a href="{% url 'catering:evento_list' %}" class="btn btn-outline-primary btn-lg rounded-pill">
+                        <i class="bi bi-arrow-right me-2"></i>
+                        Ver Eventos
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card h-100 p-4 rounded-4 shadow-sm border-0 bg-white hover-lift">
+                    <div class="feature-icon mb-4">
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-people-fill text-success fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="feature-title fs-3 fw-bold text-dark mb-3">
+                        Gestión de Clientes
+                    </h4>
+                    <p class="feature-description fs-5 text-muted lh-lg mb-4">
+                        Mantén un registro completo de clientes con historial de servicios, 
+                        preferencias y datos de contacto organizados.
+                    </p>
+                    <a href="{% url 'catering:cliente_list' %}" class="btn btn-outline-success btn-lg rounded-pill">
+                        <i class="bi bi-arrow-right me-2"></i>
+                        Ver Clientes
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card h-100 p-4 rounded-4 shadow-sm border-0 bg-white hover-lift">
+                    <div class="feature-icon mb-4">
+                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-cup-hot-fill text-warning fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="feature-title fs-3 fw-bold text-dark mb-3">
+                        Menús Personalizados
+                    </h4>
+                    <p class="feature-description fs-5 text-muted lh-lg mb-4">
+                        Crea menús únicos para cada evento con productos de alta calidad. 
+                        Personaliza según las preferencias del cliente.
+                    </p>
+                    <a href="{% url 'catering:productos_list' %}" class="btn btn-outline-warning btn-lg rounded-pill">
+                        <i class="bi bi-arrow-right me-2"></i>
+                        Ver Productos
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card h-100 p-4 rounded-4 shadow-sm border-0 bg-white hover-lift">
+                    <div class="feature-icon mb-4">
+                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-graph-up-arrow text-info fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="feature-title fs-3 fw-bold text-dark mb-3">
+                        Reportes Avanzados
+                    </h4>
+                    <p class="feature-description fs-5 text-muted lh-lg mb-4">
+                        Genera reportes financieros y análisis detallados del negocio. 
+                        Toma decisiones basadas en datos reales.
+                    </p>
+                    <a href="{% url 'catering:consulta_financiera' %}" class="btn btn-outline-info btn-lg rounded-pill">
+                        <i class="bi bi-arrow-right me-2"></i>
+                        Ver Reportes
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card h-100 p-4 rounded-4 shadow-sm border-0 bg-white hover-lift">
+                    <div class="feature-icon mb-4">
+                        <div class="icon-wrapper bg-danger bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-shield-check text-danger fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="feature-title fs-3 fw-bold text-dark mb-3">
+                        Seguridad Total
+                    </h4>
+                    <p class="feature-description fs-5 text-muted lh-lg mb-4">
+                        Sistema seguro con autenticación y control de acceso por roles. 
+                        Protege la información de tu negocio.
+                    </p>
+                    <a href="{% url 'login' %}" class="btn btn-outline-danger btn-lg rounded-pill">
+                        <i class="bi bi-arrow-right me-2"></i>
+                        Iniciar Sesión
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card h-100 p-4 rounded-4 shadow-sm border-0 bg-white hover-lift">
+                    <div class="feature-icon mb-4">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-phone-fill text-primary fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="feature-title fs-3 fw-bold text-dark mb-3">
+                        Responsive Design
+                    </h4>
+                    <p class="feature-description fs-5 text-muted lh-lg mb-4">
+                        Interfaz adaptativa que funciona perfectamente en todos los dispositivos. 
+                        Accede desde cualquier lugar.
+                    </p>
+                    <a href="{% url 'catering:index' %}" class="btn btn-outline-primary btn-lg rounded-pill">
+                        <i class="bi bi-arrow-right me-2"></i>
+                        Explorar
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Sección de Acciones Rápidas -->
+<section class="quick-actions-section py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <div class="section-badge mb-3">
+                    <span class="badge bg-warning bg-opacity-20 text-warning px-4 py-2 rounded-pill fs-6 fw-semibold">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>
+                        Acciones Rápidas
+                    </span>
+                </div>
+                <h2 class="display-4 fw-bold text-dark mb-4">
+                    Comienza a trabajar ahora
+                </h2>
+                <p class="fs-4 text-muted lh-lg">
+                    Accede rápidamente a las funciones más utilizadas del sistema
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="quick-action-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="action-icon mb-3">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-calendar-plus text-primary fs-1"></i>
+                        </div>
+                    </div>
+                    <h5 class="action-title fs-4 fw-bold text-dark mb-3">
+                        Nueva Reserva
+                    </h5>
+                    <p class="action-description fs-6 text-muted mb-4">
+                        Crea una nueva reserva de catering con menú personalizado
+                    </p>
+                    <a href="{% url 'catering:reserva_catering' %}" class="btn btn-primary btn-lg rounded-pill w-100">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Crear Reserva
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="quick-action-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="action-icon mb-3">
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-person-plus text-success fs-1"></i>
+                        </div>
+                    </div>
+                    <h5 class="action-title fs-4 fw-bold text-dark mb-3">
+                        Nuevo Cliente
+                    </h5>
+                    <p class="action-description fs-6 text-muted mb-4">
+                        Registra un nuevo cliente en el sistema
+                    </p>
+                    <a href="{% url 'catering:cliente_create' %}" class="btn btn-success btn-lg rounded-pill w-100">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Agregar Cliente
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="quick-action-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="action-icon mb-3">
+                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-calendar-event text-info fs-1"></i>
+                        </div>
+                    </div>
+                    <h5 class="action-title fs-4 fw-bold text-dark mb-3">
+                        Ver Eventos
+                    </h5>
+                    <p class="action-description fs-6 text-muted mb-4">
+                        Gestiona todos los eventos programados
+                    </p>
+                    <a href="{% url 'catering:evento_list' %}" class="btn btn-info btn-lg rounded-pill w-100">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        Ver Eventos
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="quick-action-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="action-icon mb-3">
+                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-graph-up text-warning fs-1"></i>
+                        </div>
+                    </div>
+                    <h5 class="action-title fs-4 fw-bold text-dark mb-3">
+                        Reportes
+                    </h5>
+                    <p class="action-description fs-6 text-muted mb-4">
+                        Genera reportes financieros y análisis
+                    </p>
+                    <a href="{% url 'catering:consulta_financiera' %}" class="btn btn-warning btn-lg rounded-pill w-100">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Ver Reportes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Estado del Sistema -->
+{% if eventos_pendientes > 0 %}
+<section class="system-status-section py-4">
+    <div class="container">
+        <div class="alert alert-warning alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
+            <div class="d-flex align-items-center">
+                <div class="alert-icon me-3">
+                    <i class="bi bi-exclamation-triangle-fill fs-2 text-warning"></i>
+                </div>
+                <div class="alert-content flex-grow-1">
+                    <h5 class="alert-heading fs-4 fw-bold mb-2">Atención Requerida</h5>
+                    <p class="alert-text fs-5 mb-3">
+                        Tienes <strong class="text-warning">{{ eventos_pendientes }}</strong> eventos pendientes de confirmación que requieren tu atención inmediata.
+                    </p>
+                    <a href="{% url 'catering:evento_list' %}?estado=SOLICITADO" class="btn btn-warning btn-lg rounded-pill">
+                        <i class="bi bi-eye me-2"></i>
+                        Revisar Eventos Pendientes
+                    </a>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+</section>
 {% endif %}
 
-<!-- Características del Sistema -->
-<div class="row mb-5">
-    <div class="col-12">
-        <h2 class="h3 text-center mb-5">
-            <i class="bi bi-star-fill me-2 text-warning"></i>
-            Características Principales
-        </h2>
+<!-- Sección de Call to Action Final -->
+<section class="cta-section py-5 position-relative overflow-hidden">
+    <div class="cta-background position-absolute w-100 h-100">
+        <div class="cta-gradient position-absolute w-100 h-100"></div>
     </div>
     
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <div class="feature-icon mb-4">
-                    <i class="bi bi-calendar-check-fill text-primary" style="font-size: 3rem;"></i>
+    <div class="container position-relative">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="cta-badge mb-4">
+                    <span class="badge bg-white bg-opacity-20 text-white px-4 py-2 rounded-pill fs-6 fw-semibold">
+                        <i class="bi bi-rocket-takeoff-fill me-2"></i>
+                        ¿Listo para comenzar?
+                    </span>
                 </div>
-                <h5 class="card-title fw-bold">Gestión de Eventos</h5>
-                <p class="card-text text-muted">
-                    Crea, edita y gestiona eventos de catering con un sistema intuitivo y eficiente.
+                
+                <h2 class="cta-title display-3 fw-bold text-white mb-4">
+                    Transforma tu negocio de catering hoy
+                </h2>
+                
+                <p class="cta-description fs-4 text-white-50 lh-lg mb-5">
+                    Únete a cientos de empresas que confían en Tu Solución para gestionar sus eventos de catering 
+                    de manera profesional y eficiente. Comienza a optimizar tu negocio ahora.
                 </p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <div class="feature-icon mb-4">
-                    <i class="bi bi-people-fill text-success" style="font-size: 3rem;"></i>
+                
+                <div class="cta-actions">
+                    <div class="d-flex flex-column flex-md-row gap-4 justify-content-center align-items-center">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'catering:reserva_catering' %}" class="btn btn-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="bi bi-calendar-plus me-3 fs-4"></i>
+                            <span class="fs-4 fw-bold text-dark">Crear Primera Reserva</span>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="bi bi-box-arrow-in-right me-3 fs-4"></i>
+                            <span class="fs-4 fw-bold text-dark">Comenzar Ahora</span>
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'catering:dashboard' %}" class="btn btn-outline-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="bi bi-speedometer2 me-3 fs-4"></i>
+                            <span class="fs-4 fw-bold">Ver Dashboard</span>
+                        </a>
+                    </div>
                 </div>
-                <h5 class="card-title fw-bold">Gestión de Clientes</h5>
-                <p class="card-text text-muted">
-                    Mantén un registro completo de clientes con historial de servicios y preferencias.
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <div class="feature-icon mb-4">
-                    <i class="bi bi-cup-hot-fill text-warning" style="font-size: 3rem;"></i>
-                </div>
-                <h5 class="card-title fw-bold">Menús Personalizados</h5>
-                <p class="card-text text-muted">
-                    Crea menús únicos para cada evento con productos de alta calidad.
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <div class="feature-icon mb-4">
-                    <i class="bi bi-graph-up-arrow text-info" style="font-size: 3rem;"></i>
-                </div>
-                <h5 class="card-title fw-bold">Reportes Avanzados</h5>
-                <p class="card-text text-muted">
-                    Genera reportes financieros y análisis detallados del negocio.
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <div class="feature-icon mb-4">
-                    <i class="bi bi-shield-check text-danger" style="font-size: 3rem;"></i>
-                </div>
-                <h5 class="card-title fw-bold">Seguridad Total</h5>
-                <p class="card-text text-muted">
-                    Sistema seguro con autenticación y control de acceso por roles.
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <div class="feature-icon mb-4">
-                    <i class="bi bi-phone-fill text-primary" style="font-size: 3rem;"></i>
-                </div>
-                <h5 class="card-title fw-bold">Responsive Design</h5>
-                <p class="card-text text-muted">
-                    Interfaz adaptativa que funciona perfectamente en todos los dispositivos.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Call to Action -->
-<div class="row">
-    <div class="col-12">
-        <div class="card text-center">
-            <div class="card-body py-5">
-                <h3 class="card-title mb-4">
-                    <i class="bi bi-rocket-takeoff-fill me-2 text-primary"></i>
-                    ¿Listo para comenzar?
-                </h3>
-                <p class="card-text text-muted mb-5 fs-5">
-                    Únete a cientos de empresas que confían en Tu Solución para gestionar sus eventos de catering.
-                </p>
-                <div class="d-flex justify-content-center gap-4 flex-wrap">
-                    {% if user.is_authenticated %}
-                    <a href="{% url 'catering:reserva_catering' %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-calendar-plus me-2"></i>
-                        Crear Primera Reserva
-                    </a>
-                    {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>
-                        Comenzar Ahora
-                    </a>
-                    {% endif %}
-                    <a href="{% url 'catering:dashboard' %}" class="btn btn-outline-primary btn-lg">
-                        <i class="bi bi-speedometer2 me-2"></i>
-                        Ver Dashboard
-                    </a>
+                
+                <!-- Estadísticas adicionales -->
+                <div class="cta-stats mt-5">
+                    <div class="row g-4">
+                        <div class="col-4">
+                            <div class="stat-item text-center">
+                                <div class="stat-number display-6 fw-bold text-white">{{ total_clientes }}+</div>
+                                <div class="stat-label fs-5 text-white-50">Clientes Satisfechos</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item text-center">
+                                <div class="stat-number display-6 fw-bold text-white">{{ total_eventos }}+</div>
+                                <div class="stat-label fs-5 text-white-50">Eventos Exitosos</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item text-center">
+                                <div class="stat-number display-6 fw-bold text-white">100%</div>
+                                <div class="stat-label fs-5 text-white-50">Satisfacción</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Animaciones adicionales para la página de inicio
+// Animaciones espectaculares para la página de inicio
 document.addEventListener('DOMContentLoaded', function() {
+    // Ocultar loading screen
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        setTimeout(() => {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        }, 1000);
+    }
+    
     // Efecto de parallax para el hero section
     const heroSection = document.querySelector('.hero-section');
     if (heroSection) {
         window.addEventListener('scroll', function() {
             const scrolled = window.pageYOffset;
-            const rate = scrolled * -0.5;
+            const rate = scrolled * -0.3;
             heroSection.style.transform = `translateY(${rate}px)`;
         });
     }
     
-    // Animación de contadores
-    const counters = document.querySelectorAll('.counter');
+    // Animación de contadores con efecto espectacular
     const animateCounters = () => {
+        const counters = document.querySelectorAll('.stat-number');
         counters.forEach(counter => {
-            const target = parseInt(counter.getAttribute('data-target'));
-            const duration = 2000;
+            const target = parseInt(counter.textContent);
+            if (isNaN(target)) return;
+            
+            const duration = 3000;
             const increment = target / (duration / 16);
             let current = 0;
             
@@ -369,32 +511,212 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
     
-    // Animar contadores cuando sean visibles
+    // Intersection Observer para animaciones
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                animateCounters();
-                observer.unobserve(entry.target);
+                entry.target.classList.add('animate-in');
+                
+                // Animar contadores cuando sean visibles
+                if (entry.target.classList.contains('hero-stats')) {
+                    setTimeout(animateCounters, 500);
+                }
             }
+        });
+    }, observerOptions);
+    
+    // Observar elementos para animaciones
+    document.querySelectorAll('.hero-stats, .feature-card, .quick-action-card, .stat-item').forEach(el => {
+        observer.observe(el);
+    });
+    
+    // Efectos hover mejorados para las cards
+    document.querySelectorAll('.feature-card, .quick-action-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+            this.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
         });
     });
     
-    const statsSection = document.querySelector('.stats-grid');
-    if (statsSection) {
-        observer.observe(statsSection);
-    }
-    
-    // Efectos hover para las cards de características
-    document.querySelectorAll('.feature-icon i').forEach(icon => {
-        icon.addEventListener('mouseenter', function() {
+    // Efectos hover para iconos
+    document.querySelectorAll('.icon-wrapper').forEach(iconWrapper => {
+        iconWrapper.addEventListener('mouseenter', function() {
             this.style.transform = 'scale(1.1) rotate(5deg)';
-            this.style.transition = 'transform 0.3s ease';
+            this.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
         });
         
-        icon.addEventListener('mouseleave', function() {
+        iconWrapper.addEventListener('mouseleave', function() {
             this.style.transform = 'scale(1) rotate(0deg)';
         });
     });
+    
+    // Animación de botones
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Efecto de typing para el título principal
+    const heroTitle = document.querySelector('.hero-title .text-gradient');
+    if (heroTitle) {
+        const text = heroTitle.textContent;
+        heroTitle.textContent = '';
+        
+        let i = 0;
+        const typeWriter = () => {
+            if (i < text.length) {
+                heroTitle.textContent += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        };
+        
+        setTimeout(typeWriter, 1000);
+    }
+    
+    // Smooth scroll para el indicador de scroll
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    if (scrollIndicator) {
+        scrollIndicator.addEventListener('click', function() {
+            const featuresSection = document.querySelector('.features-section');
+            if (featuresSection) {
+                featuresSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    }
+    
+    // Efecto de partículas en el hero (opcional)
+    createParticles();
 });
+
+// Función para crear efecto de partículas
+function createParticles() {
+    const heroSection = document.querySelector('.hero-section');
+    if (!heroSection) return;
+    
+    const particleCount = 50;
+    const particles = [];
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.cssText = `
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float ${3 + Math.random() * 4}s infinite ease-in-out;
+            animation-delay: ${Math.random() * 2}s;
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+        `;
+        heroSection.appendChild(particle);
+        particles.push(particle);
+    }
+}
+
+// CSS adicional para animaciones
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.5; }
+        50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+    }
+    
+    .animate-fade-in-down {
+        animation: fadeInDown 0.8s ease-out forwards;
+        opacity: 0;
+    }
+    
+    .animate-in {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    .hover-lift {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-xl {
+        padding: 1rem 2rem;
+        font-size: 1.25rem;
+    }
+    
+    .display-1 {
+        font-size: 5rem;
+        font-weight: 900;
+    }
+    
+    .display-3 {
+        font-size: 3.5rem;
+        font-weight: 800;
+    }
+    
+    .display-4 {
+        font-size: 3rem;
+        font-weight: 700;
+    }
+    
+    .display-6 {
+        font-size: 2.5rem;
+        font-weight: 600;
+    }
+    
+    .fw-black {
+        font-weight: 900;
+    }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}
