@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sena-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: none;
+        margin-bottom: 2rem;
+    }
+    
+    .evento-info {
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .info-value {
+        color: #6c757d;
+    }
+    
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    
+    .sena-fields {
+        background: #e8f5e8;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border: 2px solid #28a745;
+    }
+    
+    .sena-fields.hidden {
+        display: none;
+    }
+    
+    .btn-sena {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-sena:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Información del Evento -->
+            <div class="sena-card">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar-event me-2" style="font-size: 1.5rem; color: #667eea;"></i>
+                    <h2 class="mb-0">Gestionar Seña del Evento</h2>
+                </div>
+                
+                <div class="evento-info">
+                    <h5 class="mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Información del Evento
+                    </h5>
+                    <div class="info-item">
+                        <span class="info-label">Tipo de Evento:</span>
+                        <span class="info-value">{{ evento.get_tipo_evento_display }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Fecha:</span>
+                        <span class="info-value">{{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Cliente:</span>
+                        <span class="info-value">{{ evento.id_cliente.nombre }} {{ evento.id_cliente.apellido }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ubicación:</span>
+                        <span class="info-value">{{ evento.ubicacion }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Personas:</span>
+                        <span class="info-value">{{ evento.cantidad_personas }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Precio Total:</span>
+                        <span class="info-value fw-bold text-success">${{ evento.precio_total|floatformat:0 }}</span>
+                    </div>
+                </div>
+                
+                <!-- Formulario de Seña -->
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <div class="form-check">
+                            {{ form.tiene_sena }}
+                            <label class="form-check-label" for="{{ form.tiene_sena.id_for_label }}">
+                                <strong>{{ form.tiene_sena.label }}</strong>
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">
+                            Marque esta casilla si el cliente dejó una seña para confirmar el evento
+                        </small>
+                    </div>
+                    
+                    <div class="sena-fields" id="sena-fields">
+                        <h6 class="mb-3">
+                            <i class="bi bi-currency-dollar me-2"></i>
+                            Detalles de la Seña
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.monto_sena.id_for_label }}" class="form-label">
+                                    {{ form.monto_sena.label }}
+                                </label>
+                                {{ form.monto_sena }}
+                                {% if form.monto_sena.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.monto_sena.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.fecha_sena.id_for_label }}" class="form-label">
+                                    {{ form.fecha_sena.label }}
+                                </label>
+                                {{ form.fecha_sena }}
+                                {% if form.fecha_sena.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.fecha_sena.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.observaciones_sena.id_for_label }}" class="form-label">
+                                {{ form.observaciones_sena.label }}
+                            </label>
+                            {{ form.observaciones_sena }}
+                            {% if form.observaciones_sena.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.observaciones_sena.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Información calculada -->
+                        <div class="alert alert-info">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Porcentaje de Seña:</strong><br>
+                                    <span id="porcentaje-sena">0%</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Saldo Pendiente:</strong><br>
+                                    <span id="saldo-pendiente">${{ evento.precio_total|floatformat:0 }}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Estado:</strong><br>
+                                    <span class="badge bg-warning" id="estado-pago">Pendiente</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-cancel">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-sena">
+                            <i class="bi bi-check-circle me-1"></i>Guardar Información
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tieneSenaCheckbox = document.getElementById('{{ form.tiene_sena.id_for_label }}');
+    const senaFields = document.getElementById('sena-fields');
+    const montoSenaInput = document.getElementById('{{ form.monto_sena.id_for_label }}');
+    const precioTotal = {{ evento.precio_total|default:0 }};
+    
+    function toggleSenaFields() {
+        if (tieneSenaCheckbox.checked) {
+            senaFields.classList.remove('hidden');
+            senaFields.style.display = 'block';
+        } else {
+            senaFields.classList.add('hidden');
+            senaFields.style.display = 'none';
+        }
+        updateCalculations();
+    }
+    
+    function updateCalculations() {
+        const montoSena = parseFloat(montoSenaInput.value) || 0;
+        const porcentajeSena = precioTotal > 0 ? (montoSena / precioTotal) * 100 : 0;
+        const saldoPendiente = precioTotal - montoSena;
+        
+        document.getElementById('porcentaje-sena').textContent = porcentajeSena.toFixed(1) + '%';
+        document.getElementById('saldo-pendiente').textContent = '$' + saldoPendiente.toLocaleString('es-AR', {minimumFractionDigits: 0});
+        
+        const estadoPago = document.getElementById('estado-pago');
+        if (montoSena > 0) {
+            if (montoSena >= precioTotal) {
+                estadoPago.textContent = 'Pagado';
+                estadoPago.className = 'badge bg-success';
+            } else if (montoSena >= precioTotal * 0.3) {
+                estadoPago.textContent = 'Con Seña';
+                estadoPago.className = 'badge bg-warning';
+            } else {
+                estadoPago.textContent = 'Seña Insuficiente';
+                estadoPago.className = 'badge bg-danger';
+            }
+        } else {
+            estadoPago.textContent = 'Pendiente';
+            estadoPago.className = 'badge bg-warning';
+        }
+    }
+    
+    // Event listeners
+    tieneSenaCheckbox.addEventListener('change', toggleSenaFields);
+    montoSenaInput.addEventListener('input', updateCalculations);
+    
+    // Inicializar estado
+    toggleSenaFields();
+});
+</script>
+{% endblock %}

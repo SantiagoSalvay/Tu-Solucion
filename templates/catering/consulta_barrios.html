@@ -2,10 +2,6 @@
 
 {% block title %}Consulta de Barrios - Marketing{% endblock %}
 
-{% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="{% url 'catering:dashboard' %}">Dashboard</a></li>
-<li class="breadcrumb-item active" aria-current="page">Consulta de Barrios</li>
-{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -20,7 +16,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted mb-0">
-                    Esta consulta muestra los 10 barrios con mayor cantidad de servicios en Buenos Aires, 
+                    Esta consulta muestra los barrios con mayor cantidad de eventos en Buenos Aires, 
                     considerando únicamente eventos finalizados.
                 </p>
             </div>
@@ -42,7 +38,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Barrio</th>
-                                    <th>Cantidad de Servicios</th>
+                                    <th>Cantidad de Eventos</th>
                                     <th>Servicio de Mayor Costo</th>
                                     <th>Costo Máximo</th>
                                 </tr>
@@ -57,7 +53,7 @@
                                         <strong>{{ barrio }}</strong>
                                     </td>
                                     <td>
-                                        <span class="badge bg-info">{{ datos.cantidad_servicios }}</span>
+                                        <span class="badge bg-info">{{ datos.cantidad_eventos }}</span>
                                     </td>
                                     <td>
                                         {% if datos.servicio_mayor_costo %}
@@ -86,12 +82,12 @@
                                 </div>
                                 <div class="card-body">
                                     <p><strong>Total de barrios analizados:</strong> {{ barrios|length }}</p>
-                                    <p><strong>Total de servicios:</strong> 
-                                        {% with total_servicios=0 %}
+                                    <p><strong>Total de eventos:</strong> 
+                                        {% with total_eventos=0 %}
                                             {% for barrio, datos in barrios %}
-                                                {% with total_servicios=total_servicios|add:datos.cantidad_servicios %}{% endwith %}
+                                                {% with total_eventos=total_eventos|add:datos.cantidad_eventos %}{% endwith %}
                                             {% endfor %}
-                                            {{ total_servicios }}
+                                            {{ total_eventos }}
                                         {% endwith %}
                                     </p>
                                 </div>
@@ -100,13 +96,13 @@
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6 class="mb-0">Barrio con más servicios</h6>
+                                    <h6 class="mb-0">Barrio con más eventos</h6>
                                 </div>
                                 <div class="card-body">
                                     {% if barrios %}
                                         {% with primer_barrio=barrios.0 %}
                                             <p><strong>{{ primer_barrio.0 }}</strong></p>
-                                            <p class="text-muted">{{ primer_barrio.1.cantidad_servicios }} servicios</p>
+                                            <p class="text-muted">{{ primer_barrio.1.cantidad_eventos }} eventos</p>
                                         {% endwith %}
                                     {% endif %}
                                 </div>

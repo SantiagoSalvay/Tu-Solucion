@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
-    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio, PerfilUsuario
+    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio, PerfilUsuario,
+    Provincia, Barrio
 )
 
 
@@ -128,7 +129,8 @@ class EventoForm(forms.ModelForm):
     
     class Meta:
         model = EventoSolicitado
-        fields = ['id_cliente', 'id_responsable', 'tipo_evento', 'fecha', 'hora', 'ubicacion', 'cantidad_personas']
+        fields = ['id_cliente', 'id_responsable', 'tipo_evento', 'fecha', 'hora', 'ubicacion', 'cantidad_personas', 
+                 'tiene_sena', 'monto_sena', 'fecha_sena', 'observaciones_sena']
         widgets = {
             'id_cliente': forms.Select(attrs={'class': 'form-select'}),
             'id_responsable': forms.Select(attrs={'class': 'form-select'}),
@@ -137,6 +139,10 @@ class EventoForm(forms.ModelForm):
             'hora': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'ubicacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección completa del evento'}),
             'cantidad_personas': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'tiene_sena': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'monto_sena': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+            'fecha_sena': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'observaciones_sena': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Observaciones sobre la seña...'}),
         }
     
     def clean_fecha(self):
@@ -145,6 +151,31 @@ class EventoForm(forms.ModelForm):
         if fecha < timezone.now().date():
             raise ValidationError('La fecha del evento no puede ser anterior a hoy.')
         return fecha
+    
+    def clean(self):
+        """Validaciones cruzadas para los campos de seña"""
+        cleaned_data = super().clean()
+        tiene_sena = cleaned_data.get('tiene_sena')
+        monto_sena = cleaned_data.get('monto_sena')
+        fecha_sena = cleaned_data.get('fecha_sena')
+        
+        if tiene_sena:
+            if not monto_sena or monto_sena <= 0:
+                raise ValidationError('Si el cliente dejó seña, debe especificar un monto válido.')
+            
+            if not fecha_sena:
+                raise ValidationError('Si el cliente dejó seña, debe especificar la fecha.')
+            
+            # Validar que la fecha de seña no sea futura
+            if fecha_sena > timezone.now().date():
+                raise ValidationError('La fecha de la seña no puede ser futura.')
+        else:
+            # Si no tiene seña, limpiar los campos relacionados
+            cleaned_data['monto_sena'] = None
+            cleaned_data['fecha_sena'] = None
+            cleaned_data['observaciones_sena'] = ''
+        
+        return cleaned_data
 
 
 class EventoResponsableForm(forms.ModelForm):
@@ -165,6 +196,74 @@ class EventoResponsableForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['cantidad_personas'].label = 'Cantidad de Personas'
         self.fields['cantidad_personas'].help_text = 'Número total de personas que asistirán al evento'
+
+
+class GestionarSenaForm(forms.ModelForm):
+    """Formulario para que los responsables gestionen la seña de un evento"""
+    
+    class Meta:
+        model = EventoSolicitado
+        fields = ['tiene_sena', 'monto_sena', 'fecha_sena', 'observaciones_sena']
+        widgets = {
+            'tiene_sena': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+                'id': 'id_tiene_sena'
+            }),
+            'monto_sena': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0',
+                'id': 'id_monto_sena',
+                'placeholder': '0.00'
+            }),
+            'fecha_sena': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'id': 'id_fecha_sena'
+            }),
+            'observaciones_sena': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Observaciones sobre la seña...',
+                'id': 'id_observaciones_sena'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['tiene_sena'].label = '¿El cliente dejó seña?'
+        self.fields['monto_sena'].label = 'Monto de la Seña ($)'
+        self.fields['fecha_sena'].label = 'Fecha de la Seña'
+        self.fields['observaciones_sena'].label = 'Observaciones'
+        
+        # Establecer fecha por defecto como hoy
+        if not self.instance.pk or not self.instance.fecha_sena:
+            self.fields['fecha_sena'].initial = timezone.now().date()
+    
+    def clean(self):
+        """Validaciones para los campos de seña"""
+        cleaned_data = super().clean()
+        tiene_sena = cleaned_data.get('tiene_sena')
+        monto_sena = cleaned_data.get('monto_sena')
+        fecha_sena = cleaned_data.get('fecha_sena')
+        
+        if tiene_sena:
+            if not monto_sena or monto_sena <= 0:
+                raise ValidationError('Si el cliente dejó seña, debe especificar un monto válido.')
+            
+            if not fecha_sena:
+                raise ValidationError('Si el cliente dejó seña, debe especificar la fecha.')
+            
+            # Validar que la fecha de seña no sea futura
+            if fecha_sena > timezone.now().date():
+                raise ValidationError('La fecha de la seña no puede ser futura.')
+        else:
+            # Si no tiene seña, limpiar los campos relacionados
+            cleaned_data['monto_sena'] = None
+            cleaned_data['fecha_sena'] = None
+            cleaned_data['observaciones_sena'] = ''
+        
+        return cleaned_data
 
 
 class AsignarPersonalForm(forms.ModelForm):
@@ -266,7 +365,20 @@ class MenuForm(forms.ModelForm):
         # Configurar campos
         self.fields['id_tipo_producto'].empty_label = "Seleccione un tipo de producto"
         self.fields['id_producto'].empty_label = "Seleccione un tipo de producto primero"
-        self.fields['id_producto'].queryset = Producto.objects.none()  # Inicialmente vacío
+        
+        # Si hay datos POST, configurar el queryset de productos basado en el tipo seleccionado
+        if 'data' in kwargs and kwargs['data']:
+            tipo_id = kwargs['data'].get('id_tipo_producto')
+            if tipo_id:
+                self.fields['id_producto'].queryset = Producto.objects.filter(
+                    id_tipo_producto_id=tipo_id, 
+                    disponible=True
+                )
+            else:
+                self.fields['id_producto'].queryset = Producto.objects.none()
+        else:
+            self.fields['id_producto'].queryset = Producto.objects.none()  # Inicialmente vacío
+        
         self.fields['cantidad_producto'].initial = 1
 
 
@@ -520,13 +632,39 @@ class RegistroForm(forms.Form):
             'placeholder': 'Número de documento'
         })
     )
-    domicilio = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'placeholder': 'Dirección completa',
-            'rows': 3
+    provincia = forms.ModelChoiceField(
+        queryset=Provincia.objects.filter(activa=True),
+        empty_label="Seleccione una provincia",
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'id_provincia'
         })
     )
+    barrio = forms.ModelChoiceField(
+        queryset=Barrio.objects.none(),
+        empty_label="Primero seleccione una provincia",
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'id_barrio'
+        })
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Si hay datos POST, configurar el queryset de barrios basado en la provincia seleccionada
+        if 'data' in kwargs and kwargs['data']:
+            provincia_id = kwargs['data'].get('provincia')
+            if provincia_id:
+                self.fields['barrio'].queryset = Barrio.objects.filter(
+                    provincia_id=provincia_id, 
+                    activo=True
+                )
+            else:
+                self.fields['barrio'].queryset = Barrio.objects.none()
+        else:
+            self.fields['barrio'].queryset = Barrio.objects.none()
     
     def clean_username(self):
         username = self.cleaned_data.get('username')

@@ -102,9 +102,22 @@
     
     .quick-action-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
         margin-top: 2rem;
+        align-items: stretch;
+    }
+    
+    @media (max-width: 1200px) {
+        .quick-action-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    @media (max-width: 900px) {
+        .quick-action-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
     
     .quick-action-card {
@@ -112,11 +125,20 @@
         border-radius: 1rem;
         padding: 2rem;
         text-align: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         transition: all 0.3s ease;
         border: none;
         text-decoration: none;
         color: inherit;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 240px;
+        width: 100%;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
     }
     
     .quick-action-card:hover {
@@ -133,22 +155,84 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1.5rem;
+        margin-bottom: 1.5rem;
         font-size: 2rem;
         color: white;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .quick-action-icon::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: rotate(45deg);
+        transition: all 0.6s ease;
+        opacity: 0;
+    }
+    
+    .quick-action-card:hover .quick-action-icon::before {
+        opacity: 1;
+        animation: shine 0.6s ease-in-out;
+    }
+    
+    @keyframes shine {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    
+    .quick-action-card:hover .quick-action-icon {
+        transform: scale(1.1);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+    }
+    
+    /* Forzar círculos perfectos */
+    .quick-action-icon {
+        min-width: 80px !important;
+        min-height: 80px !important;
+        max-width: 80px !important;
+        max-height: 80px !important;
+        width: 80px !important;
+        height: 80px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .quick-action-icon i {
+        display: block;
+        line-height: 1;
+        font-size: 2rem !important;
+    }
+    
+    /* Asegurar que el contenedor no deforme los círculos */
+    .quick-action-card > div:first-child {
+        width: 80px !important;
+        height: 80px !important;
+        border-radius: 50% !important;
     }
     
     .quick-action-title {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: 700;
         color: #2c3e50;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
+        line-height: 1.3;
+        text-align: center;
     }
     
     .quick-action-desc {
-        color: #7f8c8d;
+        color: #6c757d;
         font-size: 0.9rem;
-        line-height: 1.5;
+        line-height: 1.4;
+        text-align: center;
+        margin: 0;
     }
     
     .status-badge {
@@ -250,6 +334,28 @@
         
         .quick-action-grid {
             grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .quick-action-card {
+            height: 200px;
+            padding: 1.5rem;
+        }
+        
+        .quick-action-icon {
+            width: 70px !important;
+            height: 70px !important;
+            font-size: 1.8rem !important;
+            margin-bottom: 1rem;
+        }
+        
+        .quick-action-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.6rem;
+        }
+        
+        .quick-action-desc {
+            font-size: 0.85rem;
         }
     }
 </style>
@@ -433,20 +539,12 @@
                 </div>
                 <div class="card-body">
                     <div class="quick-action-grid">
-                        <a href="{% url 'catering:cliente_create' %}" class="quick-action-card">
-                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                                <i class="bi bi-person-plus"></i>
-                            </div>
-                            <h6 class="quick-action-title">Nuevo Cliente</h6>
-                            <p class="quick-action-desc">Registra un nuevo cliente en el sistema</p>
-                        </a>
-                        
                         <a href="{% url 'catering:evento_create' %}" class="quick-action-card">
-                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
                                 <i class="bi bi-calendar-plus"></i>
                             </div>
                             <h6 class="quick-action-title">Nuevo Evento</h6>
-                            <p class="quick-action-desc">Crea un nuevo evento de catering</p>
+                            <p class="quick-action-desc">Crear evento</p>
                         </a>
                         
                         <a href="{% url 'catering:personal_create' %}" class="quick-action-card">
@@ -486,7 +584,7 @@
                                 <i class="bi bi-gift"></i>
                             </div>
                             <h6 class="quick-action-title">Cumpleaños</h6>
-                            <p class="quick-action-desc">Clientes con cumpleaños próximos</p>
+                            <p class="quick-action-desc">Cumpleaños de clientes</p>
                         </a>
                         
                         <a href="{% url 'catering:evento_list' %}" class="quick-action-card">

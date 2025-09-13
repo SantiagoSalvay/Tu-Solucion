@@ -97,6 +97,7 @@ body {
     align-items: center;
     gap: var(--space-2);
     transition: var(--transition);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-brand:hover {
@@ -248,10 +249,24 @@ h5 { font-size: 1.25rem; }
 h6 { font-size: 1.125rem; }
 
 .text-gradient {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    filter: contrast(1.2) brightness(1.1);
+}
+
+/* Fallback para navegadores que no soportan background-clip: text */
+@supports not (-webkit-background-clip: text) {
+    .text-gradient {
+        background: none;
+        -webkit-text-fill-color: initial;
+        color: #2563eb;
+        font-weight: 800;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 }
 
 /* ===== FORMULARIOS MODERNOS ===== */

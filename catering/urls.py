@@ -98,4 +98,14 @@ urlpatterns = [
     path('responsable/eventos/<int:evento_id>/asignar-personal/', views_responsables.responsable_asignar_personal, name='responsable_asignar_personal'),
     path('responsable/eventos/<int:evento_id>/cambiar-estado/', views_responsables.responsable_cambiar_estado_evento, name='responsable_cambiar_estado_evento'),
     path('responsable/servicios/<int:servicio_id>/eliminar/', views_responsables.eliminar_personal_asignado, name='eliminar_personal_asignado'),
+    
+    # API para cargar barrios dinámicamente
+    path('api/barrios-por-provincia/', views.obtener_barrios_por_provincia, name='obtener_barrios_por_provincia'),
+    
+    # Gestión de seña
+    path('eventos/<int:evento_id>/gestionar-sena/', views.gestionar_sena_evento, name='gestionar_sena_evento'),
+    
+    # Dashboards específicos
+    path('empleado/dashboard/', views.empleado_dashboard, name='empleado_dashboard'),
+    path('responsable/dashboard/', views.responsable_dashboard, name='responsable_dashboard'),
 ]

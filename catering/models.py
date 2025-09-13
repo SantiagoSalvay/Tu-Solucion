@@ -17,6 +17,8 @@ class Cliente(models.Model):
     num_doc = models.CharField(max_length=20, verbose_name="Número de Documento", unique=True)
     email = models.EmailField(verbose_name="Email")
     domicilio = models.CharField(max_length=200, verbose_name="Domicilio")
+    provincia = models.ForeignKey('Provincia', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Provincia")
+    barrio = models.ForeignKey('Barrio', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Barrio")
     fecha_alta = models.DateField(auto_now_add=True, verbose_name="Fecha de Alta")
     fecha_nacimiento = models.DateField(null=True, blank=True, verbose_name="Fecha de Nacimiento")
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Usuario")
@@ -182,6 +184,12 @@ class EventoSolicitado(models.Model):
     precio_total = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Precio Total", null=True, blank=True)
     precio_por_persona = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio por Persona", null=True, blank=True)
     
+    # Campos relacionados con la seña
+    tiene_sena = models.BooleanField(default=False, verbose_name="¿El cliente dejó seña?")
+    monto_sena = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Monto de la Seña")
+    fecha_sena = models.DateField(null=True, blank=True, verbose_name="Fecha de la Seña")
+    observaciones_sena = models.TextField(max_length=500, blank=True, null=True, verbose_name="Observaciones sobre la Seña")
+    
     class Meta:
         verbose_name = "Evento Solicitado"
         verbose_name_plural = "Eventos Solicitados"
@@ -198,6 +206,18 @@ class EventoSolicitado(models.Model):
         ).exclude(id_evento=self.id_evento)
         
         return eventos_mismo_dia.count() < 10
+    
+    def get_porcentaje_sena(self):
+        """Calcula el porcentaje de seña sobre el precio total"""
+        if self.tiene_sena and self.monto_sena and self.precio_total:
+            return (self.monto_sena / self.precio_total) * 100
+        return 0
+    
+    def get_saldo_pendiente(self):
+        """Calcula el saldo pendiente de pago"""
+        if self.tiene_sena and self.monto_sena and self.precio_total:
+            return self.precio_total - self.monto_sena
+        return self.precio_total or 0
     
     def get_barrio(self):
         """Extrae el barrio de la ubicación"""
@@ -299,6 +319,7 @@ class Personal(models.Model):
     nombre_y_apellido = models.CharField(max_length=200, verbose_name="Nombre y Apellido")
     telefono = models.CharField(max_length=20, verbose_name="Teléfono")
     email = models.EmailField(verbose_name="Email")
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Usuario")
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ACTIVO', verbose_name="Estado")
     
     class Meta:
@@ -383,3 +404,37 @@ class PerfilUsuario(models.Model):
     def esta_activo(self):
         """Verifica si el usuario está activo"""
         return self.estado == 'ACTIVO' and self.usuario.is_active
+
+
+class Provincia(models.Model):
+    """Modelo para gestionar las provincias de Córdoba"""
+    id_provincia = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100, verbose_name="Nombre de la Provincia", unique=True)
+    codigo = models.CharField(max_length=10, verbose_name="Código", unique=True)
+    activa = models.BooleanField(default=True, verbose_name="Activa")
+    
+    class Meta:
+        verbose_name = "Provincia"
+        verbose_name_plural = "Provincias"
+        ordering = ['nombre']
+    
+    def __str__(self):
+        return self.nombre
+
+
+class Barrio(models.Model):
+    """Modelo para gestionar los barrios de cada provincia"""
+    id_barrio = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100, verbose_name="Nombre del Barrio")
+    provincia = models.ForeignKey(Provincia, on_delete=models.CASCADE, verbose_name="Provincia")
+    codigo_postal = models.CharField(max_length=10, verbose_name="Código Postal", blank=True, null=True)
+    activo = models.BooleanField(default=True, verbose_name="Activo")
+    
+    class Meta:
+        verbose_name = "Barrio"
+        verbose_name_plural = "Barrios"
+        ordering = ['provincia__nombre', 'nombre']
+        unique_together = ['nombre', 'provincia']
+    
+    def __str__(self):
+        return f"{self.nombre}, {self.provincia.nombre}"

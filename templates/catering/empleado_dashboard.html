@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Empleado - Tu Solución{% endblock %}
+
+{% block extra_css %}
+<style>
+    .empleado-hero {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 2rem 2rem;
+    }
+    
+    .evento-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+    
+    .evento-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    .evento-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f8f9fa;
+    }
+    
+    .evento-tipo {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .evento-fecha {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .evento-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+    }
+    
+    .info-item i {
+        margin-right: 0.75rem;
+        color: #667eea;
+        font-size: 1.2rem;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        margin-right: 0.5rem;
+    }
+    
+    .info-value {
+        color: #6c757d;
+    }
+    
+    .estado-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .estado-confirmado { background: #d1edff; color: #0c5460; }
+    .estado-en-proceso { background: #d4edda; color: #155724; }
+    .estado-finalizado { background: #e2e3e5; color: #383d41; }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .welcome-badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+    
+    .empleado-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .empleado-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+    
+    @media (max-width: 768px) {
+        .empleado-title {
+            font-size: 2rem;
+        }
+        
+        .evento-info {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section del Empleado -->
+<div class="empleado-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="welcome-badge">
+                    <i class="bi bi-person-badge me-2"></i>
+                    Panel de Empleado
+                </div>
+                <h1 class="empleado-title">Bienvenido, {{ user.first_name|default:user.username }}</h1>
+                <p class="empleado-subtitle">
+                    Aquí puedes ver los eventos donde debes trabajar y toda la información necesaria
+                </p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <div class="d-flex justify-content-end">
+                    <div class="text-center">
+                        <i class="bi bi-calendar-check" style="font-size: 4rem; opacity: 0.3;"></i>
+                        <div class="mt-2">
+                            <small>Eventos asignados</small><br>
+                            <strong>{{ eventos_asignados|length }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Eventos Asignados -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Mis Eventos Asignados
+                </h2>
+                <span class="badge bg-primary fs-6">{{ eventos_asignados|length }} eventos</span>
+            </div>
+            
+            {% if eventos_asignados %}
+                {% for evento in eventos_asignados %}
+                <div class="evento-card">
+                    <div class="evento-header">
+                        <div class="d-flex align-items-center">
+                            <span class="evento-tipo">{{ evento.get_tipo_evento_display }}</span>
+                            <span class="evento-fecha ms-3">
+                                <i class="bi bi-calendar me-1"></i>
+                                {{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}
+                            </span>
+                        </div>
+                        <span class="estado-badge estado-{{ evento.estado|lower }}">
+                            {{ evento.get_estado_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="evento-info">
+                        <div class="info-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <div>
+                                <span class="info-label">Ubicación:</span>
+                                <span class="info-value">{{ evento.ubicacion }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="bi bi-people"></i>
+                            <div>
+                                <span class="info-label">Personas:</span>
+                                <span class="info-value">{{ evento.cantidad_personas }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="bi bi-person"></i>
+                            <div>
+                                <span class="info-label">Cliente:</span>
+                                <span class="info-value">{{ evento.id_cliente.nombre }} {{ evento.id_cliente.apellido }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="bi bi-currency-dollar"></i>
+                            <div>
+                                <span class="info-label">Precio:</span>
+                                <span class="info-value">${{ evento.precio_total|floatformat:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Menú del Evento -->
+                    {% if evento.menuxproducto_set.all %}
+                    <div class="mt-3">
+                        <h6 class="mb-2">
+                            <i class="bi bi-list-ul me-2"></i>
+                            Menú del Evento
+                        </h6>
+                        <div class="row">
+                            {% for menu_item in evento.menuxproducto_set.all %}
+                            <div class="col-md-6 mb-2">
+                                <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                    <span class="fw-medium">{{ menu_item.id_producto.descripcion }}</span>
+                                    <span class="badge bg-secondary">{{ menu_item.cantidad_producto }} unidades</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-3 text-end">
+                        <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-eye me-1"></i>Ver Detalles
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x"></i>
+                    <h5>No tienes eventos asignados</h5>
+                    <p>Cuando te asignen a un evento, aparecerá aquí con toda la información necesaria</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de las tarjetas
+    const cards = document.querySelectorAll('.evento-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Auto-refresh cada 5 minutos
+    setInterval(() => {
+        location.reload();
+    }, 300000);
+});
+</script>
+{% endblock %}

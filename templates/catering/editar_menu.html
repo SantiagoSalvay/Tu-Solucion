@@ -63,6 +63,7 @@
                     
                     <!-- Campo oculto para asegurar que el valor se envíe -->
                     <input type="hidden" id="hidden_producto" name="id_producto" value="">
+                    <input type="hidden" id="hidden_tipo_producto" name="id_tipo_producto" value="">
                     
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-plus"></i> Agregar al Menú
@@ -144,11 +145,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const tipoSelect = document.getElementById('id_id_tipo_producto');
     const productoSelect = document.getElementById('id_id_producto');
     const hiddenProducto = document.getElementById('hidden_producto');
+    const hiddenTipoProducto = document.getElementById('hidden_tipo_producto');
     
     if (tipoSelect) {
         tipoSelect.addEventListener('change', function() {
             const tipoId = this.value;
             if (tipoId) {
+                // Actualizar campo oculto
+                hiddenTipoProducto.value = tipoId;
+                
                 // Mostrar loading
                 productoSelect.innerHTML = '<option value="">Cargando productos...</option>';
                 productoSelect.disabled = true;
@@ -170,6 +175,8 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 productoSelect.innerHTML = '<option value="">Seleccione un tipo de producto primero</option>';
                 productoSelect.disabled = true;
+                hiddenTipoProducto.value = '';
+                hiddenProducto.value = '';
             }
         });
     }
@@ -180,35 +187,41 @@ document.addEventListener('DOMContentLoaded', function() {
         productoSelect.disabled = true;
     }
     
-    // Limpiar formulario después de envío exitoso
+    // Manejar envío del formulario
     const form = document.getElementById('menu-form');
     if (form) {
         form.addEventListener('submit', function(e) {
-            // Validar que se haya seleccionado un producto
-            if (!productoSelect.value) {
+            // Validar que se haya seleccionado un tipo de producto
+            if (!tipoSelect.value) {
                 e.preventDefault();
-                alert('Por favor, seleccione un tipo de producto y luego un producto específico.');
+                alert('Por favor, seleccione un tipo de producto.');
                 return false;
             }
             
-            // IMPORTANTE: Habilitar el campo antes del envío para que Django lo procese
+            // Validar que se haya seleccionado un producto
+            if (!productoSelect.value) {
+                e.preventDefault();
+                alert('Por favor, seleccione un producto específico.');
+                return false;
+            }
+            
+            // IMPORTANTE: Habilitar los campos antes del envío para que Django los procese
             if (productoSelect.disabled) {
                 productoSelect.disabled = false;
             }
+            if (tipoSelect.disabled) {
+                tipoSelect.disabled = false;
+            }
             
-            // Asegurar que el campo oculto tenga el valor correcto
+            // Asegurar que los campos ocultos tengan los valores correctos
             hiddenProducto.value = productoSelect.value;
+            hiddenTipoProducto.value = tipoSelect.value;
             
-            // Limpiar el formulario después de un breve delay para permitir el envío
-            setTimeout(() => {
-                form.reset();
-                productoSelect.innerHTML = '<option value="">Seleccione un tipo de producto primero</option>';
-                productoSelect.disabled = true;
-                // También limpiar el select de tipo de producto
-                if (tipoSelect) {
-                    tipoSelect.value = '';
-                }
-            }, 100);
+            console.log('Enviando formulario con:', {
+                tipo_producto: hiddenTipoProducto.value,
+                producto: hiddenProducto.value,
+                cantidad: document.querySelector('input[name="cantidad_producto"]').value
+            });
         });
     }
 });

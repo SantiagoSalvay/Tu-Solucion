@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Actualizar Estado del Servicio - Tu Solución{% endblock %}
+
+{% block extra_css %}
+<style>
+    .update-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 2rem 2rem;
+    }
+    
+    .update-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+    
+    .update-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    .estado-option {
+        border: 2px solid #e9ecef;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .estado-option:hover {
+        border-color: #667eea;
+        background-color: #f8f9fa;
+    }
+    
+    .estado-option.selected {
+        border-color: #667eea;
+        background-color: #e3f2fd;
+    }
+    
+    .estado-option input[type="radio"] {
+        margin-right: 0.75rem;
+    }
+    
+    .estado-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .estado-asignado { background: #d1edff; color: #0c5460; }
+    .estado-en-servicio { background: #d4edda; color: #155724; }
+    .estado-completado { background: #e2e3e5; color: #383d41; }
+    .estado-cancelado { background: #f8d7da; color: #721c24; }
+    
+    .welcome-badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+    
+    .update-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .update-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+    
+    @media (max-width: 768px) {
+        .update-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="update-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="welcome-badge">
+                    <i class="bi bi-arrow-repeat me-2"></i>
+                    Actualizar Estado
+                </div>
+                <h1 class="update-title">Actualizar Estado del Servicio</h1>
+                <p class="update-subtitle">
+                    Cambia el estado de tu servicio para mantener actualizada la información
+                </p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <div class="d-flex justify-content-end">
+                    <div class="text-center">
+                        <span class="estado-badge estado-{{ servicio.estado|lower }}">
+                            Estado Actual: {{ servicio.get_estado_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="update-card">
+                <h4 class="mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Información del Servicio
+                </h4>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Evento:</label>
+                            <p class="mb-0">{{ servicio.id_evento.get_tipo_evento_display }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Fecha:</label>
+                            <p class="mb-0">{{ servicio.id_evento.fecha|date:"d/m/Y" }} - {{ servicio.id_evento.hora|time:"H:i" }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ubicación:</label>
+                            <p class="mb-0">{{ servicio.id_evento.ubicacion }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tu Rol:</label>
+                            <p class="mb-0">{{ servicio.get_rol_display }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <h4 class="mb-4">
+                        <i class="bi bi-arrow-repeat me-2"></i>
+                        Seleccionar Nuevo Estado
+                    </h4>
+                    
+                    <div class="mb-4">
+                        <div class="estado-option" onclick="selectEstado('ASIGNADO')">
+                            <input type="radio" name="estado" value="ASIGNADO" id="estado_asignado" 
+                                   {% if servicio.estado == 'ASIGNADO' %}checked{% endif %}>
+                            <label for="estado_asignado" class="form-label mb-0">
+                                <span class="estado-badge estado-asignado me-2">ASIGNADO</span>
+                                El servicio ha sido asignado y está pendiente de ejecución
+                            </label>
+                        </div>
+                        
+                        <div class="estado-option" onclick="selectEstado('EN_SERVICIO')">
+                            <input type="radio" name="estado" value="EN_SERVICIO" id="estado_en_servicio"
+                                   {% if servicio.estado == 'EN_SERVICIO' %}checked{% endif %}>
+                            <label for="estado_en_servicio" class="form-label mb-0">
+                                <span class="estado-badge estado-en-servicio me-2">EN SERVICIO</span>
+                                Actualmente ejecutando el servicio
+                            </label>
+                        </div>
+                        
+                        <div class="estado-option" onclick="selectEstado('COMPLETADO')">
+                            <input type="radio" name="estado" value="COMPLETADO" id="estado_completado"
+                                   {% if servicio.estado == 'COMPLETADO' %}checked{% endif %}>
+                            <label for="estado_completado" class="form-label mb-0">
+                                <span class="estado-badge estado-completado me-2">COMPLETADO</span>
+                                El servicio ha sido completado exitosamente
+                            </label>
+                        </div>
+                        
+                        <div class="estado-option" onclick="selectEstado('CANCELADO')">
+                            <input type="radio" name="estado" value="CANCELADO" id="estado_cancelado"
+                                   {% if servicio.estado == 'CANCELADO' %}checked{% endif %}>
+                            <label for="estado_cancelado" class="form-label mb-0">
+                                <span class="estado-badge estado-cancelado me-2">CANCELADO</span>
+                                El servicio ha sido cancelado
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'catering:trabajador_servicio_detail' servicio.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Actualizar Estado
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectEstado(estado) {
+    // Remover selección anterior
+    document.querySelectorAll('.estado-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Seleccionar el nuevo estado
+    const selectedOption = document.querySelector(`input[value="${estado}"]`).closest('.estado-option');
+    selectedOption.classList.add('selected');
+    
+    // Marcar el radio button
+    document.querySelector(`input[value="${estado}"]`).checked = true;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Marcar como seleccionado el estado actual
+    const currentEstado = '{{ servicio.estado }}';
+    selectEstado(currentEstado);
+    
+    // Animación de la tarjeta
+    const card = document.querySelector('.update-card');
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        card.style.transition = 'all 0.5s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    }, 100);
+});
+</script>
+{% endblock %}

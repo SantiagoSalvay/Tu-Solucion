@@ -11,9 +11,10 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
-    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio, PerfilUsuario
+    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio, PerfilUsuario,
+    Provincia, Barrio
 )
-from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm, AsignarPersonalForm, CambiarEstadoEventoForm, ProductoForm, TipoProductoForm, RegistroForm
+from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm, AsignarPersonalForm, CambiarEstadoEventoForm, ProductoForm, TipoProductoForm, RegistroForm, GestionarSenaForm
 
 
 def index(request):
@@ -491,11 +492,25 @@ def consulta_barrios(request):
                 ingreso = evento.id_comprobante.total_servicio or Decimal('0')
                 barrios_data[barrio_normalizado]['ingresos_total'] += ingreso
     
-    # Calcular promedios y ordenar
+    # Calcular promedios, encontrar evento de mayor costo y ordenar
     for barrio, data in barrios_data.items():
         if data['cantidad_eventos'] > 0:
             data['promedio_personas'] = data['cantidad_personas_total'] / data['cantidad_eventos']
             data['promedio_ingresos'] = data['ingresos_total'] / data['cantidad_eventos']
+            
+            # Encontrar el evento de mayor costo
+            evento_mayor_costo = None
+            costo_maximo = Decimal('0')
+            
+            for evento in data['eventos']:
+                if hasattr(evento, 'id_comprobante') and evento.id_comprobante:
+                    costo = evento.id_comprobante.total_servicio or Decimal('0')
+                    if costo > costo_maximo:
+                        costo_maximo = costo
+                        evento_mayor_costo = evento
+            
+            data['servicio_mayor_costo'] = evento_mayor_costo
+            data['costo_maximo'] = costo_maximo
     
     # Ordenar por cantidad de eventos
     barrios_ordenados = sorted(
@@ -1110,6 +1125,11 @@ def editar_menu(request, evento_id):
             # Actualizar comprobante
             actualizar_comprobante(evento)
             return redirect('catering:editar_menu', evento_id=evento_id)
+        else:
+            # Si el formulario no es válido, mostrar errores
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'Error en {field}: {error}')
     else:
         form = MenuForm()
     
@@ -1213,7 +1233,8 @@ def registro_usuario(request):
                 tipo_doc=form.cleaned_data['tipo_doc'],
                 num_doc=form.cleaned_data['num_doc'],
                 email=form.cleaned_data['email'],
-                domicilio=form.cleaned_data['domicilio'],
+                provincia=form.cleaned_data.get('provincia'),
+                barrio=form.cleaned_data.get('barrio'),
                 fecha_alta=timezone.now().date(),
                 usuario=user
             )
@@ -1228,3 +1249,116 @@ def registro_usuario(request):
         'title': 'Registro de Usuario'
     }
     return render(request, 'registration/registro.html', context)
+
+
+def obtener_barrios_por_provincia(request):
+    """Vista AJAX para obtener barrios de una provincia específica"""
+    provincia_id = request.GET.get('provincia_id')
+    
+    if provincia_id:
+        barrios = Barrio.objects.filter(provincia_id=provincia_id, activo=True).order_by('nombre')
+        data = [{'id': barrio.id_barrio, 'nombre': barrio.nombre} for barrio in barrios]
+    else:
+        data = []
+    
+    return JsonResponse(data, safe=False)
+
+
+@login_required
+def gestionar_sena_evento(request, evento_id):
+    """Vista para que los responsables gestionen la seña de un evento"""
+    evento = get_object_or_404(EventoSolicitado, pk=evento_id)
+    
+    # Verificar que el usuario sea responsable del evento o admin
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    if not user_profile or (user_profile.tipo_usuario != 'RESPONSABLE' and not request.user.is_superuser):
+        if user_profile and user_profile.tipo_usuario == 'RESPONSABLE':
+            if evento.id_responsable.usuario != request.user:
+                messages.error(request, 'No tienes permisos para gestionar este evento.')
+                return redirect('catering:dashboard')
+        else:
+            messages.error(request, 'No tienes permisos para acceder a esta función.')
+            return redirect('catering:dashboard')
+    
+    if request.method == 'POST':
+        form = GestionarSenaForm(request.POST, instance=evento)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Información de seña actualizada correctamente.')
+            return redirect('catering:evento_detail', pk=evento.pk)
+    else:
+        form = GestionarSenaForm(instance=evento)
+    
+    context = {
+        'form': form,
+        'evento': evento,
+        'title': f'Gestionar Seña - {evento.get_tipo_evento_display()}'
+    }
+    return render(request, 'catering/gestionar_sena.html', context)
+
+
+@login_required
+def empleado_dashboard(request):
+    """Dashboard para empleados - muestra eventos donde deben trabajar"""
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    
+    # Verificar que el usuario sea empleado
+    if not user_profile or user_profile.tipo_usuario != 'EMPLEADO':
+        messages.error(request, 'No tienes permisos para acceder a esta página.')
+        return redirect('catering:index')
+    
+    # Obtener el personal asociado al usuario
+    try:
+        personal = Personal.objects.get(usuario=request.user)
+    except Personal.DoesNotExist:
+        messages.error(request, 'No se encontró información de personal para tu usuario.')
+        return redirect('catering:index')
+    
+    # Obtener eventos donde el personal está asignado
+    servicios = Servicio.objects.filter(id_personal=personal)
+    eventos_asignados = [servicio.id_evento for servicio in servicios]
+    
+    context = {
+        'eventos_asignados': eventos_asignados,
+        'personal': personal,
+        'title': 'Dashboard Empleado'
+    }
+    return render(request, 'catering/empleado_dashboard.html', context)
+
+
+@login_required
+def responsable_dashboard(request):
+    """Dashboard para responsables - muestra eventos asignados y herramientas de gestión"""
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    
+    # Verificar que el usuario sea responsable
+    if not user_profile or user_profile.tipo_usuario != 'RESPONSABLE':
+        messages.error(request, 'No tienes permisos para acceder a esta página.')
+        return redirect('catering:index')
+    
+    # Obtener el responsable asociado al usuario
+    try:
+        responsable = Responsable.objects.get(usuario=request.user)
+    except Responsable.DoesNotExist:
+        messages.error(request, 'No se encontró información de responsable para tu usuario.')
+        return redirect('catering:index')
+    
+    # Obtener eventos asignados al responsable
+    eventos_asignados = EventoSolicitado.objects.filter(id_responsable=responsable)
+    eventos_confirmados = eventos_asignados.filter(estado__in=['CONFIRMADO', 'EN_PROCESO', 'FINALIZADO'])
+    
+    # Estadísticas
+    total_personal = Personal.objects.filter(estado='ACTIVO').count()
+    ingresos_totales = eventos_confirmados.aggregate(
+        total=Sum('precio_total')
+    )['total'] or 0
+    
+    context = {
+        'eventos_asignados': eventos_asignados,
+        'eventos_confirmados': eventos_confirmados,
+        'total_personal': total_personal,
+        'ingresos_totales': ingresos_totales,
+        'responsable': responsable,
+        'title': 'Dashboard Responsable'
+    }
+    return render(request, 'catering/responsable_dashboard.html', context)
