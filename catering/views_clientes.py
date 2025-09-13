@@ -27,6 +27,17 @@ def cliente_dashboard(request):
     total_eventos = eventos.count()
     eventos_activos = eventos.filter(estado__in=['SOLICITADO', 'CONFIRMADO', 'EN_PROCESO']).count()
     eventos_finalizados = eventos.filter(estado='FINALIZADO').count()
+    gasto_total = sum(evento.precio_total for evento in eventos if evento.precio_total)
+    
+    # Eventos confirmados (pagados) para el historial
+    eventos_confirmados = eventos.filter(
+        estado__in=['CONFIRMADO', 'EN_PROCESO', 'FINALIZADO']
+    ).order_by('-fecha')[:10]  # Últimos 10 eventos confirmados
+    
+    # Calcular promedio por evento
+    promedio_por_evento = 0
+    if eventos_confirmados.exists():
+        promedio_por_evento = gasto_total / eventos_confirmados.count()
     
     # Próximos eventos
     from django.utils import timezone
@@ -44,6 +55,9 @@ def cliente_dashboard(request):
         'eventos_finalizados': eventos_finalizados,
         'eventos_proximos': eventos_proximos,
         'eventos': eventos[:10],  # Últimos 10 eventos
+        'eventos_confirmados': eventos_confirmados,  # Eventos pagados/confirmados
+        'gasto_total': gasto_total,
+        'promedio_por_evento': promedio_por_evento,
     }
     
     return render(request, 'catering/cliente_dashboard.html', context)

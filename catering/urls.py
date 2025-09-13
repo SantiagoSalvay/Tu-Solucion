@@ -91,6 +91,9 @@ urlpatterns = [
     path('responsable/eventos/', views_responsables.responsable_eventos, name='responsable_eventos'),
     path('responsable/eventos/<int:pk>/', views_responsables.responsable_evento_detail, name='responsable_evento_detail'),
     path('responsable/eventos/crear/', views_responsables.responsable_crear_evento, name='responsable_crear_evento'),
+    
+    # URL para registro de usuarios
+    path('registro/', views.registro_usuario, name='registro_usuario'),
     path('responsable/eventos/<int:pk>/editar/', views_responsables.responsable_editar_evento, name='responsable_editar_evento'),
     path('responsable/eventos/<int:evento_id>/asignar-personal/', views_responsables.responsable_asignar_personal, name='responsable_asignar_personal'),
     path('responsable/eventos/<int:evento_id>/cambiar-estado/', views_responsables.responsable_cambiar_estado_evento, name='responsable_cambiar_estado_evento'),

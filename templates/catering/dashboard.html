@@ -1,136 +1,595 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Dashboard - Tu Solución{% endblock %}
+{% block title %}Dashboard Administrador - Tu Solución{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 2rem 2rem;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stats-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        color: #7f8c8d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+    
+    .admin-card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .admin-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    
+    .admin-card-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 1rem 1rem 0 0;
+        border: none;
+        padding: 1.5rem;
+    }
+    
+    .admin-card-title {
+        color: #2c3e50;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .admin-card-title i {
+        margin-right: 0.75rem;
+        font-size: 1.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .quick-action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .quick-action-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: none;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .quick-action-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: white;
+    }
+    
+    .quick-action-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .quick-action-desc {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-solicitado { background: #fff3cd; color: #856404; }
+    .status-confirmado { background: #d1edff; color: #0c5460; }
+    .status-en-proceso { background: #d4edda; color: #155724; }
+    .status-finalizado { background: #e2e3e5; color: #383d41; }
+    .status-cancelado { background: #f8d7da; color: #721c24; }
+    
+    .recent-activity-item {
+        padding: 1rem;
+        border-left: 4px solid #667eea;
+        background: #f8f9fa;
+        border-radius: 0 0.5rem 0.5rem 0;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .recent-activity-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .activity-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+    
+    .activity-desc {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        padding: 1rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .welcome-badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+    
+    .admin-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .admin-subtitle {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+    
+    @media (max-width: 768px) {
+        .admin-title {
+            font-size: 2rem;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+        }
+        
+        .quick-action-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row mb-5">
-    <div class="col-12">
-        <h1 class="text-gradient text-center mb-4">Dashboard</h1>
-        <p class="text-center text-muted">Bienvenido al panel de control de Tu Solución</p>
-    </div>
-</div>
-
-<!-- Estadísticas principales -->
-<div class="stats-grid mb-5">
-    <div class="stats-card">
-        <i class="bi bi-calendar-event stats-icon"></i>
-        <div class="stats-number">{{ total_eventos }}</div>
-        <div class="stats-label">Total Eventos</div>
-    </div>
-    <div class="stats-card">
-        <i class="bi bi-calendar-check stats-icon"></i>
-        <div class="stats-number">{{ eventos_este_mes }}</div>
-        <div class="stats-label">Eventos Este Mes</div>
-    </div>
-    <div class="stats-card">
-        <i class="bi bi-person-badge stats-icon"></i>
-        <div class="stats-number">{{ personal_disponible }}</div>
-        <div class="stats-label">Personal Disponible</div>
-    </div>
-    <div class="stats-card">
-        <i class="bi bi-graph-up stats-icon"></i>
-        <div class="stats-number">{{ eventos_proximos|length }}</div>
-        <div class="stats-label">Eventos Próximos</div>
-    </div>
-</div>
-
-<!-- Eventos por estado -->
-<div class="row mb-5">
-    <div class="col-lg-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i> Eventos por Estado</h5>
+<!-- Hero Section del Admin -->
+<div class="admin-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="welcome-badge">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Panel de Administración
+                </div>
+                <h1 class="admin-title">Bienvenido, {{ user.first_name|default:user.username }}</h1>
+                <p class="admin-subtitle">
+                    Gestiona tu empresa de catering con herramientas profesionales y análisis en tiempo real
+                </p>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Estado</th>
-                                <th>Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for estado in eventos_por_estado %}
-                            <tr>
-                                <td>
-                                    <span class="badge bg-{% if estado.estado == 'SOLICITADO' %}warning{% elif estado.estado == 'CONFIRMADO' %}success{% elif estado.estado == 'EN_PROCESO' %}info{% elif estado.estado == 'FINALIZADO' %}secondary{% elif estado.estado == 'CANCELADO' %}danger{% else %}dark{% endif %}">
-                                        {{ estado.estado }}
-                                    </span>
-                                </td>
-                                <td><strong>{{ estado.count }}</strong></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="col-lg-4 text-end">
+                <div class="d-flex justify-content-end">
+                    <div class="text-center">
+                        <i class="bi bi-calendar-check" style="font-size: 4rem; opacity: 0.3;"></i>
+                        <div class="mt-2">
+                            <small>Última actualización</small><br>
+                            <strong>{{ "now"|date:"d/m/Y H:i" }}</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-lg-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i> Eventos Próximos (7 días)</h5>
+</div>
+
+<div class="container">
+    <!-- Estadísticas Principales -->
+    <div class="row mb-5">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stats-card">
+                <i class="bi bi-calendar-event stats-icon"></i>
+                <div class="stats-number">{{ total_eventos }}</div>
+                <div class="stats-label">Total Eventos</div>
             </div>
-            <div class="card-body">
-                {% if eventos_proximos %}
-                <div class="list-group list-group-flush">
-                    {% for evento in eventos_proximos %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-1 fw-bold">{{ evento.tipo_evento }}</h6>
-                            <small class="text-muted">
-                                <i class="bi bi-calendar me-1"></i>{{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}<br>
-                                <i class="bi bi-person me-1"></i>{{ evento.id_cliente }}
-                            </small>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stats-card">
+                <i class="bi bi-calendar-check stats-icon"></i>
+                <div class="stats-number">{{ eventos_este_mes }}</div>
+                <div class="stats-label">Este Mes</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stats-card">
+                <i class="bi bi-people stats-icon"></i>
+                <div class="stats-number">{{ total_clientes }}</div>
+                <div class="stats-label">Clientes</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stats-card">
+                <i class="bi bi-person-badge stats-icon"></i>
+                <div class="stats-number">{{ personal_disponible }}</div>
+                <div class="stats-label">Personal Activo</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="row mb-5">
+        <!-- Eventos por Estado -->
+        <div class="col-lg-6 mb-4">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-pie-chart"></i>
+                        Eventos por Estado
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if eventos_por_estado %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Estado</th>
+                                        <th class="text-end">Cantidad</th>
+                                        <th class="text-end">%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for estado in eventos_por_estado %}
+                                    <tr>
+                                        <td>
+                                            <span class="status-badge status-{{ estado.estado|lower }}">
+                                                {{ estado.get_estado_display }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong>{{ estado.count }}</strong>
+                                        </td>
+                                        <td class="text-end">
+                                            <small class="text-muted">
+                                                {{ estado.porcentaje }}%
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
-                        <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye me-1"></i>Ver
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-calendar-x"></i>
+                            <h5>No hay eventos registrados</h5>
+                            <p>Comienza creando tu primer evento</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Eventos Próximos -->
+        <div class="col-lg-6 mb-4">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-calendar-week"></i>
+                        Próximos Eventos (7 días)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if eventos_proximos %}
+                        <div class="list-group list-group-flush">
+                            {% for evento in eventos_proximos %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold text-dark">{{ evento.get_tipo_evento_display }}</h6>
+                                    <div class="d-flex align-items-center text-muted small mb-1">
+                                        <i class="bi bi-calendar me-2"></i>
+                                        {{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}
+                                    </div>
+                                    <div class="d-flex align-items-center text-muted small">
+                                        <i class="bi bi-person me-2"></i>
+                                        {{ evento.id_cliente.nombre }} {{ evento.id_cliente.apellido }}
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="status-badge status-{{ evento.estado|lower }} mb-2 d-block">
+                                        {{ evento.get_estado_display }}
+                                    </span>
+                                    <a href="{% url 'catering:evento_detail' evento.pk %}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye me-1"></i>Ver
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-calendar-x"></i>
+                            <h5>No hay eventos próximos</h5>
+                            <p>No tienes eventos programados para los próximos 7 días</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-lightning-charge"></i>
+                        Acciones Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-action-grid">
+                        <a href="{% url 'catering:cliente_create' %}" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                <i class="bi bi-person-plus"></i>
+                            </div>
+                            <h6 class="quick-action-title">Nuevo Cliente</h6>
+                            <p class="quick-action-desc">Registra un nuevo cliente en el sistema</p>
+                        </a>
+                        
+                        <a href="{% url 'catering:evento_create' %}" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                                <i class="bi bi-calendar-plus"></i>
+                            </div>
+                            <h6 class="quick-action-title">Nuevo Evento</h6>
+                            <p class="quick-action-desc">Crea un nuevo evento de catering</p>
+                        </a>
+                        
+                        <a href="{% url 'catering:personal_create' %}" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <h6 class="quick-action-title">Nuevo Personal</h6>
+                            <p class="quick-action-desc">Agrega personal a tu equipo</p>
+                        </a>
+                        
+                        <a href="{% url 'catering:producto_create' %}" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                                <i class="bi bi-cup-hot"></i>
+                            </div>
+                            <h6 class="quick-action-title">Nuevo Producto</h6>
+                            <p class="quick-action-desc">Agrega productos al menú</p>
+                        </a>
+                        
+                        <a href="{% url 'catering:consulta_financiera' %}" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <h6 class="quick-action-title">Reportes Financieros</h6>
+                            <p class="quick-action-desc">Análisis financiero del negocio</p>
+                        </a>
+                        
+                        <a href="{% url 'catering:consulta_barrios' %}" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
+                            <h6 class="quick-action-title">Análisis por Barrios</h6>
+                            <p class="quick-action-desc">Estadísticas por ubicación</p>
+                        </a>
+                        
+                        <a href="{% url 'catering:consulta_cumpleanos' %}" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);">
+                                <i class="bi bi-gift"></i>
+                            </div>
+                            <h6 class="quick-action-title">Cumpleaños</h6>
+                            <p class="quick-action-desc">Clientes con cumpleaños próximos</p>
+                        </a>
+                        
+                        <a href="{% url 'catering:evento_list' %}" class="quick-action-card">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">
+                                <i class="bi bi-list-ul"></i>
+                            </div>
+                            <h6 class="quick-action-title">Ver Todos los Eventos</h6>
+                            <p class="quick-action-desc">Gestiona todos los eventos</p>
                         </a>
                     </div>
-                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="empty-state">
-                    <i class="bi bi-calendar-x"></i>
-                    <h4>No hay eventos próximos</h4>
-                    <p>No tienes eventos programados para los próximos 7 días</p>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
-</div>
 
-<!-- Acciones rápidas -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-lightning-charge me-2"></i> Acciones Rápidas</h5>
-            </div>
-            <div class="card-body">
-                <div class="quick-actions">
-                    <a href="{% url 'catering:cliente_create' %}" class="quick-action-btn">
-                        <i class="bi bi-person-plus"></i>
-                        <span class="fw-bold">Nuevo Cliente</span>
-                    </a>
-                    <a href="{% url 'catering:evento_create' %}" class="quick-action-btn">
-                        <i class="bi bi-calendar-plus"></i>
-                        <span class="fw-bold">Nuevo Evento</span>
-                    </a>
-                    <a href="{% url 'catering:consulta_financiera' %}" class="quick-action-btn">
-                        <i class="bi bi-graph-up"></i>
-                        <span class="fw-bold">Reporte Financiero</span>
-                    </a>
-                    <a href="{% url 'catering:consulta_barrios' %}" class="quick-action-btn">
-                        <i class="bi bi-geo-alt"></i>
-                        <span class="fw-bold">Análisis Barrios</span>
-                    </a>
+    <!-- Información del Sistema -->
+    <div class="row">
+        <div class="col-12">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-info-circle"></i>
+                        Información del Sistema
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="p-3">
+                                <i class="bi bi-server text-primary" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2 mb-1">Estado del Sistema</h6>
+                                <span class="badge bg-success">Operativo</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="p-3">
+                                <i class="bi bi-database text-info" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2 mb-1">Base de Datos</h6>
+                                <span class="badge bg-success">Conectada</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="p-3">
+                                <i class="bi bi-shield-check text-success" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2 mb-1">Seguridad</h6>
+                                <span class="badge bg-success">Activa</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de contadores
+    const animateCounters = () => {
+        const counters = document.querySelectorAll('.stats-number');
+        counters.forEach(counter => {
+            const target = parseInt(counter.textContent);
+            if (isNaN(target)) return;
+            
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            let current = 0;
+            
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    counter.textContent = Math.floor(current);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.textContent = target;
+                }
+            };
+            
+            updateCounter();
+        });
+    };
+    
+    // Iniciar animaciones cuando la página cargue
+    setTimeout(animateCounters, 500);
+    
+    // Efectos hover para las cards
+    document.querySelectorAll('.stats-card, .quick-action-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Auto-refresh de estadísticas cada 5 minutos
+    setInterval(() => {
+        // Aquí podrías agregar lógica para actualizar estadísticas
+        console.log('Actualizando estadísticas...');
+    }, 300000);
+});
+</script>
 {% endblock %}

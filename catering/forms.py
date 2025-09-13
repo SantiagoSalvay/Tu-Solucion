@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
@@ -250,8 +251,7 @@ class MenuForm(forms.ModelForm):
             'id_producto': forms.Select(attrs={
                 'class': 'form-select', 
                 'id': 'id_id_producto',
-                'required': True,
-                'disabled': True
+                'required': True
             }),
             'cantidad_producto': forms.NumberInput(attrs={
                 'class': 'form-control', 
@@ -460,6 +460,101 @@ class MenuItemForm(forms.Form):
                     )
             except (ValueError, TypeError):
                 pass
+
+
+# Formulario de registro de usuarios
+class RegistroForm(forms.Form):
+    """Formulario para registro de nuevos usuarios (clientes)"""
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nombre de usuario'
+        }),
+        help_text='Requerido. 150 caracteres o menos. Solo letras, números y @/./+/-/_'
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Correo electrónico'
+        })
+    )
+    password1 = forms.CharField(
+        min_length=8,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Contraseña'
+        }),
+        help_text='Mínimo 8 caracteres'
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirmar contraseña'
+        })
+    )
+    nombre = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nombre'
+        })
+    )
+    apellido = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Apellido'
+        })
+    )
+    tipo_doc = forms.ChoiceField(
+        choices=[('DNI', 'DNI'), ('PASAPORTE', 'Pasaporte'), ('CEDULA', 'Cédula')],
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        })
+    )
+    num_doc = forms.CharField(
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Número de documento'
+        })
+    )
+    domicilio = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Dirección completa',
+            'rows': 3
+        })
+    )
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise ValidationError('Ya existe un usuario con este nombre de usuario.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise ValidationError('Ya existe un usuario con este correo electrónico.')
+        return email
+    
+    def clean_num_doc(self):
+        num_doc = self.cleaned_data.get('num_doc')
+        if Cliente.objects.filter(num_doc=num_doc).exists():
+            raise ValidationError('Ya existe un cliente con este número de documento.')
+        return num_doc
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
+        
+        if password1 and password2 and password1 != password2:
+            raise ValidationError('Las contraseñas no coinciden.')
+        
+        return cleaned_data
 
 
 # Formularios para reportes

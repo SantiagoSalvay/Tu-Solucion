@@ -2,9 +2,6 @@
 
 {% block title %}Iniciar Sesión - Tu Solución{% endblock %}
 
-{% block breadcrumb_items %}
-<li class="breadcrumb-item active" aria-current="page">Iniciar Sesión</li>
-{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -90,7 +87,7 @@
                     <div class="text-center">
                         <p class="text-muted mb-0">
                             ¿No tienes una cuenta? 
-                            <a href="#" class="text-primary text-decoration-none fw-semibold">Contacta al administrador</a>
+                            <a href="{% url 'catering:registro_usuario' %}" class="text-primary text-decoration-none fw-semibold">Regístrate aquí</a>
                         </p>
                     </div>
                 </div>
@@ -104,7 +101,7 @@
                         Información de Acceso
                     </h6>
                     <p class="card-text text-muted small mb-0">
-                        Usa las credenciales proporcionadas por el administrador del sistema.
+                        Usa las credenciales proporcionadas por el administrador del sistema o regístrate como nuevo cliente.
                     </p>
                 </div>
             </div>

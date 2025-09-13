@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Sum, Count, Max, Q
 from django.utils import timezone
@@ -9,9 +11,9 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from .models import (
     Cliente, Responsable, TipoProducto, Producto, Comprobante,
-    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio
+    EventoSolicitado, MenuXTipoProducto, Senia, Personal, Servicio, PerfilUsuario
 )
-from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm, AsignarPersonalForm, CambiarEstadoEventoForm, ProductoForm, TipoProductoForm
+from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm, AsignarPersonalForm, CambiarEstadoEventoForm, ProductoForm, TipoProductoForm, RegistroForm
 
 
 def index(request):
@@ -36,10 +38,17 @@ def dashboard(request):
         fecha__year=timezone.now().year
     ).count()
     
-    # Eventos por estado
-    eventos_por_estado = EventoSolicitado.objects.values('estado').annotate(
+    # Eventos por estado con porcentajes
+    eventos_por_estado_raw = EventoSolicitado.objects.values('estado').annotate(
         count=Count('id_evento')
     ).order_by('estado')
+    
+    # Calcular porcentajes
+    eventos_por_estado = []
+    for estado in eventos_por_estado_raw:
+        porcentaje = (estado['count'] / total_eventos * 100) if total_eventos > 0 else 0
+        estado['porcentaje'] = round(porcentaje, 1)
+        eventos_por_estado.append(estado)
     
     # Eventos próximos (próximos 7 días)
     eventos_proximos = EventoSolicitado.objects.filter(
@@ -50,12 +59,16 @@ def dashboard(request):
     # Personal disponible
     personal_disponible = Personal.objects.filter(estado='ACTIVO').count()
     
+    # Total de clientes
+    total_clientes = Cliente.objects.count()
+    
     context = {
         'total_eventos': total_eventos,
         'eventos_este_mes': eventos_este_mes,
         'eventos_por_estado': eventos_por_estado,
         'eventos_proximos': eventos_proximos,
         'personal_disponible': personal_disponible,
+        'total_clientes': total_clientes,
     }
     return render(request, 'catering/dashboard.html', context)
 
@@ -291,7 +304,7 @@ def evento_create(request):
         if form.is_valid():
             evento = form.save()
             messages.success(request, f'Evento {evento} creado exitosamente.')
-            return redirect('evento_detail', pk=evento.pk)
+            return redirect('catering:evento_detail', pk=evento.pk)
     else:
         form = EventoForm()
     
@@ -311,7 +324,7 @@ def evento_update(request, pk):
         if form.is_valid():
             evento = form.save()
             messages.success(request, f'Evento {evento} actualizado exitosamente.')
-            return redirect('evento_detail', pk=evento.pk)
+            return redirect('catering:evento_detail', pk=evento.pk)
     else:
         form = EventoForm(instance=evento)
     
@@ -1168,3 +1181,50 @@ def actualizar_comprobante(evento):
     evento.precio_total = comprobante.total_servicio
     evento.precio_por_persona = comprobante.precio_x_persona
     evento.save()
+
+
+def registro_usuario(request):
+    """Vista para registro de nuevos usuarios (clientes)"""
+    if request.user.is_authenticated:
+        return redirect('catering:index')
+    
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            # Crear usuario
+            user = User.objects.create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password1'],
+                first_name=form.cleaned_data['nombre'],
+                last_name=form.cleaned_data['apellido']
+            )
+            
+            # Crear perfil de usuario
+            PerfilUsuario.objects.create(
+                usuario=user,
+                tipo_usuario='CLIENTE'
+            )
+            
+            # Crear cliente
+            cliente = Cliente.objects.create(
+                nombre=form.cleaned_data['nombre'],
+                apellido=form.cleaned_data['apellido'],
+                tipo_doc=form.cleaned_data['tipo_doc'],
+                num_doc=form.cleaned_data['num_doc'],
+                email=form.cleaned_data['email'],
+                domicilio=form.cleaned_data['domicilio'],
+                fecha_alta=timezone.now().date(),
+                usuario=user
+            )
+            
+            messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión con tus credenciales.')
+            return redirect('login')
+    else:
+        form = RegistroForm()
+    
+    context = {
+        'form': form,
+        'title': 'Registro de Usuario'
+    }
+    return render(request, 'registration/registro.html', context)

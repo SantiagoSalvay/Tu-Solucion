@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% load catering_extras %}
+
+{% block title %}Dashboard Cliente - Tu Solución{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header del Dashboard -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">¡Hola, {{ user.first_name }}!</h1>
+                    <p class="text-muted mb-0">Bienvenido a tu panel de cliente</p>
+                </div>
+                <div class="text-end">
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Contacta al responsable para solicitar un servicio
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_eventos }}</h4>
+                            <p class="card-text">Total Eventos</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-calendar-event" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ eventos_activos }}</h4>
+                            <p class="card-text">Activos</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ eventos_finalizados }}</h4>
+                            <p class="card-text">Finalizados</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-clock" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">${{ gasto_total|floatformat:2 }}</h4>
+                            <p class="card-text">Gasto Total</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-currency-dollar" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Historial de Eventos Pagados -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-check-circle me-2"></i>Historial de Eventos Confirmados
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if eventos_confirmados %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Evento</th>
+                                        <th>Fecha</th>
+                                        <th>Personas</th>
+                                        <th>Estado</th>
+                                        <th>Total Pagado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for evento in eventos_confirmados %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>{{ evento.get_tipo_evento_display }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ evento.domicilio_evento|truncatechars:30 }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                {{ evento.fecha|date:"d/m/Y" }}
+                                                <br>
+                                                <small class="text-muted">{{ evento.hora|time:"H:i" }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ evento.cantidad_personas }} personas</span>
+                                        </td>
+                                        <td>
+                                            {% if evento.estado == 'CONFIRMADO' %}
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle me-1"></i>Confirmado
+                                                </span>
+                                            {% elif evento.estado == 'EN_PROCESO' %}
+                                                <span class="badge bg-warning">
+                                                    <i class="bi bi-clock me-1"></i>En Proceso
+                                                </span>
+                                            {% elif evento.estado == 'FINALIZADO' %}
+                                                <span class="badge bg-primary">
+                                                    <i class="bi bi-check2-all me-1"></i>Finalizado
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ evento.get_estado_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <strong class="text-success">${{ evento.precio_total|floatformat:2 }}</strong>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'catering:cliente_evento_detail' evento.pk %}" 
+                                               class="btn btn-sm btn-outline-primary" title="Ver Detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-calendar-check text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted mt-3">No tienes eventos confirmados</h5>
+                            <p class="text-muted">Los eventos que hayas pagado aparecerán aquí</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Lateral -->
+        <div class="col-lg-4">
+            <!-- Acciones Rápidas -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'catering:index' %}" class="btn btn-primary">
+                            <i class="bi bi-house me-2"></i>Página Principal
+                        </a>
+                        <div class="alert alert-info mt-3">
+                            <small>
+                                <i class="bi bi-telephone me-1"></i>
+                                <strong>Para solicitar un servicio:</strong><br>
+                                Contacta al responsable de servicios
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de Pagos -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-currency-dollar me-2"></i>Resumen de Pagos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-success mb-1">${{ gasto_total|floatformat:2 }}</h4>
+                                <small class="text-muted">Total Pagado</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-primary mb-1">{{ eventos_confirmados|length }}</h4>
+                            <small class="text-muted">Eventos Pagados</small>
+                        </div>
+                    </div>
+                    {% if eventos_confirmados %}
+                        <hr>
+                        <div class="text-center">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Promedio por evento: ${{ promedio_por_evento|floatformat:2 }}
+                            </small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información del Cliente -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person me-2"></i>Mi Información
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if cliente %}
+                        <div class="mb-3">
+                            <strong>Nombre:</strong><br>
+                            {{ cliente.nombre }} {{ cliente.apellido }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Email:</strong><br>
+                            {{ cliente.email }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Documento:</strong><br>
+                            {{ cliente.tipo_doc }}: {{ cliente.num_doc }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Domicilio:</strong><br>
+                            {{ cliente.domicilio }}
+                        </div>
+                        <div class="mb-0">
+                            <strong>Cliente desde:</strong><br>
+                            {{ cliente.fecha_alta|date:"d/m/Y" }}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No se encontró información del cliente.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animaciones para las tarjetas
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fade-in-up');
+    });
+    
+    // Efecto hover en las filas de la tabla
+    const tableRows = document.querySelectorAll('tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(5px)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

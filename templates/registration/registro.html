@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Registro de Usuario - Tu Solución{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center min-vh-100 align-items-center">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <!-- Logo y título -->
+            <div class="text-center mb-5 animate-fade-in">
+                <div class="mb-4">
+                    <i class="bi bi-person-plus text-primary" style="font-size: 4rem;"></i>
+                </div>
+                <h1 class="text-gradient mb-2">Registro de Usuario</h1>
+                <p class="text-muted">Crea tu cuenta para acceder al sistema</p>
+            </div>
+            
+            <!-- Formulario de registro -->
+            <div class="card glass-effect animate-fade-in-up">
+                <div class="card-body p-5">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Información de Usuario -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="bi bi-person me-2"></i>
+                                    Información de Usuario
+                                </h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.username|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.email|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.password1|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.password2|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Información Personal -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    Información Personal
+                                </h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.nombre|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.apellido|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.tipo_doc|as_crispy_field }}
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                {{ form.num_doc|as_crispy_field }}
+                            </div>
+                            <div class="col-12 mb-3">
+                                {{ form.domicilio|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        {% if form.errors %}
+                        <div class="alert alert-danger animate-slide-in-down mb-4">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Error en el formulario:</strong>
+                            <ul class="mb-0 mt-2">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg hover-effect">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Registrarse
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center">
+                        <p class="text-muted mb-0">
+                            ¿Ya tienes una cuenta? 
+                            <a href="{% url 'login' %}" class="text-primary text-decoration-none fw-semibold">Inicia sesión aquí</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Información adicional -->
+            <div class="card glass-effect mt-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+                <div class="card-body text-center p-4">
+                    <h6 class="card-title text-primary">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Información Importante
+                    </h6>
+                    <p class="card-text text-muted small mb-0">
+                        Al registrarte, tu cuenta será de tipo <strong>Cliente</strong> y podrás solicitar servicios de catering.
+                        Los administradores pueden cambiar tu tipo de usuario si es necesario.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación de formulario
+    const form = document.querySelector('.needs-validation');
+    
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+    
+    // Toggle password visibility
+    const passwordInputs = document.querySelectorAll('input[type="password"]');
+    passwordInputs.forEach(input => {
+        const wrapper = input.parentElement;
+        const toggleBtn = document.createElement('button');
+        toggleBtn.type = 'button';
+        toggleBtn.className = 'btn btn-outline-secondary border-start-0';
+        toggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
+        
+        wrapper.appendChild(toggleBtn);
+        
+        toggleBtn.addEventListener('click', function() {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            
+            const icon = toggleBtn.querySelector('i');
+            if (type === 'text') {
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+    });
+    
+    // Efectos de focus en los campos
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+    });
+    
+    // Auto-focus en el primer campo
+    const usernameInput = document.getElementById('id_username');
+    if (usernameInput) {
+        usernameInput.focus();
+    }
+});
+</script>
+{% endblock %}

@@ -57,13 +57,7 @@
                         {% get_user_profile user as user_profile %}
                         
                         <!-- Dashboard según rol -->
-                        {% if user_profile.tipo_usuario == 'ADMIN' or user.is_superuser %}
-                            <li class="nav-item">
-                                <a class="nav-link hover-effect" href="{% url 'catering:admin_dashboard' %}">
-                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard Admin
-                                </a>
-                            </li>
-                        {% elif user_profile.tipo_usuario == 'RESPONSABLE' %}
+                        {% if user_profile.tipo_usuario == 'RESPONSABLE' %}
                             <li class="nav-item">
                                 <a class="nav-link hover-effect" href="{% url 'catering:responsable_dashboard' %}">
                                     <i class="bi bi-speedometer2 me-1"></i>Dashboard
@@ -95,7 +89,7 @@
                                 <a class="nav-link dropdown-toggle hover-effect" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-calendar-event me-1"></i>Eventos
                                 </a>
-                                <ul class="dropdown-menu glass-effect">
+                                <ul class="dropdown-menu" style="background-color: #ffffff; border: 1px solid #dee2e6; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);">
                                     {% if user_profile.tipo_usuario == 'RESPONSABLE' %}
                                         <li><a class="dropdown-item" href="{% url 'catering:responsable_crear_evento' %}">
                                             <i class="bi bi-plus-circle me-2"></i>Crear Evento
@@ -104,20 +98,11 @@
                                             <i class="bi bi-list-ul me-2"></i>Mis Eventos
                                         </a></li>
                                     {% else %}
-                                        <li><a class="dropdown-item" href="{% url 'catering:reserva_catering' %}">
-                                            <i class="bi bi-plus-circle me-2"></i>Nueva Reserva
-                                        </a></li>
                                         <li><a class="dropdown-item" href="{% url 'catering:evento_list' %}">
                                             <i class="bi bi-list-ul me-2"></i>Ver Eventos
                                         </a></li>
                                     {% endif %}
                                 </ul>
-                            </li>
-                        {% elif user_profile.tipo_usuario == 'CLIENTE' %}
-                            <li class="nav-item">
-                                <a class="nav-link hover-effect" href="{% url 'catering:cliente_eventos' %}">
-                                    <i class="bi bi-calendar-event me-1"></i>Mis Eventos
-                                </a>
                             </li>
                         {% elif user_profile.tipo_usuario == 'EMPLEADO' %}
                             <li class="nav-item">
@@ -133,7 +118,7 @@
                                 <a class="nav-link dropdown-toggle hover-effect" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-people me-1"></i>Gestión
                                 </a>
-                                <ul class="dropdown-menu glass-effect">
+                                <ul class="dropdown-menu" style="background-color: #ffffff; border: 1px solid #dee2e6; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);">
                                     <li><a class="dropdown-item" href="{% url 'catering:cliente_list' %}">
                                         <i class="bi bi-person me-2"></i>Clientes
                                     </a></li>
@@ -160,15 +145,12 @@
                                 <a class="nav-link dropdown-toggle hover-effect" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-graph-up me-1"></i>Reportes
                                 </a>
-                                <ul class="dropdown-menu glass-effect">
+                                <ul class="dropdown-menu" style="background-color: #ffffff; border: 1px solid #dee2e6; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);">
                                     <li><a class="dropdown-item" href="{% url 'catering:consulta_financiera' %}">
                                         <i class="bi bi-currency-dollar me-2"></i>Consulta Financiera
                                     </a></li>
                                     <li><a class="dropdown-item" href="{% url 'catering:consulta_barrios' %}">
                                         <i class="bi bi-geo-alt me-2"></i>Análisis de Barrios
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'catering:consulta_cumpleanos' %}">
-                                        <i class="bi bi-gift me-2"></i>Reporte de Cumpleaños
                                     </a></li>
                                 </ul>
                             </li>
@@ -182,11 +164,13 @@
                         <a class="nav-link dropdown-toggle hover-effect" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle me-1"></i>{{ user.username }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end glass-effect">
+                        <ul class="dropdown-menu dropdown-menu-end" style="background-color: #ffffff; border: 1px solid #dee2e6; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);">
+                            {% if user_profile.tipo_usuario == 'ADMIN' or user.is_superuser %}
                             <li><a class="dropdown-item" href="{% url 'admin:index' %}">
                                 <i class="bi bi-gear me-2"></i>Administración
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
+                            {% endif %}
                             <li>
                                 <!-- Fixed logout form with POST method -->
                                 <form method="post" action="{% url 'logout' %}" class="d-inline">
@@ -214,18 +198,6 @@
     <main class="main-content">
         <div class="container">
             <!-- Breadcrumb -->
-            {% block breadcrumb %}
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb glass-effect">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'catering:index' %}" class="text-decoration-none">
-                            <i class="bi bi-house-door"></i> Inicio
-                        </a>
-                    </li>
-                    {% block breadcrumb_items %}{% endblock %}
-                </ol>
-            </nav>
-            {% endblock %}
 
             <!-- Mensajes Flash -->
             {% if messages %}

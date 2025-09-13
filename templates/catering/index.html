@@ -7,9 +7,6 @@
 <link href="{% static 'css/landing-page.css' %}" rel="stylesheet">
 {% endblock %}
 
-{% block breadcrumb_items %}
-<li class="breadcrumb-item active" aria-current="page">Inicio</li>
-{% endblock %}
 
 {% block content %}
 <!-- Hero Section Espectacular -->
@@ -63,9 +60,9 @@
                             <span class="fs-4 fw-bold">Iniciar Sesión</span>
                         </a>
                         {% endif %}
-                        <a href="{% url 'catering:reserva_catering' %}" class="btn btn-outline-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
-                            <i class="bi bi-calendar-plus me-3 fs-4"></i>
-                            <span class="fs-4 fw-bold">Nueva Reserva</span>
+                        <a href="{% url 'catering:registro_usuario' %}" class="btn btn-outline-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="bi bi-person-plus me-3 fs-4"></i>
+                            <span class="fs-4 fw-bold">Registrarse</span>
                         </a>
                     </div>
                 </div>
@@ -119,10 +116,10 @@
                     </span>
                 </div>
                 <h2 class="display-4 fw-bold text-dark mb-4">
-                    Todo lo que necesitas para tu negocio de catering
+                    ¿Por qué elegir Tu Solución?
                 </h2>
                 <p class="fs-4 text-muted lh-lg">
-                    Un sistema completo diseñado para optimizar cada aspecto de tu empresa de catering
+                    Descubre las ventajas de nuestro sistema profesional de gestión de catering
                 </p>
             </div>
         </div>
@@ -139,13 +136,16 @@
                         Gestión de Eventos
                     </h4>
                     <p class="feature-description fs-5 text-muted lh-lg mb-4">
-                        Crea, edita y gestiona eventos de catering con un sistema intuitivo y eficiente. 
-                        Controla fechas, horarios y disponibilidad en tiempo real.
+                        Sistema completo para gestionar eventos de catering con control de fechas, 
+                        horarios y disponibilidad en tiempo real. Ideal para empresas profesionales.
                     </p>
-                    <a href="{% url 'catering:evento_list' %}" class="btn btn-outline-primary btn-lg rounded-pill">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Ver Eventos
-                    </a>
+                    <div class="feature-benefits">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Control de disponibilidad</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Gestión de horarios</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Seguimiento en tiempo real</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             
@@ -160,13 +160,16 @@
                         Gestión de Clientes
                     </h4>
                     <p class="feature-description fs-5 text-muted lh-lg mb-4">
-                        Mantén un registro completo de clientes con historial de servicios, 
-                        preferencias y datos de contacto organizados.
+                        Base de datos completa de clientes con historial de servicios, 
+                        preferencias y datos de contacto organizados profesionalmente.
                     </p>
-                    <a href="{% url 'catering:cliente_list' %}" class="btn btn-outline-success btn-lg rounded-pill">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Ver Clientes
-                    </a>
+                    <div class="feature-benefits">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Historial completo</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Preferencias guardadas</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Contacto organizado</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             
@@ -181,13 +184,16 @@
                         Menús Personalizados
                     </h4>
                     <p class="feature-description fs-5 text-muted lh-lg mb-4">
-                        Crea menús únicos para cada evento con productos de alta calidad. 
-                        Personaliza según las preferencias del cliente.
+                        Sistema de menús únicos para cada evento con productos de alta calidad. 
+                        Personalización completa según las preferencias del cliente.
                     </p>
-                    <a href="{% url 'catering:productos_list' %}" class="btn btn-outline-warning btn-lg rounded-pill">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Ver Productos
-                    </a>
+                    <div class="feature-benefits">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Productos de calidad</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Personalización total</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Variedad de opciones</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             
@@ -202,13 +208,16 @@
                         Reportes Avanzados
                     </h4>
                     <p class="feature-description fs-5 text-muted lh-lg mb-4">
-                        Genera reportes financieros y análisis detallados del negocio. 
-                        Toma decisiones basadas en datos reales.
+                        Sistema de reportes financieros y análisis detallados del negocio. 
+                        Toma decisiones basadas en datos reales y estadísticas precisas.
                     </p>
-                    <a href="{% url 'catering:consulta_financiera' %}" class="btn btn-outline-info btn-lg rounded-pill">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Ver Reportes
-                    </a>
+                    <div class="feature-benefits">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Análisis financiero</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Estadísticas detalladas</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Decisiones informadas</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             
@@ -224,12 +233,15 @@
                     </h4>
                     <p class="feature-description fs-5 text-muted lh-lg mb-4">
                         Sistema seguro con autenticación y control de acceso por roles. 
-                        Protege la información de tu negocio.
+                        Protege la información de tu negocio con tecnología avanzada.
                     </p>
-                    <a href="{% url 'login' %}" class="btn btn-outline-danger btn-lg rounded-pill">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Iniciar Sesión
-                    </a>
+                    <div class="feature-benefits">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Autenticación segura</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Control de acceso</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Protección de datos</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             
@@ -245,116 +257,231 @@
                     </h4>
                     <p class="feature-description fs-5 text-muted lh-lg mb-4">
                         Interfaz adaptativa que funciona perfectamente en todos los dispositivos. 
-                        Accede desde cualquier lugar.
+                        Accede desde cualquier lugar con la misma experiencia.
                     </p>
-                    <a href="{% url 'catering:index' %}" class="btn btn-outline-primary btn-lg rounded-pill">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Explorar
-                    </a>
+                    <div class="feature-benefits">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Móvil y tablet</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Acceso remoto</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Experiencia uniforme</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Sección de Acciones Rápidas -->
-<section class="quick-actions-section py-5 bg-light">
+<!-- Sección de Información del Sistema -->
+<section class="system-info-section py-5 bg-light">
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <div class="section-badge mb-3">
-                    <span class="badge bg-warning bg-opacity-20 text-warning px-4 py-2 rounded-pill fs-6 fw-semibold">
-                        <i class="bi bi-lightning-charge-fill me-2"></i>
-                        Acciones Rápidas
+                    <span class="badge bg-info bg-opacity-20 text-info px-4 py-2 rounded-pill fs-6 fw-semibold">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Información del Sistema
                     </span>
                 </div>
                 <h2 class="display-4 fw-bold text-dark mb-4">
-                    Comienza a trabajar ahora
+                    ¿Cómo funciona nuestro sistema?
                 </h2>
                 <p class="fs-4 text-muted lh-lg">
-                    Accede rápidamente a las funciones más utilizadas del sistema
+                    Descubre el proceso completo de gestión de catering
                 </p>
             </div>
         </div>
         
         <div class="row g-4">
             <div class="col-lg-3 col-md-6">
-                <div class="quick-action-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
-                    <div class="action-icon mb-3">
+                <div class="info-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="info-icon mb-3">
                         <div class="icon-wrapper bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex">
-                            <i class="bi bi-calendar-plus text-primary fs-1"></i>
+                            <i class="bi bi-person-check text-primary fs-1"></i>
                         </div>
                     </div>
-                    <h5 class="action-title fs-4 fw-bold text-dark mb-3">
-                        Nueva Reserva
+                    <h5 class="info-title fs-4 fw-bold text-dark mb-3">
+                        1. Registro
                     </h5>
-                    <p class="action-description fs-6 text-muted mb-4">
-                        Crea una nueva reserva de catering con menú personalizado
+                    <p class="info-description fs-6 text-muted mb-4">
+                        Los clientes se registran en el sistema para acceder a nuestros servicios
                     </p>
-                    <a href="{% url 'catering:reserva_catering' %}" class="btn btn-primary btn-lg rounded-pill w-100">
-                        <i class="bi bi-plus-circle me-2"></i>
-                        Crear Reserva
-                    </a>
+                    <div class="info-step">
+                        <span class="badge bg-primary rounded-pill">Paso 1</span>
+                    </div>
                 </div>
             </div>
             
             <div class="col-lg-3 col-md-6">
-                <div class="quick-action-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
-                    <div class="action-icon mb-3">
+                <div class="info-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="info-icon mb-3">
                         <div class="icon-wrapper bg-success bg-opacity-10 rounded-3 p-3 d-inline-flex">
-                            <i class="bi bi-person-plus text-success fs-1"></i>
+                            <i class="bi bi-telephone text-success fs-1"></i>
                         </div>
                     </div>
-                    <h5 class="action-title fs-4 fw-bold text-dark mb-3">
-                        Nuevo Cliente
+                    <h5 class="info-title fs-4 fw-bold text-dark mb-3">
+                        2. Contacto
                     </h5>
-                    <p class="action-description fs-6 text-muted mb-4">
-                        Registra un nuevo cliente en el sistema
+                    <p class="info-description fs-6 text-muted mb-4">
+                        Los clientes contactan con nuestros responsables para solicitar servicios
                     </p>
-                    <a href="{% url 'catering:cliente_create' %}" class="btn btn-success btn-lg rounded-pill w-100">
-                        <i class="bi bi-person-plus me-2"></i>
-                        Agregar Cliente
-                    </a>
+                    <div class="info-step">
+                        <span class="badge bg-success rounded-pill">Paso 2</span>
+                    </div>
                 </div>
             </div>
             
             <div class="col-lg-3 col-md-6">
-                <div class="quick-action-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
-                    <div class="action-icon mb-3">
-                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-3 p-3 d-inline-flex">
-                            <i class="bi bi-calendar-event text-info fs-1"></i>
-                        </div>
-                    </div>
-                    <h5 class="action-title fs-4 fw-bold text-dark mb-3">
-                        Ver Eventos
-                    </h5>
-                    <p class="action-description fs-6 text-muted mb-4">
-                        Gestiona todos los eventos programados
-                    </p>
-                    <a href="{% url 'catering:evento_list' %}" class="btn btn-info btn-lg rounded-pill w-100">
-                        <i class="bi bi-calendar-event me-2"></i>
-                        Ver Eventos
-                    </a>
-                </div>
-            </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <div class="quick-action-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
-                    <div class="action-icon mb-3">
+                <div class="info-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="info-icon mb-3">
                         <div class="icon-wrapper bg-warning bg-opacity-10 rounded-3 p-3 d-inline-flex">
-                            <i class="bi bi-graph-up text-warning fs-1"></i>
+                            <i class="bi bi-calendar-check text-warning fs-1"></i>
                         </div>
                     </div>
-                    <h5 class="action-title fs-4 fw-bold text-dark mb-3">
-                        Reportes
+                    <h5 class="info-title fs-4 fw-bold text-dark mb-3">
+                        3. Confirmación
                     </h5>
-                    <p class="action-description fs-6 text-muted mb-4">
-                        Genera reportes financieros y análisis
+                    <p class="info-description fs-6 text-muted mb-4">
+                        Los responsables crean y confirman los eventos en el sistema
                     </p>
-                    <a href="{% url 'catering:consulta_financiera' %}" class="btn btn-warning btn-lg rounded-pill w-100">
-                        <i class="bi bi-graph-up me-2"></i>
-                        Ver Reportes
-                    </a>
+                    <div class="info-step">
+                        <span class="badge bg-warning rounded-pill">Paso 3</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="info-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="info-icon mb-3">
+                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-cup-hot text-info fs-1"></i>
+                        </div>
+                    </div>
+                    <h5 class="info-title fs-4 fw-bold text-dark mb-3">
+                        4. Servicio
+                    </h5>
+                    <p class="info-description fs-6 text-muted mb-4">
+                        Se ejecuta el servicio de catering con personal asignado
+                    </p>
+                    <div class="info-step">
+                        <span class="badge bg-info rounded-pill">Paso 4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Tipos de Usuario -->
+<section class="user-types-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <div class="section-badge mb-3">
+                    <span class="badge bg-secondary bg-opacity-20 text-secondary px-4 py-2 rounded-pill fs-6 fw-semibold">
+                        <i class="bi bi-people-fill me-2"></i>
+                        Tipos de Usuario
+                    </span>
+                </div>
+                <h2 class="display-4 fw-bold text-dark mb-4">
+                    ¿Qué tipo de usuario eres?
+                </h2>
+                <p class="fs-4 text-muted lh-lg">
+                    Descubre las funcionalidades disponibles para cada tipo de usuario
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="user-type-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="user-icon mb-3">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-person-badge text-primary fs-1"></i>
+                        </div>
+                    </div>
+                    <h5 class="user-title fs-4 fw-bold text-dark mb-3">
+                        Administrador
+                    </h5>
+                    <p class="user-description fs-6 text-muted mb-4">
+                        Acceso completo al sistema, gestión de usuarios, reportes y configuración
+                    </p>
+                    <div class="user-features">
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Gestión completa</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Reportes avanzados</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Configuración del sistema</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="user-type-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="user-icon mb-3">
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-person-gear text-success fs-1"></i>
+                        </div>
+                    </div>
+                    <h5 class="user-title fs-4 fw-bold text-dark mb-3">
+                        Responsable
+                    </h5>
+                    <p class="user-description fs-6 text-muted mb-4">
+                        Gestiona eventos, asigna personal y coordina servicios de catering
+                    </p>
+                    <div class="user-features">
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Crear eventos</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Asignar personal</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Gestionar menús</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="user-type-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="user-icon mb-3">
+                        <div class="icon-wrapper bg-warning bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-person-workspace text-warning fs-1"></i>
+                        </div>
+                    </div>
+                    <h5 class="user-title fs-4 fw-bold text-dark mb-3">
+                        Personal
+                    </h5>
+                    <p class="user-description fs-6 text-muted mb-4">
+                        Ve sus asignaciones y gestiona su disponibilidad para eventos
+                    </p>
+                    <div class="user-features">
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Ver asignaciones</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Gestionar disponibilidad</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Ver eventos asignados</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="user-type-card text-center p-4 rounded-4 bg-white shadow-sm border-0 hover-lift">
+                    <div class="user-icon mb-3">
+                        <div class="icon-wrapper bg-info bg-opacity-10 rounded-3 p-3 d-inline-flex">
+                            <i class="bi bi-person text-info fs-1"></i>
+                        </div>
+                    </div>
+                    <h5 class="user-title fs-4 fw-bold text-dark mb-3">
+                        Cliente
+                    </h5>
+                    <p class="user-description fs-6 text-muted mb-4">
+                        Ve el estado de sus eventos y contacta con responsables para servicios
+                    </p>
+                    <div class="user-features">
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Ver eventos</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Historial de pagos</li>
+                            <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>Contactar responsables</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -404,30 +531,30 @@
                 </div>
                 
                 <h2 class="cta-title display-3 fw-bold text-white mb-4">
-                    Transforma tu negocio de catering hoy
+                    ¿Listo para comenzar?
                 </h2>
                 
                 <p class="cta-description fs-4 text-white-50 lh-lg mb-5">
                     Únete a cientos de empresas que confían en Tu Solución para gestionar sus eventos de catering 
-                    de manera profesional y eficiente. Comienza a optimizar tu negocio ahora.
+                    de manera profesional y eficiente. Accede a nuestro sistema ahora.
                 </p>
                 
                 <div class="cta-actions">
                     <div class="d-flex flex-column flex-md-row gap-4 justify-content-center align-items-center">
                         {% if user.is_authenticated %}
-                        <a href="{% url 'catering:reserva_catering' %}" class="btn btn-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
-                            <i class="bi bi-calendar-plus me-3 fs-4"></i>
-                            <span class="fs-4 fw-bold text-dark">Crear Primera Reserva</span>
+                        <a href="{% url 'catering:dashboard' %}" class="btn btn-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="bi bi-speedometer2 me-3 fs-4"></i>
+                            <span class="fs-4 fw-bold text-dark">Ir al Dashboard</span>
                         </a>
                         {% else %}
                         <a href="{% url 'login' %}" class="btn btn-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
                             <i class="bi bi-box-arrow-in-right me-3 fs-4"></i>
-                            <span class="fs-4 fw-bold text-dark">Comenzar Ahora</span>
+                            <span class="fs-4 fw-bold text-dark">Iniciar Sesión</span>
                         </a>
                         {% endif %}
-                        <a href="{% url 'catering:dashboard' %}" class="btn btn-outline-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
-                            <i class="bi bi-speedometer2 me-3 fs-4"></i>
-                            <span class="fs-4 fw-bold">Ver Dashboard</span>
+                        <a href="{% url 'catering:registro_usuario' %}" class="btn btn-outline-light btn-xl px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="bi bi-person-plus me-3 fs-4"></i>
+                            <span class="fs-4 fw-bold">Registrarse</span>
                         </a>
                     </div>
                 </div>
