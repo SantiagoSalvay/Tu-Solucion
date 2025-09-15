@@ -116,11 +116,7 @@
                                 </a>
                             </li>
                         {% elif user_profile.tipo_usuario == 'CLIENTE' %}
-                            <li class="nav-item">
-                                <a class="nav-link hover-effect" href="{% url 'catering:cliente_eventos' %}">
-                                    <i class="bi bi-calendar-event me-1"></i>Mis Eventos
-                                </a>
-                            </li>
+                            <!-- Los clientes no tienen opción de "Mis Eventos" en el navbar -->
                         {% endif %}
                         
                         <!-- Menú de Gestión (solo Admin) -->

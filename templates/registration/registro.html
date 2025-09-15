@@ -92,17 +92,7 @@
                                 {% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.barrio.id_for_label }}" class="form-label">
-                                    {{ form.barrio.label }}
-                                </label>
-                                {{ form.barrio }}
-                                {% if form.barrio.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {% for error in form.barrio.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+                                {{ form.barrio|as_crispy_field }}
                             </div>
                         </div>
                         
@@ -215,67 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
         usernameInput.focus();
     }
     
-    // Cargar barrios dinámicamente según la provincia seleccionada
-    const provinciaSelect = document.getElementById('id_provincia');
-    const barrioSelect = document.getElementById('id_barrio');
-    
-    if (provinciaSelect && barrioSelect) {
-        // Asegurar que el campo barrio sea siempre un select
-        barrioSelect.setAttribute('readonly', 'true');
-        barrioSelect.style.pointerEvents = 'auto';
-        
-        provinciaSelect.addEventListener('change', function() {
-            const provinciaId = this.value;
-            
-            // Limpiar el select de barrios
-            barrioSelect.innerHTML = '<option value="">Primero seleccione una provincia</option>';
-            
-            if (provinciaId) {
-                // Mostrar indicador de carga
-                barrioSelect.innerHTML = '<option value="">Cargando barrios...</option>';
-                barrioSelect.disabled = true;
-                
-                // Hacer petición AJAX para obtener los barrios
-                fetch(`/api/barrios-por-provincia/?provincia_id=${provinciaId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Limpiar el select
-                        barrioSelect.innerHTML = '<option value="">Seleccione un barrio</option>';
-                        
-                        // Agregar las opciones de barrios
-                        data.forEach(barrio => {
-                            const option = document.createElement('option');
-                            option.value = barrio.id;
-                            option.textContent = barrio.nombre;
-                            barrioSelect.appendChild(option);
-                        });
-                        
-                        barrioSelect.disabled = false;
-                    })
-                    .catch(error => {
-                        console.error('Error al cargar barrios:', error);
-                        barrioSelect.innerHTML = '<option value="">Error al cargar barrios</option>';
-                        barrioSelect.disabled = false;
-                    });
-            } else {
-                barrioSelect.disabled = true;
-            }
-        });
-        
-        // Inicializar estado del select de barrios
-        if (!provinciaSelect.value) {
-            barrioSelect.disabled = true;
-        }
-        
-        // Prevenir entrada manual en el campo barrio
-        barrioSelect.addEventListener('keydown', function(e) {
-            e.preventDefault();
-        });
-        
-        barrioSelect.addEventListener('paste', function(e) {
-            e.preventDefault();
-        });
-    }
+    // Ya no necesitamos cargar barrios dinámicamente
 });
 </script>
 {% endblock %}

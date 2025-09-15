@@ -1082,7 +1082,11 @@ def registro_usuario(request):
         return redirect('catering:index')
     
     if request.method == 'POST':
+        print(f"DEBUG - Datos POST recibidos: {request.POST}")
         form = RegistroForm(request.POST)
+        print(f"DEBUG - Formulario válido: {form.is_valid()}")
+        if not form.is_valid():
+            print(f"DEBUG - Errores del formulario: {form.errors}")
         if form.is_valid():
             try:
                 # Crear usuario
@@ -1109,7 +1113,7 @@ def registro_usuario(request):
                     email=form.cleaned_data['email'],
                     domicilio=form.cleaned_data['domicilio'],
                     provincia=form.cleaned_data.get('provincia'),
-                    barrio=form.cleaned_data.get('barrio'),
+                    barrio=None,  # Ya no usamos la relación con Barrio
                     fecha_alta=timezone.now().date(),
                     usuario=user
                 )

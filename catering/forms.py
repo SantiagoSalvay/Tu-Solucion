@@ -654,14 +654,15 @@ class RegistroForm(forms.Form):
             'id': 'id_provincia'
         })
     )
-    barrio = forms.ModelChoiceField(
-        queryset=Barrio.objects.none(),
-        empty_label="Primero seleccione una provincia",
+    barrio = forms.CharField(
+        max_length=100,
         required=True,
-        widget=forms.Select(attrs={
-            'class': 'form-select',
-            'id': 'id_barrio'
-        })
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'id': 'id_barrio',
+            'placeholder': 'Ingrese el nombre del barrio'
+        }),
+        help_text='Nombre del barrio donde reside'
     )
     domicilio = forms.CharField(
         max_length=200,
@@ -674,19 +675,7 @@ class RegistroForm(forms.Form):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # Si hay datos POST, configurar el queryset de barrios basado en la provincia seleccionada
-        if 'data' in kwargs and kwargs['data']:
-            provincia_id = kwargs['data'].get('provincia')
-            if provincia_id:
-                self.fields['barrio'].queryset = Barrio.objects.filter(
-                    provincia_id=provincia_id, 
-                    activo=True
-                )
-            else:
-                self.fields['barrio'].queryset = Barrio.objects.none()
-        else:
-            self.fields['barrio'].queryset = Barrio.objects.none()
+        # Ya no necesitamos configurar el queryset de barrios
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
@@ -708,12 +697,8 @@ class RegistroForm(forms.Form):
     
     def clean_barrio(self):
         barrio = self.cleaned_data.get('barrio')
-        provincia = self.cleaned_data.get('provincia')
-        
-        if barrio and provincia:
-            if barrio.provincia != provincia:
-                raise ValidationError('El barrio seleccionado no pertenece a la provincia elegida.')
-        
+        if barrio:
+            return barrio.strip()
         return barrio
     
     def clean(self):
