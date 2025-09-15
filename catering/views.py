@@ -378,220 +378,8 @@ def evento_update(request, pk):
 
 
 # Vistas de Consultas
-@login_required
-def consulta_financiera(request):
-    """Consulta financiera - Análisis financiero detallado - Solo Admin"""
-    # Verificar permisos
-    user_profile = getattr(request.user, 'perfilusuario', None)
-    if not user_profile or user_profile.tipo_usuario != 'ADMIN':
-        if not request.user.is_superuser:
-            messages.error(request, 'No tienes permisos para acceder a consultas financieras.')
-            return redirect('catering:index')
-    
-    from django.db.models import Sum, Count, Avg
-    from decimal import Decimal
-    
-    # Filtros de fecha
-    fecha_desde = request.GET.get('fecha_desde')
-    fecha_hasta = request.GET.get('fecha_hasta')
-    
-    eventos = EventoSolicitado.objects.all()
-    
-    if fecha_desde:
-        eventos = eventos.filter(fecha__gte=fecha_desde)
-    if fecha_hasta:
-        eventos = eventos.filter(fecha__lte=fecha_hasta)
-    
-    # Estadísticas generales
-    total_eventos = eventos.count()
-    eventos_finalizados = eventos.filter(estado='FINALIZADO').count()
-    eventos_activos = eventos.filter(estado__in=['SOLICITADO', 'CONFIRMADO', 'EN_PROCESO']).count()
-    
-    # Cálculos financieros
-    eventos_con_ingresos = []
-    total_ingresos = Decimal('0')
-    total_ingresos_por_persona = Decimal('0')
-    
-    for evento in eventos:
-        if hasattr(evento, 'id_comprobante') and evento.id_comprobante:
-            ingreso_total = evento.id_comprobante.total_servicio or Decimal('0')
-            ingreso_por_persona = evento.id_comprobante.precio_x_persona or Decimal('0')
-            
-            eventos_con_ingresos.append({
-                'evento': evento,
-                'ingreso_total': ingreso_total,
-                'ingreso_por_persona': ingreso_por_persona,
-                'cantidad_personas': evento.cantidad_personas,
-                'estado': evento.get_estado_display()
-            })
-            
-            total_ingresos += ingreso_total
-            total_ingresos_por_persona += ingreso_por_persona
-    
-    # Promedios
-    promedio_por_evento = total_ingresos / len(eventos_con_ingresos) if eventos_con_ingresos else Decimal('0')
-    promedio_por_persona = total_ingresos_por_persona / len(eventos_con_ingresos) if eventos_con_ingresos else Decimal('0')
-    
-    # Análisis por tipo de evento
-    ingresos_por_tipo = {}
-    for evento_data in eventos_con_ingresos:
-        tipo = evento_data['evento'].tipo_evento
-        if tipo not in ingresos_por_tipo:
-            ingresos_por_tipo[tipo] = {
-                'total': Decimal('0'),
-                'cantidad': 0,
-                'promedio': Decimal('0')
-            }
-        ingresos_por_tipo[tipo]['total'] += evento_data['ingreso_total']
-        ingresos_por_tipo[tipo]['cantidad'] += 1
-    
-    # Calcular promedios por tipo
-    for tipo in ingresos_por_tipo:
-        if ingresos_por_tipo[tipo]['cantidad'] > 0:
-            ingresos_por_tipo[tipo]['promedio'] = ingresos_por_tipo[tipo]['total'] / ingresos_por_tipo[tipo]['cantidad']
-    
-    # Análisis por mes
-    ingresos_por_mes = {}
-    for evento_data in eventos_con_ingresos:
-        mes = evento_data['evento'].fecha.strftime('%Y-%m')
-        if mes not in ingresos_por_mes:
-            ingresos_por_mes[mes] = Decimal('0')
-        ingresos_por_mes[mes] += evento_data['ingreso_total']
-    
-    context = {
-        'eventos_con_ingresos': eventos_con_ingresos,
-        'total_ingresos': total_ingresos,
-        'total_eventos': total_eventos,
-        'eventos_finalizados': eventos_finalizados,
-        'eventos_activos': eventos_activos,
-        'promedio_por_evento': promedio_por_evento,
-        'promedio_por_persona': promedio_por_persona,
-        'ingresos_por_tipo': ingresos_por_tipo,
-        'ingresos_por_mes': ingresos_por_mes,
-        'filtros': {
-            'fecha_desde': fecha_desde,
-            'fecha_hasta': fecha_hasta,
-        }
-    }
-    return render(request, 'catering/consulta_financiera.html', context)
 
 
-@login_required
-def consulta_barrios(request):
-    """Consulta de marketing - Análisis de barrios más solicitados - Solo Admin"""
-    # Verificar permisos
-    user_profile = getattr(request.user, 'perfilusuario', None)
-    if not user_profile or user_profile.tipo_usuario != 'ADMIN':
-        if not request.user.is_superuser:
-            messages.error(request, 'No tienes permisos para acceder a consultas de marketing.')
-            return redirect('catering:index')
-    
-    from decimal import Decimal
-    
-    # Filtros
-    fecha_desde = request.GET.get('fecha_desde')
-    fecha_hasta = request.GET.get('fecha_hasta')
-    estado = request.GET.get('estado', 'FINALIZADO')
-    
-    # Filtrar eventos
-    eventos = EventoSolicitado.objects.exclude(
-        ubicacion__isnull=True
-    ).exclude(
-        ubicacion__exact=''
-    )
-    
-    if estado:
-        eventos = eventos.filter(estado=estado)
-    if fecha_desde:
-        eventos = eventos.filter(fecha__gte=fecha_desde)
-    if fecha_hasta:
-        eventos = eventos.filter(fecha__lte=fecha_hasta)
-    
-    # Extraer y analizar barrios
-    barrios_data = {}
-    total_eventos = 0
-    
-    for evento in eventos:
-        total_eventos += 1
-        barrio = evento.get_barrio()
-        
-        if barrio:
-            # Normalizar nombre del barrio
-            barrio_normalizado = barrio.strip().title()
-            
-            if barrio_normalizado not in barrios_data:
-                barrios_data[barrio_normalizado] = {
-                    'cantidad_eventos': 0,
-                    'cantidad_personas_total': 0,
-                    'ingresos_total': Decimal('0'),
-                    'eventos': [],
-                    'tipos_evento': {},
-                    'promedio_personas': 0,
-                    'promedio_ingresos': Decimal('0')
-                }
-            
-            # Actualizar estadísticas
-            barrios_data[barrio_normalizado]['cantidad_eventos'] += 1
-            barrios_data[barrio_normalizado]['cantidad_personas_total'] += evento.cantidad_personas
-            barrios_data[barrio_normalizado]['eventos'].append(evento)
-            
-            # Contar tipos de evento
-            tipo = evento.get_tipo_evento_display()
-            if tipo not in barrios_data[barrio_normalizado]['tipos_evento']:
-                barrios_data[barrio_normalizado]['tipos_evento'][tipo] = 0
-            barrios_data[barrio_normalizado]['tipos_evento'][tipo] += 1
-            
-            # Calcular ingresos si tiene comprobante
-            if hasattr(evento, 'id_comprobante') and evento.id_comprobante:
-                ingreso = evento.id_comprobante.total_servicio or Decimal('0')
-                barrios_data[barrio_normalizado]['ingresos_total'] += ingreso
-    
-    # Calcular promedios, encontrar evento de mayor costo y ordenar
-    for barrio, data in barrios_data.items():
-        if data['cantidad_eventos'] > 0:
-            data['promedio_personas'] = data['cantidad_personas_total'] / data['cantidad_eventos']
-            data['promedio_ingresos'] = data['ingresos_total'] / data['cantidad_eventos']
-            
-            # Encontrar el evento de mayor costo
-            evento_mayor_costo = None
-            costo_maximo = Decimal('0')
-            
-            for evento in data['eventos']:
-                if hasattr(evento, 'id_comprobante') and evento.id_comprobante:
-                    costo = evento.id_comprobante.total_servicio or Decimal('0')
-                    if costo > costo_maximo:
-                        costo_maximo = costo
-                        evento_mayor_costo = evento
-            
-            data['servicio_mayor_costo'] = evento_mayor_costo
-            data['costo_maximo'] = costo_maximo
-    
-    # Ordenar por cantidad de eventos
-    barrios_ordenados = sorted(
-        barrios_data.items(),
-        key=lambda x: x[1]['cantidad_eventos'],
-        reverse=True
-    )
-    
-    # Top 10 barrios
-    top_barrios = barrios_ordenados[:10]
-    
-    # Estadísticas generales
-    total_barrios = len(barrios_data)
-    barrio_mas_solicitado = top_barrios[0] if top_barrios else None
-    
-    context = {
-        'barrios': top_barrios,
-        'total_eventos': total_eventos,
-        'total_barrios': total_barrios,
-        'barrio_mas_solicitado': barrio_mas_solicitado,
-        'filtros': {
-            'fecha_desde': fecha_desde,
-            'fecha_hasta': fecha_hasta,
-            'estado': estado,
-        }
-    }
-    return render(request, 'catering/consulta_barrios.html', context)
 
 
 @login_required
@@ -1296,6 +1084,7 @@ def registro_usuario(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         if form.is_valid():
+<<<<<<< HEAD
             # Crear usuario
             user = User.objects.create_user(
                 username=form.cleaned_data['username'],
@@ -1327,6 +1116,49 @@ def registro_usuario(request):
             
             messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión con tus credenciales.')
             return redirect('login')
+=======
+            try:
+                # Crear usuario
+                user = User.objects.create_user(
+                    username=form.cleaned_data['username'],
+                    email=form.cleaned_data['email'],
+                    password=form.cleaned_data['password1'],
+                    first_name=form.cleaned_data['nombre'],
+                    last_name=form.cleaned_data['apellido']
+                )
+                
+                # Crear perfil de usuario
+                PerfilUsuario.objects.create(
+                    usuario=user,
+                    tipo_usuario='CLIENTE'
+                )
+                
+                # Crear cliente
+                cliente = Cliente.objects.create(
+                    nombre=form.cleaned_data['nombre'],
+                    apellido=form.cleaned_data['apellido'],
+                    tipo_doc=form.cleaned_data['tipo_doc'],
+                    num_doc=form.cleaned_data['num_doc'],
+                    email=form.cleaned_data['email'],
+                    provincia=form.cleaned_data.get('provincia'),
+                    barrio=form.cleaned_data.get('barrio'),
+                    fecha_alta=timezone.now().date(),
+                    usuario=user
+                )
+                
+                messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión con tus credenciales.')
+                return redirect('login')
+                
+            except Exception as e:
+                messages.error(request, f'Error al crear el usuario: {str(e)}')
+                print(f"Error en registro_usuario: {e}")  # Para debug
+        else:
+            # Si el formulario no es válido, mostrar errores específicos
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'Error en {field}: {error}')
+            print(f"Errores del formulario: {form.errors}")  # Para debug
+>>>>>>> 4da63c5e624036d1f7d24ecf448e4bd080d7ccc1
     else:
         form = RegistroForm()
     

@@ -50,8 +50,6 @@ urlpatterns = [
     path('servicios/<int:servicio_id>/eliminar/', views.eliminar_personal_asignado, name='eliminar_personal_asignado'),
     
     # URLs para consultas
-    path('consultas/financiera/', views.consulta_financiera, name='consulta_financiera'),
-    path('consultas/barrios/', views.consulta_barrios, name='consulta_barrios'),
     path('consultas/cumpleanos/', views.consulta_cumpleanos, name='consulta_cumpleanos'),
     
     # URLs para clientes
@@ -74,15 +72,14 @@ urlpatterns = [
     path('cliente/eventos/<int:pk>/', views_clientes.cliente_evento_detail, name='cliente_evento_detail'),
     
     # URLs para Trabajadores
-    path('trabajador/dashboard/', views_trabajadores.trabajador_dashboard, name='trabajador_dashboard'),
     path('trabajador/servicios/', views_trabajadores.trabajador_servicios, name='trabajador_servicios'),
     path('trabajador/servicios/<int:pk>/', views_trabajadores.trabajador_servicio_detail, name='trabajador_servicio_detail'),
-    path('trabajador/servicios/<int:pk>/actualizar-estado/', views_trabajadores.actualizar_estado_servicio, name='actualizar_estado_servicio'),
     
     # URLs para Administradores
     path('admin/dashboard/', views_admin.admin_dashboard, name='admin_dashboard'),
     path('admin/crear-usuario/', views_admin.crear_usuario_admin, name='crear_usuario_admin'),
     path('admin/crear-trabajador/', views_admin.crear_trabajador, name='crear_trabajador'),
+    path('admin/crear-responsable/', views_admin.crear_responsable, name='crear_responsable'),
     path('admin/crear-cliente/', views_admin.crear_cliente, name='crear_cliente'),
     path('admin/gestion-usuarios/', views_admin.gestion_usuarios, name='gestion_usuarios'),
     

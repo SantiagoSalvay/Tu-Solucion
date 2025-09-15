@@ -102,7 +102,7 @@ def trabajador_servicios(request):
 @empleado_required
 def trabajador_servicio_detail(request, pk):
     """
-    Detalle de un servicio específico del trabajador
+    Detalle de un servicio específico del trabajador - Solo información básica
     """
     try:
         personal = Personal.objects.get(email=request.user.email)
@@ -113,51 +113,18 @@ def trabajador_servicio_detail(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk, id_personal=personal)
     evento = servicio.id_evento
     
-    # Obtener menú del evento
-    menu_items = evento.menuxproducto_set.all()
-    
-    # Obtener otros trabajadores asignados al mismo evento
-    otros_servicios = Servicio.objects.filter(
-        id_evento=evento
-    ).exclude(id_servicio=servicio.pk)
+    # Solo obtener información básica del evento
+    # NO incluir menú, información del cliente, ni opciones de edición
     
     context = {
         'servicio': servicio,
         'evento': evento,
         'personal': personal,
-        'menu_items': menu_items,
-        'otros_servicios': otros_servicios,
+        'es_empleado': True,  # Flag para el template
     }
     
     return render(request, 'catering/trabajador_servicio_detail.html', context)
 
 
-@empleado_required
-def actualizar_estado_servicio(request, pk):
-    """
-    Actualizar el estado de un servicio
-    """
-    try:
-        personal = Personal.objects.get(email=request.user.email)
-    except Personal.DoesNotExist:
-        messages.error(request, 'No se encontró información del trabajador.')
-        return redirect('catering:index')
-    
-    servicio = get_object_or_404(Servicio, pk=pk, id_personal=personal)
-    
-    if request.method == 'POST':
-        nuevo_estado = request.POST.get('estado')
-        if nuevo_estado in ['ASIGNADO', 'EN_SERVICIO', 'COMPLETADO', 'CANCELADO']:
-            servicio.estado = nuevo_estado
-            servicio.save()
-            messages.success(request, f'Estado del servicio actualizado a {nuevo_estado}.')
-            return redirect('catering:trabajador_servicio_detail', pk=pk)
-        else:
-            messages.error(request, 'Estado inválido.')
-    
-    context = {
-        'servicio': servicio,
-        'personal': personal,
-    }
-    
-    return render(request, 'catering/actualizar_estado_servicio.html', context)
+# Los empleados no pueden actualizar estados de servicios
+# Solo pueden ver la información básica de sus servicios asignados

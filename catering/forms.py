@@ -656,7 +656,7 @@ class RegistroForm(forms.Form):
     barrio = forms.ModelChoiceField(
         queryset=Barrio.objects.none(),
         empty_label="Primero seleccione una provincia",
-        required=False,
+        required=True,
         widget=forms.Select(attrs={
             'class': 'form-select',
             'id': 'id_barrio'
@@ -704,6 +704,16 @@ class RegistroForm(forms.Form):
         if Cliente.objects.filter(num_doc=num_doc).exists():
             raise ValidationError('Ya existe un cliente con este número de documento.')
         return num_doc
+    
+    def clean_barrio(self):
+        barrio = self.cleaned_data.get('barrio')
+        provincia = self.cleaned_data.get('provincia')
+        
+        if barrio and provincia:
+            if barrio.provincia != provincia:
+                raise ValidationError('El barrio seleccionado no pertenece a la provincia elegida.')
+        
+        return barrio
     
     def clean(self):
         cleaned_data = super().clean()
@@ -1015,6 +1025,66 @@ class CrearClienteForm(forms.Form):
         if Cliente.objects.filter(num_doc=num_doc).exists():
             raise ValidationError('Ya existe un cliente con este número de documento.')
         return num_doc
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+        
+        if password and password_confirm and password != password_confirm:
+            raise ValidationError('Las contraseñas no coinciden.')
+        
+        return cleaned_data
+
+
+class CrearResponsableForm(forms.Form):
+    """Formulario para crear responsables con cuenta de usuario"""
+    
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}),
+        help_text='Requerido. 150 caracteres o menos.'
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@email.com'})
+    )
+    password = forms.CharField(
+        min_length=8,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña'}),
+        help_text='Mínimo 8 caracteres.'
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirmar contraseña'})
+    )
+    nombre_apellido = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre y apellido completo'})
+    )
+    telefono = forms.CharField(
+        max_length=20,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de teléfono'})
+    )
+    direccion = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección (opcional)'})
+    )
+    
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        from django.contrib.auth.models import User
+        if User.objects.filter(username=username).exists():
+            raise ValidationError('Ya existe un usuario con este nombre de usuario.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        from django.contrib.auth.models import User
+        if User.objects.filter(email=email).exists():
+            raise ValidationError('Ya existe un usuario con este email.')
+        if Responsable.objects.filter(email=email).exists():
+            raise ValidationError('Ya existe un responsable con este email.')
+        return email
     
     def clean(self):
         cleaned_data = super().clean()
