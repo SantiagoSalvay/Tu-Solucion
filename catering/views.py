@@ -310,7 +310,26 @@ def evento_create(request):
     if request.method == 'POST':
         form = EventoForm(request.POST)
         if form.is_valid():
-            evento = form.save()
+            # Crear el evento sin guardar aún
+            evento = form.save(commit=False)
+            
+            # Crear un comprobante para el evento
+            from catering.models import Comprobante
+            comprobante = Comprobante.objects.create(
+                id_cliente=evento.id_cliente,
+                fecha_pedido=timezone.now().date(),
+                importe_total_productos=0.00,
+                total_servicio=0.00,
+                precio_x_persona=0.00,
+                fecha_vigencia=evento.fecha
+            )
+            
+            # Asignar el comprobante al evento
+            evento.id_comprobante = comprobante
+            
+            # Guardar el evento
+            evento.save()
+            
             messages.success(request, f'Evento {evento} creado exitosamente.')
             return redirect('catering:evento_detail', pk=evento.pk)
     else:
@@ -1299,6 +1318,7 @@ def registro_usuario(request):
                 tipo_doc=form.cleaned_data['tipo_doc'],
                 num_doc=form.cleaned_data['num_doc'],
                 email=form.cleaned_data['email'],
+                domicilio=form.cleaned_data['domicilio'],
                 provincia=form.cleaned_data.get('provincia'),
                 barrio=form.cleaned_data.get('barrio'),
                 fecha_alta=timezone.now().date(),

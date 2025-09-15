@@ -75,6 +75,9 @@
                                     Ubicación
                                 </h6>
                             </div>
+                            <div class="col-12 mb-3">
+                                {{ form.domicilio|as_crispy_field }}
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.provincia.id_for_label }}" class="form-label">
                                     {{ form.provincia.label }}

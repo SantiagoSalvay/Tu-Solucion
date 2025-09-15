@@ -662,6 +662,14 @@ class RegistroForm(forms.Form):
             'id': 'id_barrio'
         })
     )
+    domicilio = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Dirección completa'
+        }),
+        help_text='Dirección completa de residencia'
+    )
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load catering_extras %}
+
+{% block title %}Mis Eventos - Responsable{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="bi bi-calendar-event text-primary me-2"></i>
+                        Mis Eventos
+                    </h1>
+                    <p class="text-muted mb-0">Gestiona los eventos asignados a ti</p>
+                </div>
+                <div>
+                    <a href="{% url 'catering:evento_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Nuevo Evento
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="estado" class="form-label">Estado</label>
+                            <select name="estado" id="estado" class="form-select">
+                                <option value="">Todos los estados</option>
+                                <option value="SOLICITADO" {% if request.GET.estado == 'SOLICITADO' %}selected{% endif %}>Solicitado</option>
+                                <option value="CONFIRMADO" {% if request.GET.estado == 'CONFIRMADO' %}selected{% endif %}>Confirmado</option>
+                                <option value="EN_PROCESO" {% if request.GET.estado == 'EN_PROCESO' %}selected{% endif %}>En Proceso</option>
+                                <option value="FINALIZADO" {% if request.GET.estado == 'FINALIZADO' %}selected{% endif %}>Finalizado</option>
+                                <option value="CANCELADO" {% if request.GET.estado == 'CANCELADO' %}selected{% endif %}>Cancelado</option>
+                                <option value="VENCIDO" {% if request.GET.estado == 'VENCIDO' %}selected{% endif %}>Vencido</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="fecha_desde" class="form-label">Fecha Desde</label>
+                            <input type="date" name="fecha_desde" id="fecha_desde" class="form-control" value="{{ request.GET.fecha_desde }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+                            <input type="date" name="fecha_hasta" id="fecha_hasta" class="form-control" value="{{ request.GET.fecha_hasta }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="bi bi-funnel me-1"></i>
+                                    Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de eventos -->
+            <div class="card">
+                <div class="card-body">
+                    {% if eventos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Evento</th>
+                                        <th>Cliente</th>
+                                        <th>Fecha</th>
+                                        <th>Ubicación</th>
+                                        <th>Personas</th>
+                                        <th>Estado</th>
+                                        <th>Precio Total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for evento in eventos %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>{{ evento.get_tipo_evento_display }}</strong>
+                                                <br>
+                                                <small class="text-muted">#{{ evento.id_evento }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                {{ evento.id_cliente.nombre }} {{ evento.id_cliente.apellido }}
+                                                <br>
+                                                <small class="text-muted">{{ evento.id_cliente.email }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                {{ evento.fecha|date:"d/m/Y" }}
+                                                <br>
+                                                <small class="text-muted">{{ evento.hora|time:"H:i" }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                {{ evento.ubicacion|truncatechars:30 }}
+                                                {% if evento.id_cliente.barrio %}
+                                                    <br>
+                                                    <small class="text-muted">{{ evento.id_cliente.barrio.nombre }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ evento.cantidad_personas }} personas</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if evento.estado == 'SOLICITADO' %}bg-warning{% elif evento.estado == 'CONFIRMADO' %}bg-success{% elif evento.estado == 'EN_PROCESO' %}bg-primary{% elif evento.estado == 'FINALIZADO' %}bg-secondary{% elif evento.estado == 'CANCELADO' %}bg-danger{% else %}bg-dark{% endif %}">
+                                                {{ evento.get_estado_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>${{ evento.precio_total|floatformat:2 }}</strong>
+                                            {% if evento.precio_por_persona %}
+                                                <br>
+                                                <small class="text-muted">${{ evento.precio_por_persona|floatformat:2 }}/persona</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'catering:evento_detail' evento.id_evento %}" 
+                                                   class="btn btn-sm btn-outline-primary" 
+                                                   title="Ver detalles">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{% url 'catering:editar_menu' evento.id_evento %}" 
+                                                   class="btn btn-sm btn-outline-success" 
+                                                   title="Editar menú">
+                                                    <i class="bi bi-menu-button-wide"></i>
+                                                </a>
+                                                <a href="{% url 'catering:evento_update' evento.id_evento %}" 
+                                                   class="btn btn-sm btn-outline-warning" 
+                                                   title="Editar evento">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginación -->
+                        {% if eventos.has_other_pages %}
+                        <nav aria-label="Paginación de eventos">
+                            <ul class="pagination justify-content-center">
+                                {% if eventos.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">Primera</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ eventos.previous_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">Anterior</a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        Página {{ eventos.number }} de {{ eventos.paginator.num_pages }}
+                                    </span>
+                                </li>
+
+                                {% if eventos.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ eventos.next_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">Siguiente</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ eventos.paginator.num_pages }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">Última</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="text-muted mt-3">No hay eventos asignados</h4>
+                            <p class="text-muted">No tienes eventos asignados con los filtros actuales.</p>
+                            <a href="{% url 'catering:evento_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>
+                                Crear Primer Evento
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit del formulario de filtros cuando cambian los selects
+    const filtros = document.querySelectorAll('select[name="estado"], input[type="date"]');
+    filtros.forEach(filtro => {
+        filtro.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}
