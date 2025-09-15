@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import PerfilUsuario
 
-
 def admin_required(view_func):
     """
     Decorador que requiere que el usuario sea administrador
@@ -18,14 +17,13 @@ def admin_required(view_func):
                 messages.error(request, 'No tienes permisos para acceder a esta sección.')
                 return redirect('catering:index')
         except PerfilUsuario.DoesNotExist:
-            # Si no tiene perfil, verificar si es superuser
+
             if not request.user.is_superuser:
                 messages.error(request, 'No tienes permisos para acceder a esta sección.')
                 return redirect('catering:index')
         
         return view_func(request, *args, **kwargs)
     return _wrapped_view
-
 
 def empleado_required(view_func):
     """
@@ -40,14 +38,13 @@ def empleado_required(view_func):
                 messages.error(request, 'No tienes permisos para acceder a esta sección.')
                 return redirect('catering:index')
         except PerfilUsuario.DoesNotExist:
-            # Si no tiene perfil, verificar si es superuser
+
             if not request.user.is_superuser:
                 messages.error(request, 'No tienes permisos para acceder a esta sección.')
                 return redirect('catering:index')
         
         return view_func(request, *args, **kwargs)
     return _wrapped_view
-
 
 def responsable_required(view_func):
     """
@@ -62,14 +59,13 @@ def responsable_required(view_func):
                 messages.error(request, 'No tienes permisos para acceder a esta sección.')
                 return redirect('catering:index')
         except PerfilUsuario.DoesNotExist:
-            # Si no tiene perfil, verificar si es superuser
+
             if not request.user.is_superuser:
                 messages.error(request, 'No tienes permisos para acceder a esta sección.')
                 return redirect('catering:index')
         
         return view_func(request, *args, **kwargs)
     return _wrapped_view
-
 
 def responsable_or_admin_required(view_func):
     """
@@ -84,14 +80,13 @@ def responsable_or_admin_required(view_func):
                 messages.error(request, 'No tienes permisos para acceder a esta sección.')
                 return redirect('catering:index')
         except PerfilUsuario.DoesNotExist:
-            # Si no tiene perfil, verificar si es superuser
+
             if not request.user.is_superuser:
                 messages.error(request, 'No tienes permisos para acceder a esta sección.')
                 return redirect('catering:index')
         
         return view_func(request, *args, **kwargs)
     return _wrapped_view
-
 
 def cliente_required(view_func):
     """
@@ -106,14 +101,13 @@ def cliente_required(view_func):
                 messages.error(request, 'Tu cuenta no está activa.')
                 return redirect('catering:index')
         except PerfilUsuario.DoesNotExist:
-            # Si no tiene perfil, verificar si es superuser
+
             if not request.user.is_superuser:
                 messages.error(request, 'No tienes permisos para acceder a esta sección.')
                 return redirect('catering:index')
         
         return view_func(request, *args, **kwargs)
     return _wrapped_view
-
 
 def get_user_profile(user):
     """

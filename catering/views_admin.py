@@ -8,15 +8,13 @@ from .models import PerfilUsuario, Cliente, Personal, Responsable
 from .decorators import admin_required, get_user_profile
 from .forms import CrearUsuarioForm, CrearTrabajadorForm, CrearClienteForm, CrearResponsableForm
 
-
 @admin_required
 def admin_dashboard(request):
     """
     Dashboard específico para administradores
     """
     perfil = get_user_profile(request.user)
-    
-    # Estadísticas generales
+
     from .models import EventoSolicitado
     from django.utils import timezone
     from django.db.models import Count
@@ -25,18 +23,15 @@ def admin_dashboard(request):
     total_clientes = Cliente.objects.count()
     total_personal = Personal.objects.count()
     total_eventos = EventoSolicitado.objects.count()
-    
-    # Usuarios por tipo
+
     usuarios_por_tipo = PerfilUsuario.objects.values('tipo_usuario').annotate(
         count=Count('id')
     ).order_by('tipo_usuario')
-    
-    # Eventos por estado
+
     eventos_por_estado = EventoSolicitado.objects.values('estado').annotate(
         count=Count('id_evento')
     ).order_by('estado')
-    
-    # Usuarios recientes
+
     usuarios_recientes = User.objects.order_by('-date_joined')[:5]
     
     context = {
@@ -52,7 +47,6 @@ def admin_dashboard(request):
     
     return render(request, 'catering/admin_dashboard.html', context)
 
-
 @admin_required
 def crear_usuario_admin(request):
     """
@@ -62,7 +56,7 @@ def crear_usuario_admin(request):
         form = CrearUsuarioForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                # Crear usuario
+
                 user = User.objects.create_user(
                     username=form.cleaned_data['username'],
                     email=form.cleaned_data['email'],
@@ -72,8 +66,7 @@ def crear_usuario_admin(request):
                     is_staff=form.cleaned_data['tipo_usuario'] == 'ADMIN',
                     is_superuser=form.cleaned_data['tipo_usuario'] == 'ADMIN'
                 )
-                
-                # Crear perfil
+
                 PerfilUsuario.objects.create(
                     usuario=user,
                     tipo_usuario=form.cleaned_data['tipo_usuario'],
@@ -96,7 +89,6 @@ def crear_usuario_admin(request):
     
     return render(request, 'catering/crear_usuario_admin.html', context)
 
-
 @admin_required
 def crear_trabajador(request):
     """
@@ -106,7 +98,7 @@ def crear_trabajador(request):
         form = CrearTrabajadorForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                # Crear usuario
+
                 user = User.objects.create_user(
                     username=form.cleaned_data['username'],
                     email=form.cleaned_data['email'],
@@ -116,8 +108,7 @@ def crear_trabajador(request):
                     is_staff=False,
                     is_superuser=False
                 )
-                
-                # Crear perfil de usuario
+
                 PerfilUsuario.objects.create(
                     usuario=user,
                     tipo_usuario='EMPLEADO',
@@ -127,8 +118,7 @@ def crear_trabajador(request):
                     direccion=form.cleaned_data.get('direccion', ''),
                     notas=f"Trabajador - {form.cleaned_data['tipo_personal']}"
                 )
-                
-                # Crear registro de personal
+
                 Personal.objects.create(
                     tipo_personal=form.cleaned_data['tipo_personal'],
                     nombre_y_apellido=form.cleaned_data['nombre_y_apellido'],
@@ -149,7 +139,6 @@ def crear_trabajador(request):
     
     return render(request, 'catering/crear_trabajador.html', context)
 
-
 @admin_required
 def crear_cliente(request):
     """
@@ -159,7 +148,7 @@ def crear_cliente(request):
         form = CrearClienteForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                # Crear usuario
+
                 user = User.objects.create_user(
                     username=form.cleaned_data['username'],
                     email=form.cleaned_data['email'],
@@ -169,8 +158,7 @@ def crear_cliente(request):
                     is_staff=False,
                     is_superuser=False
                 )
-                
-                # Crear perfil de usuario
+
                 PerfilUsuario.objects.create(
                     usuario=user,
                     tipo_usuario='CLIENTE',
@@ -180,8 +168,7 @@ def crear_cliente(request):
                     direccion=form.cleaned_data['domicilio'],
                     notas='Cliente creado por administrador'
                 )
-                
-                # Crear registro de cliente
+
                 Cliente.objects.create(
                     nombre=form.cleaned_data['nombre'],
                     apellido=form.cleaned_data['apellido'],
@@ -205,7 +192,6 @@ def crear_cliente(request):
     
     return render(request, 'catering/crear_cliente.html', context)
 
-
 @admin_required
 def crear_responsable(request):
     """
@@ -215,7 +201,7 @@ def crear_responsable(request):
         form = CrearResponsableForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                # Crear usuario
+
                 user = User.objects.create_user(
                     username=form.cleaned_data['username'],
                     email=form.cleaned_data['email'],
@@ -225,8 +211,7 @@ def crear_responsable(request):
                     is_staff=False,
                     is_superuser=False
                 )
-                
-                # Crear perfil de usuario
+
                 PerfilUsuario.objects.create(
                     usuario=user,
                     tipo_usuario='RESPONSABLE',
@@ -235,8 +220,7 @@ def crear_responsable(request):
                     direccion=form.cleaned_data.get('direccion', ''),
                     notas='Responsable creado por administrador'
                 )
-                
-                # Crear registro de responsable
+
                 Responsable.objects.create(
                     nombre_apellido=form.cleaned_data['nombre_apellido'],
                     telefono=form.cleaned_data['telefono'],
@@ -256,15 +240,13 @@ def crear_responsable(request):
     
     return render(request, 'catering/crear_responsable.html', context)
 
-
 @admin_required
 def gestion_usuarios(request):
     """
     Vista para gestionar todos los usuarios del sistema
     """
     usuarios = User.objects.all().order_by('-date_joined')
-    
-    # Filtros
+
     tipo_usuario = request.GET.get('tipo_usuario', '')
     estado = request.GET.get('estado', '')
     
@@ -272,8 +254,7 @@ def gestion_usuarios(request):
         usuarios = usuarios.filter(perfilusuario__tipo_usuario=tipo_usuario)
     if estado:
         usuarios = usuarios.filter(perfilusuario__estado=estado)
-    
-    # Opciones para filtros
+
     tipos_usuario = PerfilUsuario.TIPO_USUARIO_CHOICES
     estados = PerfilUsuario.ESTADO_CHOICES
     

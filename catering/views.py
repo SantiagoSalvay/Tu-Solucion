@@ -16,7 +16,6 @@ from .models import (
 )
 from .forms import ClienteForm, EventoForm, MenuForm, PersonalForm, AsignarPersonalForm, CambiarEstadoEventoForm, ProductoForm, TipoProductoForm, RegistroForm, GestionarSenaForm
 
-
 def index(request):
     """Vista principal del sistema"""
     context = {
@@ -28,39 +27,33 @@ def index(request):
     }
     return render(request, 'catering/index.html', context)
 
-
 @login_required
 def dashboard(request):
     """Dashboard principal para usuarios autenticados"""
-    # Estadísticas generales
+
     total_eventos = EventoSolicitado.objects.count()
     eventos_este_mes = EventoSolicitado.objects.filter(
         fecha__month=timezone.now().month,
         fecha__year=timezone.now().year
     ).count()
-    
-    # Eventos por estado con porcentajes
+
     eventos_por_estado_raw = EventoSolicitado.objects.values('estado').annotate(
         count=Count('id_evento')
     ).order_by('estado')
-    
-    # Calcular porcentajes
+
     eventos_por_estado = []
     for estado in eventos_por_estado_raw:
         porcentaje = (estado['count'] / total_eventos * 100) if total_eventos > 0 else 0
         estado['porcentaje'] = round(porcentaje, 1)
         eventos_por_estado.append(estado)
-    
-    # Eventos próximos (próximos 7 días)
+
     eventos_proximos = EventoSolicitado.objects.filter(
         fecha__gte=timezone.now().date(),
         fecha__lte=timezone.now().date() + timedelta(days=7)
     ).order_by('fecha', 'hora')[:10]
-    
-    # Personal disponible
+
     personal_disponible = Personal.objects.filter(estado='ACTIVO').count()
-    
-    # Total de clientes
+
     total_clientes = Cliente.objects.count()
     
     context = {
@@ -73,14 +66,11 @@ def dashboard(request):
     }
     return render(request, 'catering/dashboard.html', context)
 
-
-# Vistas de Clientes
 @login_required
 def cliente_list(request):
     """Lista de clientes"""
     clientes = Cliente.objects.all().order_by('apellido', 'nombre')
-    
-    # Filtros
+
     search = request.GET.get('search')
     if search:
         clientes = clientes.filter(
@@ -89,8 +79,7 @@ def cliente_list(request):
             Q(email__icontains=search) |
             Q(num_doc__icontains=search)
         )
-    
-    # Paginación
+
     paginator = Paginator(clientes, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -101,19 +90,16 @@ def cliente_list(request):
     }
     return render(request, 'catering/cliente_list.html', context)
 
-
 @login_required
 def cliente_detail(request, pk):
     """Detalle de un cliente"""
     cliente = get_object_or_404(Cliente, pk=pk)
     eventos = EventoSolicitado.objects.filter(id_cliente=cliente).order_by('-fecha')
-    
-    # Estadísticas del cliente
+
     total_eventos = eventos.count()
     eventos_completados = eventos.filter(estado='FINALIZADO').count()
     eventos_pendientes = eventos.filter(estado__in=['SOLICITADO', 'CONFIRMADO', 'EN_PROCESO']).count()
-    
-    # Calcular total facturado (suma de todos los eventos finalizados)
+
     total_facturado = eventos.filter(estado='FINALIZADO').aggregate(
         total=Sum('id_comprobante__total_servicio')
     )['total'] or 0
@@ -127,7 +113,6 @@ def cliente_detail(request, pk):
         'total_facturado': total_facturado,
     }
     return render(request, 'catering/cliente_detail.html', context)
-
 
 @login_required
 def cliente_create(request):
@@ -146,7 +131,6 @@ def cliente_create(request):
         'title': 'Nuevo Cliente',
     }
     return render(request, 'catering/cliente_form.html', context)
-
 
 @login_required
 def cliente_update(request, pk):
@@ -168,14 +152,13 @@ def cliente_update(request, pk):
     }
     return render(request, 'catering/cliente_form.html', context)
 
-
 @login_required
 def cliente_delete(request, pk):
     """Eliminar cliente"""
     cliente = get_object_or_404(Cliente, pk=pk)
     
     if request.method == 'POST':
-        # Verificar que no tenga eventos asociados
+
         if EventoSolicitado.objects.filter(id_cliente=cliente).exists():
             messages.error(request, 'No se puede eliminar un cliente que tiene eventos asociados.')
             return redirect('catering:cliente_detail', pk=pk)
@@ -188,7 +171,6 @@ def cliente_delete(request, pk):
         'cliente': cliente,
     }
     return render(request, 'catering/cliente_confirm_delete.html', context)
-
 
 @login_required
 def cliente_eventos(request):
@@ -206,7 +188,6 @@ def cliente_eventos(request):
         'title': 'Mis Eventos'
     }
     return render(request, 'catering/cliente_eventos.html', context)
-
 
 @login_required
 def cliente_evento_detail(request, pk):
@@ -235,14 +216,11 @@ def cliente_evento_detail(request, pk):
     }
     return render(request, 'catering/cliente_evento_detail.html', context)
 
-
-# Vistas de Eventos
 @login_required
 def evento_list(request):
     """Lista de eventos"""
     eventos = EventoSolicitado.objects.select_related('id_cliente', 'id_responsable').all().order_by('-fecha')
-    
-    # Filtros
+
     estado = request.GET.get('estado')
     tipo = request.GET.get('tipo')
     fecha_desde = request.GET.get('fecha_desde')
@@ -256,8 +234,7 @@ def evento_list(request):
         eventos = eventos.filter(fecha__gte=fecha_desde)
     if fecha_hasta:
         eventos = eventos.filter(fecha__lte=fecha_hasta)
-    
-    # Paginación
+
     paginator = Paginator(eventos, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -274,7 +251,6 @@ def evento_list(request):
         }
     }
     return render(request, 'catering/evento_list.html', context)
-
 
 @login_required
 def evento_detail(request, pk):
@@ -296,11 +272,10 @@ def evento_detail(request, pk):
     }
     return render(request, 'catering/evento_detail.html', context)
 
-
 @login_required
 def evento_create(request):
     """Crear nuevo evento - Solo Admin y Responsables"""
-    # Verificar permisos
+
     user_profile = getattr(request.user, 'perfilusuario', None)
     if not user_profile or user_profile.tipo_usuario not in ['ADMIN', 'RESPONSABLE']:
         if not request.user.is_superuser:
@@ -310,10 +285,9 @@ def evento_create(request):
     if request.method == 'POST':
         form = EventoForm(request.POST)
         if form.is_valid():
-            # Crear el evento sin guardar aún
+
             evento = form.save(commit=False)
-            
-            # Crear un comprobante para el evento
+
             from catering.models import Comprobante
             comprobante = Comprobante.objects.create(
                 id_cliente=evento.id_cliente,
@@ -323,11 +297,9 @@ def evento_create(request):
                 precio_x_persona=0.00,
                 fecha_vigencia=evento.fecha
             )
-            
-            # Asignar el comprobante al evento
+
             evento.id_comprobante = comprobante
-            
-            # Guardar el evento
+
             evento.save()
             
             messages.success(request, f'Evento {evento} creado exitosamente.')
@@ -341,20 +313,17 @@ def evento_create(request):
     }
     return render(request, 'catering/evento_form.html', context)
 
-
 @login_required
 def evento_update(request, pk):
     """Actualizar evento - Solo Admin y Responsables"""
     evento = get_object_or_404(EventoSolicitado, pk=pk)
-    
-    # Verificar permisos
+
     user_profile = getattr(request.user, 'perfilusuario', None)
     if not user_profile or user_profile.tipo_usuario not in ['ADMIN', 'RESPONSABLE']:
         if not request.user.is_superuser:
             messages.error(request, 'No tienes permisos para editar eventos.')
             return redirect('catering:evento_detail', pk=pk)
-    
-    # Si es responsable, verificar que el evento esté asignado a él
+
     if user_profile and user_profile.tipo_usuario == 'RESPONSABLE':
         if evento.id_responsable and evento.id_responsable.usuario != request.user:
             messages.error(request, 'No tienes permisos para editar este evento.')
@@ -376,16 +345,10 @@ def evento_update(request, pk):
     }
     return render(request, 'catering/evento_form.html', context)
 
-
-# Vistas de Consultas
-
-
-
-
 @login_required
 def consulta_cumpleanos(request):
     """Consulta de marketing - Reporte de cumpleaños para recordatorios - Solo Admin"""
-    # Verificar permisos
+
     user_profile = getattr(request.user, 'perfilusuario', None)
     if not user_profile or user_profile.tipo_usuario != 'ADMIN':
         if not request.user.is_superuser:
@@ -393,8 +356,7 @@ def consulta_cumpleanos(request):
             return redirect('catering:index')
     
     from decimal import Decimal
-    
-    # Filtros
+
     mes = request.GET.get('mes', timezone.now().month)
     incluir_vocal = request.GET.get('incluir_vocal', 'true') == 'true'
     
@@ -404,27 +366,23 @@ def consulta_cumpleanos(request):
             mes = timezone.now().month
     except (ValueError, TypeError):
         mes = timezone.now().month
-    
-    # Filtrar clientes con cumpleaños en el mes seleccionado
+
     clientes_cumpleanos = Cliente.objects.filter(
         fecha_nacimiento__month=mes
     ).exclude(
         fecha_nacimiento__isnull=True
     ).order_by('fecha_nacimiento__day', 'apellido', 'nombre')
-    
-    # Filtrar por vocal en segunda letra del nombre si se solicita
+
     clientes_filtrados = []
     total_monto = Decimal('0')
     
     for cliente in clientes_cumpleanos:
-        # Aplicar filtro de vocal si está habilitado
+
         if incluir_vocal and not cliente.tiene_vocal_segunda_letra():
             continue
-        
-        # Calcular edad
+
         edad = cliente.get_edad() if cliente.fecha_nacimiento else None
-        
-        # Calcular monto total cobrado
+
         eventos_cliente = EventoSolicitado.objects.filter(id_cliente=cliente)
         monto_total = Decimal('0')
         cantidad_eventos = eventos_cliente.count()
@@ -432,8 +390,7 @@ def consulta_cumpleanos(request):
         for evento in eventos_cliente:
             if hasattr(evento, 'id_comprobante') and evento.id_comprobante:
                 monto_total += evento.id_comprobante.total_servicio or Decimal('0')
-        
-        # Obtener último evento
+
         ultimo_evento = eventos_cliente.order_by('-fecha').first()
         
         clientes_filtrados.append({
@@ -446,12 +403,10 @@ def consulta_cumpleanos(request):
         })
         
         total_monto += monto_total
-    
-    # Estadísticas
+
     total_clientes = len(clientes_filtrados)
     promedio_monto = total_monto / total_clientes if total_clientes > 0 else Decimal('0')
-    
-    # Clientes por rango de edad
+
     clientes_por_edad = {
         '18-30': 0,
         '31-50': 0,
@@ -470,8 +425,7 @@ def consulta_cumpleanos(request):
                 clientes_por_edad['51-70'] += 1
             else:
                 clientes_por_edad['70+'] += 1
-    
-    # Nombres de meses
+
     meses = {
         1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril',
         5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto',
@@ -494,14 +448,11 @@ def consulta_cumpleanos(request):
     }
     return render(request, 'catering/consulta_cumpleanos.html', context)
 
-
-# Vistas de Personal
 @login_required
 def personal_list(request):
     """Lista de personal"""
     personal = Personal.objects.all().order_by('tipo_personal', 'nombre_y_apellido')
-    
-    # Filtros
+
     tipo = request.GET.get('tipo')
     estado = request.GET.get('estado')
     
@@ -509,8 +460,7 @@ def personal_list(request):
         personal = personal.filter(tipo_personal=tipo)
     if estado:
         personal = personal.filter(estado=estado)
-    
-    # Estadísticas
+
     total_personal = Personal.objects.count()
     personal_activo = Personal.objects.filter(estado='ACTIVO').count()
     mozos = Personal.objects.filter(tipo_personal='MOZO').count()
@@ -533,14 +483,12 @@ def personal_list(request):
     }
     return render(request, 'catering/personal_list.html', context)
 
-
 @login_required
 def personal_detail(request, pk):
     """Detalle de un miembro del personal"""
     personal = get_object_or_404(Personal, pk=pk)
     servicios = Servicio.objects.filter(id_personal=personal).select_related('id_evento', 'id_evento__id_cliente').order_by('-fecha_asignacion')
-    
-    # Estadísticas del personal
+
     total_servicios = servicios.count()
     servicios_completados = servicios.filter(estado='COMPLETADO').count()
     servicios_pendientes = servicios.filter(estado__in=['ASIGNADO', 'EN_SERVICIO']).count()
@@ -554,11 +502,10 @@ def personal_detail(request, pk):
     }
     return render(request, 'catering/personal_detail.html', context)
 
-
 @login_required
 def personal_create(request):
     """Crear nuevo miembro del personal - Solo Admin"""
-    # Verificar permisos
+
     user_profile = getattr(request.user, 'perfilusuario', None)
     if not user_profile or user_profile.tipo_usuario != 'ADMIN':
         if not request.user.is_superuser:
@@ -580,7 +527,6 @@ def personal_create(request):
     }
     return render(request, 'catering/personal_form.html', context)
 
-
 @login_required
 def personal_update(request, pk):
     """Actualizar miembro del personal"""
@@ -601,14 +547,13 @@ def personal_update(request, pk):
     }
     return render(request, 'catering/personal_form.html', context)
 
-
 @login_required
 def personal_delete(request, pk):
     """Eliminar miembro del personal"""
     personal = get_object_or_404(Personal, pk=pk)
     
     if request.method == 'POST':
-        # Verificar que no tenga servicios asociados
+
         if Servicio.objects.filter(id_personal=personal).exists():
             messages.error(request, 'No se puede eliminar un miembro del personal que tiene servicios asociados.')
             return redirect('catering:personal_detail', pk=pk)
@@ -621,7 +566,6 @@ def personal_delete(request, pk):
         'personal': personal,
     }
     return render(request, 'catering/personal_confirm_delete.html', context)
-
 
 @login_required
 def asignar_personal(request, evento_id):
@@ -639,8 +583,7 @@ def asignar_personal(request, evento_id):
             return redirect('catering:evento_detail', pk=evento_id)
     else:
         form = AsignarPersonalForm()
-    
-    # Obtener personal ya asignado
+
     personal_asignado = Servicio.objects.filter(id_evento=evento).select_related('id_personal')
     
     context = {
@@ -650,7 +593,6 @@ def asignar_personal(request, evento_id):
         'title': f'Asignar Personal - Evento {evento.id_evento}'
     }
     return render(request, 'catering/asignar_personal.html', context)
-
 
 @login_required
 def cambiar_estado_evento(request, evento_id):
@@ -673,7 +615,6 @@ def cambiar_estado_evento(request, evento_id):
     }
     return render(request, 'catering/cambiar_estado_evento.html', context)
 
-
 @login_required
 def eliminar_personal_asignado(request, servicio_id):
     """Eliminar personal asignado a un evento"""
@@ -692,14 +633,11 @@ def eliminar_personal_asignado(request, servicio_id):
     }
     return render(request, 'catering/eliminar_personal_asignado.html', context)
 
-
-# Vistas de Productos
 @login_required
 def productos_list(request):
     """Lista todos los productos disponibles"""
     productos = Producto.objects.all().select_related('id_tipo_producto')
-    
-    # Filtros
+
     tipo_filter = request.GET.get('tipo')
     disponible_filter = request.GET.get('disponible')
     
@@ -722,11 +660,10 @@ def productos_list(request):
     }
     return render(request, 'catering/productos_list.html', context)
 
-
 @login_required
 def producto_create(request):
     """Crear un nuevo producto - Solo Admin y Responsables"""
-    # Verificar permisos
+
     user_profile = getattr(request.user, 'perfilusuario', None)
     if not user_profile or user_profile.tipo_usuario not in ['ADMIN', 'RESPONSABLE']:
         if not request.user.is_superuser:
@@ -747,7 +684,6 @@ def producto_create(request):
         'title': 'Crear Nuevo Producto'
     }
     return render(request, 'catering/producto_form.html', context)
-
 
 @login_required
 def producto_update(request, pk):
@@ -770,7 +706,6 @@ def producto_update(request, pk):
     }
     return render(request, 'catering/producto_form.html', context)
 
-
 @login_required
 def producto_delete(request, pk):
     """Eliminar un producto"""
@@ -788,13 +723,11 @@ def producto_delete(request, pk):
     }
     return render(request, 'catering/producto_confirm_delete.html', context)
 
-
 @login_required
 def producto_detail(request, pk):
     """Ver detalles de un producto"""
     producto = get_object_or_404(Producto, pk=pk)
-    
-    # Obtener eventos donde se usó este producto
+
     eventos_usados = MenuXTipoProducto.objects.filter(
         id_producto=producto
     ).select_related('id_evento', 'id_evento__id_cliente')
@@ -806,8 +739,6 @@ def producto_detail(request, pk):
     }
     return render(request, 'catering/producto_detail.html', context)
 
-
-# Vistas de Tipos de Producto
 @login_required
 def tipos_producto_list(request):
     """Lista todos los tipos de productos"""
@@ -818,7 +749,6 @@ def tipos_producto_list(request):
         'title': 'Tipos de Productos'
     }
     return render(request, 'catering/tipos_producto_list.html', context)
-
 
 @login_required
 def tipo_producto_create(request):
@@ -837,7 +767,6 @@ def tipo_producto_create(request):
         'title': 'Crear Nuevo Tipo de Producto'
     }
     return render(request, 'catering/tipo_producto_form.html', context)
-
 
 @login_required
 def tipo_producto_update(request, pk):
@@ -860,13 +789,11 @@ def tipo_producto_update(request, pk):
     }
     return render(request, 'catering/tipo_producto_form.html', context)
 
-
 @login_required
 def tipo_producto_delete(request, pk):
     """Eliminar un tipo de producto"""
     tipo = get_object_or_404(TipoProducto, pk=pk)
-    
-    # Verificar si hay productos asociados
+
     productos_asociados = Producto.objects.filter(id_tipo_producto=tipo)
     
     if request.method == 'POST':
@@ -882,8 +809,6 @@ def tipo_producto_delete(request, pk):
     }
     return render(request, 'catering/tipo_producto_confirm_delete.html', context)
 
-
-# API Views para AJAX
 def verificar_disponibilidad(request):
     """Verificar disponibilidad para una fecha específica"""
     fecha = request.GET.get('fecha')
@@ -906,7 +831,6 @@ def verificar_disponibilidad(request):
     
     return JsonResponse({'error': 'Fecha requerida'}, status=400)
 
-
 def obtener_productos_por_tipo(request):
     """Obtener productos por tipo para el armado de menús"""
     tipo_id = request.GET.get('tipo_id')
@@ -922,8 +846,6 @@ def obtener_productos_por_tipo(request):
     
     return JsonResponse({'error': 'Tipo de producto requerido'}, status=400)
 
-
-# Vistas para Reserva de Catering
 @login_required
 def reserva_catering(request):
     """Vista para crear una nueva reserva de catering"""
@@ -931,12 +853,10 @@ def reserva_catering(request):
         form = EventoForm(request.POST)
         if form.is_valid():
             evento = form.save(commit=False)
-            
-            # Asignar responsable por defecto si no hay uno seleccionado
+
             if not evento.id_responsable:
                 evento.id_responsable = Responsable.objects.first()
-            
-            # Crear comprobante temporal
+
             comprobante = Comprobante.objects.create(
                 id_cliente=evento.id_cliente,
                 importe_total_productos=0,
@@ -958,7 +878,6 @@ def reserva_catering(request):
     }
     return render(request, 'catering/reserva_catering.html', context)
 
-
 @login_required
 def editar_menu(request, evento_id):
     """Vista para editar el menú de un evento"""
@@ -968,7 +887,7 @@ def editar_menu(request, evento_id):
         form = MenuForm(request.POST)
         if form.is_valid():
             try:
-                # Verificar si ya existe un producto del mismo tipo para este evento
+
                 producto_existente = MenuXTipoProducto.objects.filter(
                     id_evento=evento,
                     id_tipo_producto=form.cleaned_data['id_tipo_producto'],
@@ -976,37 +895,35 @@ def editar_menu(request, evento_id):
                 ).first()
                 
                 if producto_existente:
-                    # Si existe, actualizar la cantidad
+
                     producto_existente.cantidad_producto += form.cleaned_data['cantidad_producto']
                     producto_existente.precio_total = producto_existente.precio_uni * producto_existente.cantidad_producto
                     producto_existente.save()
                     messages.success(request, 'Cantidad del producto actualizada exitosamente.')
                 else:
-                    # Si no existe, crear uno nuevo
+
                     menu_item = form.save(commit=False)
                     menu_item.id_evento = evento
                     menu_item.precio_uni = menu_item.id_producto.precio
                     menu_item.precio_total = menu_item.precio_uni * menu_item.cantidad_producto
                     menu_item.save()
                     messages.success(request, 'Producto agregado al menú exitosamente.')
-                
-                # Actualizar comprobante
+
                 actualizar_comprobante(evento)
                 return redirect('catering:editar_menu', evento_id=evento_id)
                 
             except Exception as e:
                 messages.error(request, f'Error al agregar producto al menú: {str(e)}')
-                print(f"Error en editar_menu: {e}")  # Para debug
+                print(f"Error en editar_menu: {e}")
         else:
-            # Si el formulario no es válido, mostrar errores
+
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f'Error en {field}: {error}')
-            print(f"Errores del formulario: {form.errors}")  # Para debug
+            print(f"Errores del formulario: {form.errors}")
     else:
         form = MenuForm()
-    
-    # Obtener productos del menú actual
+
     menu_actual = MenuXTipoProducto.objects.filter(id_evento=evento).select_related('id_producto', 'id_tipo_producto')
     
     context = {
@@ -1017,7 +934,6 @@ def editar_menu(request, evento_id):
     }
     return render(request, 'catering/editar_menu.html', context)
 
-
 @login_required
 def eliminar_producto_menu(request, menu_id):
     """Eliminar un producto del menú"""
@@ -1025,13 +941,11 @@ def eliminar_producto_menu(request, menu_id):
     evento_id = menu_item.id_evento.id_evento
     
     menu_item.delete()
-    
-    # Actualizar comprobante
+
     actualizar_comprobante(menu_item.id_evento)
     
     messages.success(request, 'Producto eliminado del menú exitosamente.')
     return redirect('catering:editar_menu', evento_id=evento_id)
-
 
 @login_required
 def evento_delete(request, pk):
@@ -1039,12 +953,11 @@ def evento_delete(request, pk):
     evento = get_object_or_404(EventoSolicitado, pk=pk)
     
     if request.method == 'POST':
-        # Verificar que no tenga personal asignado
+
         if Servicio.objects.filter(id_evento=evento).exists():
             messages.error(request, 'No se puede eliminar un evento que tiene personal asignado.')
             return redirect('catering:evento_detail', pk=pk)
-        
-        # Eliminar menú y comprobante asociados
+
         MenuXTipoProducto.objects.filter(id_evento=evento).delete()
         if hasattr(evento, 'id_comprobante'):
             evento.id_comprobante.delete()
@@ -1058,7 +971,6 @@ def evento_delete(request, pk):
     }
     return render(request, 'catering/evento_confirm_delete.html', context)
 
-
 def actualizar_comprobante(evento):
     """Función auxiliar para actualizar el comprobante de un evento"""
     menu_items = MenuXTipoProducto.objects.filter(id_evento=evento)
@@ -1066,15 +978,13 @@ def actualizar_comprobante(evento):
     
     comprobante = evento.id_comprobante
     comprobante.importe_total_productos = total_productos
-    comprobante.total_servicio = total_productos * Decimal('1.3')  # 30% de ganancia
+    comprobante.total_servicio = total_productos * Decimal('1.3')
     comprobante.precio_x_persona = comprobante.total_servicio / evento.cantidad_personas if evento.cantidad_personas > 0 else 0
     comprobante.save()
-    
-    # Actualizar precio total del evento
+
     evento.precio_total = comprobante.total_servicio
     evento.precio_por_persona = comprobante.precio_x_persona
     evento.save()
-
 
 def registro_usuario(request):
     """Vista para registro de nuevos usuarios (clientes)"""
@@ -1089,7 +999,7 @@ def registro_usuario(request):
             print(f"DEBUG - Errores del formulario: {form.errors}")
         if form.is_valid():
             try:
-                # Crear usuario
+
                 user = User.objects.create_user(
                     username=form.cleaned_data['username'],
                     email=form.cleaned_data['email'],
@@ -1097,14 +1007,12 @@ def registro_usuario(request):
                     first_name=form.cleaned_data['nombre'],
                     last_name=form.cleaned_data['apellido']
                 )
-                
-                # Crear perfil de usuario
+
                 PerfilUsuario.objects.create(
                     usuario=user,
                     tipo_usuario='CLIENTE'
                 )
-                
-                # Crear cliente
+
                 cliente = Cliente.objects.create(
                     nombre=form.cleaned_data['nombre'],
                     apellido=form.cleaned_data['apellido'],
@@ -1113,7 +1021,7 @@ def registro_usuario(request):
                     email=form.cleaned_data['email'],
                     domicilio=form.cleaned_data['domicilio'],
                     provincia=form.cleaned_data.get('provincia'),
-                    barrio=None,  # Ya no usamos la relación con Barrio
+                    barrio=None,
                     fecha_alta=timezone.now().date(),
                     usuario=user
                 )
@@ -1123,13 +1031,13 @@ def registro_usuario(request):
                 
             except Exception as e:
                 messages.error(request, f'Error al crear el usuario: {str(e)}')
-                print(f"Error en registro_usuario: {e}")  # Para debug
+                print(f"Error en registro_usuario: {e}")
         else:
-            # Si el formulario no es válido, mostrar errores específicos
+
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f'Error en {field}: {error}')
-            print(f"Errores del formulario: {form.errors}")  # Para debug
+            print(f"Errores del formulario: {form.errors}")
     else:
         form = RegistroForm()
     
@@ -1138,7 +1046,6 @@ def registro_usuario(request):
         'title': 'Registro de Usuario'
     }
     return render(request, 'registration/registro.html', context)
-
 
 def obtener_barrios_por_provincia(request):
     """Vista AJAX para obtener barrios de una provincia específica"""
@@ -1152,13 +1059,11 @@ def obtener_barrios_por_provincia(request):
     
     return JsonResponse(data, safe=False)
 
-
 @login_required
 def gestionar_sena_evento(request, evento_id):
     """Vista para que los responsables gestionen la seña de un evento"""
     evento = get_object_or_404(EventoSolicitado, pk=evento_id)
-    
-    # Verificar que el usuario sea responsable del evento o admin
+
     user_profile = getattr(request.user, 'perfilusuario', None)
     if not user_profile or (user_profile.tipo_usuario != 'RESPONSABLE' and not request.user.is_superuser):
         if user_profile and user_profile.tipo_usuario == 'RESPONSABLE':
@@ -1185,25 +1090,21 @@ def gestionar_sena_evento(request, evento_id):
     }
     return render(request, 'catering/gestionar_sena.html', context)
 
-
 @login_required
 def empleado_dashboard(request):
     """Dashboard para empleados - muestra eventos donde deben trabajar"""
     user_profile = getattr(request.user, 'perfilusuario', None)
-    
-    # Verificar que el usuario sea empleado
+
     if not user_profile or user_profile.tipo_usuario != 'EMPLEADO':
         messages.error(request, 'No tienes permisos para acceder a esta página.')
         return redirect('catering:index')
-    
-    # Obtener el personal asociado al usuario
+
     try:
         personal = Personal.objects.get(usuario=request.user)
     except Personal.DoesNotExist:
         messages.error(request, 'No se encontró información de personal para tu usuario.')
         return redirect('catering:index')
-    
-    # Obtener eventos donde el personal está asignado
+
     servicios = Servicio.objects.filter(id_personal=personal)
     eventos_asignados = [servicio.id_evento for servicio in servicios]
     
@@ -1214,29 +1115,24 @@ def empleado_dashboard(request):
     }
     return render(request, 'catering/empleado_dashboard.html', context)
 
-
 @login_required
 def responsable_dashboard(request):
     """Dashboard para responsables - muestra eventos asignados y herramientas de gestión"""
     user_profile = getattr(request.user, 'perfilusuario', None)
-    
-    # Verificar que el usuario sea responsable
+
     if not user_profile or user_profile.tipo_usuario != 'RESPONSABLE':
         messages.error(request, 'No tienes permisos para acceder a esta página.')
         return redirect('catering:index')
-    
-    # Obtener el responsable asociado al usuario
+
     try:
         responsable = Responsable.objects.get(usuario=request.user)
     except Responsable.DoesNotExist:
         messages.error(request, 'No se encontró información de responsable para tu usuario.')
         return redirect('catering:index')
-    
-    # Obtener eventos asignados al responsable
+
     eventos_asignados = EventoSolicitado.objects.filter(id_responsable=responsable)
     eventos_confirmados = eventos_asignados.filter(estado__in=['CONFIRMADO', 'EN_PROCESO', 'FINALIZADO'])
-    
-    # Estadísticas
+
     total_personal = Personal.objects.filter(estado='ACTIVO').count()
     ingresos_totales = eventos_confirmados.aggregate(
         total=Sum('precio_total')

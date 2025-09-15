@@ -6,36 +6,30 @@ from datetime import timedelta
 from .models import Personal, Servicio, EventoSolicitado, PerfilUsuario
 from .decorators import empleado_required, get_user_profile
 
-
 @empleado_required
 def trabajador_dashboard(request):
     """
     Dashboard específico para trabajadores
     """
     perfil = get_user_profile(request.user)
-    
-    # Obtener el personal asociado al usuario
+
     try:
         personal = Personal.objects.get(email=request.user.email)
     except Personal.DoesNotExist:
         messages.error(request, 'No se encontró información del trabajador.')
         return redirect('catering:index')
-    
-    # Obtener servicios asignados
+
     servicios = Servicio.objects.filter(id_personal=personal).order_by('-fecha_asignacion')
-    
-    # Estadísticas del trabajador
+
     total_servicios = servicios.count()
     servicios_activos = servicios.filter(estado__in=['ASIGNADO', 'EN_SERVICIO']).count()
     servicios_completados = servicios.filter(estado='COMPLETADO').count()
-    
-    # Próximos servicios (próximos 30 días)
+
     servicios_proximos = servicios.filter(
         id_evento__fecha__gte=timezone.now().date(),
         id_evento__fecha__lte=timezone.now().date() + timedelta(days=30)
     ).order_by('id_evento__fecha', 'id_evento__hora')[:5]
-    
-    # Servicios de hoy
+
     servicios_hoy = servicios.filter(
         id_evento__fecha=timezone.now().date()
     ).order_by('id_evento__hora')
@@ -48,11 +42,10 @@ def trabajador_dashboard(request):
         'servicios_completados': servicios_completados,
         'servicios_proximos': servicios_proximos,
         'servicios_hoy': servicios_hoy,
-        'servicios': servicios[:10],  # Últimos 10 servicios
+        'servicios': servicios[:10],
     }
     
     return render(request, 'catering/trabajador_dashboard.html', context)
-
 
 @empleado_required
 def trabajador_servicios(request):
@@ -64,8 +57,7 @@ def trabajador_servicios(request):
     except Personal.DoesNotExist:
         messages.error(request, 'No se encontró información del trabajador.')
         return redirect('catering:index')
-    
-    # Filtros
+
     estado = request.GET.get('estado', '')
     fecha_desde = request.GET.get('fecha_desde', '')
     fecha_hasta = request.GET.get('fecha_hasta', '')
@@ -80,8 +72,7 @@ def trabajador_servicios(request):
         servicios = servicios.filter(id_evento__fecha__lte=fecha_hasta)
     
     servicios = servicios.order_by('-id_evento__fecha')
-    
-    # Opciones para filtros
+
     estados = [('ASIGNADO', 'Asignado'), ('EN_SERVICIO', 'En Servicio'), 
                ('COMPLETADO', 'Completado'), ('CANCELADO', 'Cancelado')]
     
@@ -98,7 +89,6 @@ def trabajador_servicios(request):
     
     return render(request, 'catering/trabajador_servicios.html', context)
 
-
 @empleado_required
 def trabajador_servicio_detail(request, pk):
     """
@@ -112,19 +102,13 @@ def trabajador_servicio_detail(request, pk):
     
     servicio = get_object_or_404(Servicio, pk=pk, id_personal=personal)
     evento = servicio.id_evento
-    
-    # Solo obtener información básica del evento
-    # NO incluir menú, información del cliente, ni opciones de edición
-    
+
     context = {
         'servicio': servicio,
         'evento': evento,
         'personal': personal,
-        'es_empleado': True,  # Flag para el template
+        'es_empleado': True,
     }
     
     return render(request, 'catering/trabajador_servicio_detail.html', context)
 
-
-# Los empleados no pueden actualizar estados de servicios
-# Solo pueden ver la información básica de sus servicios asignados

@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import re
 
-
 class Cliente(models.Model):
     """Modelo para gestionar los clientes de la empresa de catering"""
     id_cliente = models.AutoField(primary_key=True)
@@ -53,8 +52,7 @@ class Cliente(models.Model):
         
         if not password:
             password = f"cliente{self.num_doc}"
-        
-        # Crear usuario
+
         user = User.objects.create_user(
             username=username,
             email=self.email,
@@ -64,8 +62,7 @@ class Cliente(models.Model):
             is_staff=False,
             is_superuser=False
         )
-        
-        # Crear perfil de usuario
+
         PerfilUsuario.objects.create(
             usuario=user,
             tipo_usuario='CLIENTE',
@@ -79,7 +76,6 @@ class Cliente(models.Model):
         self.save()
         
         return user
-
 
 class Responsable(models.Model):
     """Modelo para gestionar los responsables de servicios"""
@@ -97,7 +93,6 @@ class Responsable(models.Model):
     def __str__(self):
         return self.nombre_apellido
 
-
 class TipoProducto(models.Model):
     """Modelo para los tipos de productos (bebidas, entradas, etc.)"""
     id_tipo_producto = models.AutoField(primary_key=True)
@@ -110,7 +105,6 @@ class TipoProducto(models.Model):
     
     def __str__(self):
         return self.descripcion
-
 
 class Producto(models.Model):
     """Modelo para los productos específicos de cada tipo"""
@@ -127,7 +121,6 @@ class Producto(models.Model):
     
     def __str__(self):
         return f"{self.descripcion} - {self.id_tipo_producto}"
-
 
 class Comprobante(models.Model):
     """Modelo para los comprobantes de pedido"""
@@ -151,7 +144,6 @@ class Comprobante(models.Model):
         if not self.fecha_vigencia:
             self.fecha_vigencia = self.fecha_pedido + timedelta(days=10)
         super().save(*args, **kwargs)
-
 
 class EventoSolicitado(models.Model):
     """Modelo para los eventos solicitados por los clientes"""
@@ -183,8 +175,7 @@ class EventoSolicitado(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='SOLICITADO', verbose_name="Estado")
     precio_total = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Precio Total", null=True, blank=True)
     precio_por_persona = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio por Persona", null=True, blank=True)
-    
-    # Campos relacionados con la seña
+
     tiene_sena = models.BooleanField(default=False, verbose_name="¿El cliente dejó seña?")
     monto_sena = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Monto de la Seña")
     fecha_sena = models.DateField(null=True, blank=True, verbose_name="Fecha de la Seña")
@@ -221,7 +212,7 @@ class EventoSolicitado(models.Model):
     
     def get_barrio(self):
         """Extrae el barrio de la ubicación"""
-        # Implementación básica - se puede mejorar con geocoding
+
         if ',' in self.ubicacion:
             return self.ubicacion.split(',')[-1].strip()
         return self.ubicacion
@@ -233,14 +224,13 @@ class EventoSolicitado(models.Model):
         
         if hasattr(self, 'id_comprobante'):
             self.id_comprobante.importe_total_productos = total_productos
-            self.id_comprobante.total_servicio = total_productos * Decimal('1.3')  # 30% de ganancia
+            self.id_comprobante.total_servicio = total_productos * Decimal('1.3')
             self.id_comprobante.precio_x_persona = self.id_comprobante.total_servicio / self.cantidad_personas if self.cantidad_personas > 0 else 0
             self.id_comprobante.save()
             
             self.precio_total = self.id_comprobante.total_servicio
             self.precio_por_persona = self.id_comprobante.precio_x_persona
             self.save()
-
 
 class MenuXTipoProducto(models.Model):
     """Modelo para los menús personalizados por tipo de producto"""
@@ -265,7 +255,6 @@ class MenuXTipoProducto(models.Model):
             self.precio_uni = self.id_producto.precio
         self.precio_total = self.precio_uni * self.cantidad_producto
         super().save(*args, **kwargs)
-
 
 class Senia(models.Model):
     """Modelo para gestionar las señas de los eventos"""
@@ -296,7 +285,6 @@ class Senia(models.Model):
         if not self.monto:
             self.monto = self.calcular_monto()
         super().save(*args, **kwargs)
-
 
 class Personal(models.Model):
     """Modelo para gestionar el personal de la empresa"""
@@ -330,7 +318,6 @@ class Personal(models.Model):
     def __str__(self):
         return f"{self.nombre_y_apellido} - {self.tipo_personal}"
 
-
 class Servicio(models.Model):
     """Modelo para gestionar los servicios de personal asignados a eventos"""
     id_servicio = models.AutoField(primary_key=True)
@@ -348,7 +335,6 @@ class Servicio(models.Model):
     
     def __str__(self):
         return f"{self.id_personal} - {self.id_evento}"
-
 
 class PerfilUsuario(models.Model):
     """Modelo para extender el usuario de Django con información adicional"""
@@ -405,7 +391,6 @@ class PerfilUsuario(models.Model):
         """Verifica si el usuario está activo"""
         return self.estado == 'ACTIVO' and self.usuario.is_active
 
-
 class Provincia(models.Model):
     """Modelo para gestionar las provincias de Córdoba"""
     id_provincia = models.AutoField(primary_key=True)
@@ -420,7 +405,6 @@ class Provincia(models.Model):
     
     def __str__(self):
         return self.nombre
-
 
 class Barrio(models.Model):
     """Modelo para gestionar los barrios de cada provincia"""

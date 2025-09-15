@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 """
 Script para configurar usuarios y perfiles en el sistema Tu Solución
 """
@@ -6,7 +6,6 @@ import os
 import sys
 import django
 
-# Configurar Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tu_solucion.settings')
 django.setup()
 
@@ -75,17 +74,16 @@ def crear_usuarios_ejemplo():
     for datos in usuarios_ejemplo:
         try:
             if not User.objects.filter(username=datos['username']).exists():
-                # Crear usuario
+
                 user = User.objects.create_user(
                     username=datos['username'],
                     email=datos['email'],
-                    password='TuSolucion2024!',  # Contraseña por defecto
+                    password='TuSolucion2024!',
                     first_name=datos['first_name'],
                     last_name=datos['last_name'],
                     is_staff=datos['tipo_usuario'] in ['ADMIN', 'EMPLEADO']
                 )
-                
-                # Crear perfil
+
                 PerfilUsuario.objects.create(
                     usuario=user,
                     tipo_usuario=datos['tipo_usuario'],
@@ -123,15 +121,12 @@ def mostrar_usuarios():
 def main():
     print("🚀 Configurando usuarios para Tu Solución")
     print("=" * 50)
-    
-    # Crear perfil para admin existente
+
     crear_perfil_admin()
-    
-    # Crear usuarios de ejemplo
+
     print("\n👥 Creando usuarios de ejemplo...")
     crear_usuarios_ejemplo()
-    
-    # Mostrar usuarios
+
     mostrar_usuarios()
     
     print("\n" + "=" * 50)

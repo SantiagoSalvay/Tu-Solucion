@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from catering.models import PerfilUsuario
 import getpass
 
-
 class Command(BaseCommand):
     help = 'Crea un nuevo usuario con perfil personalizado'
 
@@ -19,7 +18,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            # Obtener datos del usuario
+
             username = options['username']
             if not username:
                 username = input('Nombre de usuario: ').strip()
@@ -42,8 +41,7 @@ class Command(BaseCommand):
             tipo_usuario = options['tipo']
             is_superuser = options['superuser']
             is_staff = options['staff']
-            
-            # Solicitar contraseña de forma segura
+
             password = getpass.getpass('Contraseña: ')
             password_confirm = getpass.getpass('Confirmar contraseña: ')
             
@@ -52,8 +50,7 @@ class Command(BaseCommand):
             
             if len(password) < 8:
                 raise CommandError('La contraseña debe tener al menos 8 caracteres.')
-            
-            # Crear el usuario
+
             user = User.objects.create_user(
                 username=username,
                 email=email,
@@ -63,8 +60,7 @@ class Command(BaseCommand):
                 is_superuser=is_superuser,
                 is_staff=is_staff or is_superuser
             )
-            
-            # Crear el perfil de usuario
+
             perfil = PerfilUsuario.objects.create(
                 usuario=user,
                 tipo_usuario=tipo_usuario,

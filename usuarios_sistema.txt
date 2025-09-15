@@ -1,0 +1,202 @@
+============================================================
+USUARIOS DEL SISTEMA DE CATERING
+============================================================
+
+Usuario: admin
+Email: admin@tusolucion.com
+Tipo: ADMIN
+Nombre completo:  
+Activo: Sí
+Superusuario: Sí
+Staff: Sí
+Fecha de registro: 15/09/2025 01:18
+Último login: 15/09/2025 01:33
+--------------------------------------------------
+
+Usuario: admin2
+Email: admin2@tusolucion.com
+Tipo: ADMIN
+Nombre completo: Roberto Martínez
+Activo: Sí
+Superusuario: No
+Staff: Sí
+Fecha de registro: 15/09/2025 01:18
+Último login: 15/09/2025 03:30
+--------------------------------------------------
+
+Usuario: ana.gonzalez
+Email: ana.gonzalez@tusolucion.com
+Tipo: EMPLEADO
+Nombre completo: Ana González
+Activo: Sí
+Superusuario: No
+Staff: Sí
+Fecha de registro: 15/09/2025 01:24
+Último login: 15/09/2025 01:54
+--------------------------------------------------
+
+Usuario: carlos.martinez
+Email: carlos.martinez@tusolucion.com
+Tipo: RESPONSABLE
+Nombre completo: Carlos Martínez
+Activo: Sí
+Superusuario: No
+Staff: Sí
+Fecha de registro: 15/09/2025 01:24
+Último login: Nunca
+--------------------------------------------------
+
+Usuario: cliente_11223344
+Email: roberto.silva@yahoo.com
+Tipo: CLIENTE
+Nombre completo: Roberto Silva
+Activo: Sí
+Superusuario: No
+Staff: No
+Fecha de registro: 15/09/2025 01:24
+Último login: Nunca
+--------------------------------------------------
+
+Usuario: cliente_12345678
+Email: pedro.garcia@gmail.com
+Tipo: CLIENTE
+Nombre completo: Pedro García
+Activo: Sí
+Superusuario: No
+Staff: No
+Fecha de registro: 15/09/2025 01:24
+Último login: Nunca
+--------------------------------------------------
+
+Usuario: cliente_87654321
+Email: sofia.martin@hotmail.com
+Tipo: CLIENTE
+Nombre completo: Sofía Martín
+Activo: Sí
+Superusuario: No
+Staff: No
+Fecha de registro: 15/09/2025 01:24
+Último login: Nunca
+--------------------------------------------------
+
+Usuario: empleado1
+Email: empleado1@tusolucion.com
+Tipo: EMPLEADO
+Nombre completo: María González
+Activo: Sí
+Superusuario: No
+Staff: Sí
+Fecha de registro: 15/09/2025 01:18
+Último login: Nunca
+--------------------------------------------------
+
+Usuario: empleado2
+Email: empleado2@tusolucion.com
+Tipo: EMPLEADO
+Nombre completo: Carlos Rodríguez
+Activo: Sí
+Superusuario: No
+Staff: Sí
+Fecha de registro: 15/09/2025 01:18
+Último login: Nunca
+--------------------------------------------------
+
+Usuario: Fer
+Email: fernando@gmail.com
+Tipo: CLIENTE
+Nombre completo: Fer Fr
+Activo: Sí
+Superusuario: No
+Staff: No
+Fecha de registro: 15/09/2025 03:50
+Último login: Nunca
+--------------------------------------------------
+
+Usuario: Jeremias
+Email: joquinfieroli@gmail.com
+Tipo: CLIENTE
+Nombre completo: Jeremias Fieroli
+Activo: Sí
+Superusuario: No
+Staff: No
+Fecha de registro: 15/09/2025 03:12
+Último login: 15/09/2025 03:12
+--------------------------------------------------
+
+Usuario: Joaquin
+Email: joaquinfieroli@gmail.com
+Tipo: CLIENTE
+Nombre completo: Joaquín Fieroli
+Activo: Sí
+Superusuario: No
+Staff: No
+Fecha de registro: 15/09/2025 01:32
+Último login: 15/09/2025 03:38
+--------------------------------------------------
+
+Usuario: juan.rodriguez
+Email: juan.rodriguez@tusolucion.com
+Tipo: EMPLEADO
+Nombre completo: Juan Rodríguez
+Activo: Sí
+Superusuario: No
+Staff: Sí
+Fecha de registro: 15/09/2025 01:24
+Último login: Nunca
+--------------------------------------------------
+
+Usuario: lucia.fernandez
+Email: lucia.fernandez@tusolucion.com
+Tipo: EMPLEADO
+Nombre completo: Lucía Fernández
+Activo: Sí
+Superusuario: No
+Staff: Sí
+Fecha de registro: 15/09/2025 01:24
+Último login: Nunca
+--------------------------------------------------
+
+Usuario: maria.lopez
+Email: maria.lopez@tusolucion.com
+Tipo: RESPONSABLE
+Nombre completo: María López
+Activo: Sí
+Superusuario: No
+Staff: Sí
+Fecha de registro: 15/09/2025 01:24
+Último login: 15/09/2025 03:07
+--------------------------------------------------
+
+Usuario: responsable1
+Email: responsable1@tusolucion.com
+Tipo: RESPONSABLE
+Nombre completo: Ana López
+Activo: Sí
+Superusuario: No
+Staff: No
+Fecha de registro: 15/09/2025 01:18
+Último login: 15/09/2025 01:20
+--------------------------------------------------
+
+Usuario: Yami
+Email: yamila@gmail.com
+Tipo: CLIENTE
+Nombre completo: Yami fsds
+Activo: Sí
+Superusuario: No
+Staff: No
+Fecha de registro: 15/09/2025 03:51
+Último login: 15/09/2025 03:51
+--------------------------------------------------
+
+
+============================================================
+RESUMEN DE USUARIOS
+============================================================
+Total de usuarios: 17
+Administradores: 2
+Responsables: 3
+Empleados: 5
+Clientes: 7
+Otros/Sin perfil: 0
+============================================================

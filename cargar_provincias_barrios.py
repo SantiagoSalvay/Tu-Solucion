@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 """
 Script para cargar datos de provincias y barrios de Córdoba
 """
@@ -6,7 +6,6 @@ import os
 import sys
 import django
 
-# Configurar Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tu_solucion.settings')
 django.setup()
 
@@ -55,7 +54,7 @@ def cargar_provincias():
                 print(f"ℹ️  Provincia ya existe: {provincia.nombre}")
         except Exception as e:
             print(f"⚠️  Error con provincia {provincia_data['nombre']}: {e}")
-            # Intentar crear solo por nombre si falla por código
+
             try:
                 provincia, created = Provincia.objects.get_or_create(
                     nombre=provincia_data['nombre'],
@@ -164,8 +163,7 @@ def main():
     
     print("\n" + "=" * 50)
     print("✅ Carga completada!")
-    
-    # Mostrar estadísticas
+
     total_provincias = Provincia.objects.count()
     total_barrios = Barrio.objects.count()
     print(f"📊 Total de provincias: {total_provincias}")

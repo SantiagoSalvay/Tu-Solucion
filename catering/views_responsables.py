@@ -8,40 +8,33 @@ from .models import EventoSolicitado, Cliente, Responsable, PerfilUsuario, MenuX
 from .decorators import responsable_required, get_user_profile
 from .forms import EventoForm, EventoResponsableForm, MenuForm, AsignarPersonalForm, CambiarEstadoEventoForm, TrabajadorEventoForm
 
-
 @responsable_required
 def responsable_dashboard(request):
     """
     Dashboard específico para responsables
     """
     perfil = get_user_profile(request.user)
-    
-    # Obtener el responsable asociado al usuario
+
     try:
         responsable = Responsable.objects.get(email=request.user.email)
     except Responsable.DoesNotExist:
         messages.error(request, 'No se encontró información del responsable.')
         return redirect('catering:index')
-    
-    # Obtener eventos del responsable
+
     eventos = EventoSolicitado.objects.filter(id_responsable=responsable).order_by('-fecha')
-    
-    # Estadísticas del responsable
+
     total_eventos = eventos.count()
     eventos_activos = eventos.filter(estado__in=['SOLICITADO', 'CONFIRMADO', 'EN_PROCESO']).count()
     eventos_finalizados = eventos.filter(estado='FINALIZADO').count()
     eventos_cancelados = eventos.filter(estado='CANCELADO').count()
-    
-    # Próximos eventos (próximos 30 días)
+
     eventos_proximos = eventos.filter(
         fecha__gte=timezone.now().date(),
         fecha__lte=timezone.now().date() + timedelta(days=30)
     ).order_by('fecha', 'hora')[:5]
-    
-    # Eventos de hoy
+
     eventos_hoy = eventos.filter(fecha=timezone.now().date()).order_by('hora')
-    
-    # Eventos por estado
+
     eventos_por_estado = eventos.values('estado').annotate(
         count=Count('id_evento')
     ).order_by('estado')
@@ -56,11 +49,10 @@ def responsable_dashboard(request):
         'eventos_proximos': eventos_proximos,
         'eventos_hoy': eventos_hoy,
         'eventos_por_estado': eventos_por_estado,
-        'eventos': eventos[:10],  # Últimos 10 eventos
+        'eventos': eventos[:10],
     }
     
     return render(request, 'catering/responsable_dashboard.html', context)
-
 
 @responsable_required
 def responsable_eventos(request):
@@ -72,8 +64,7 @@ def responsable_eventos(request):
     except Responsable.DoesNotExist:
         messages.error(request, 'No se encontró información del responsable.')
         return redirect('catering:index')
-    
-    # Filtros
+
     estado = request.GET.get('estado', '')
     tipo = request.GET.get('tipo', '')
     fecha_desde = request.GET.get('fecha_desde', '')
@@ -91,8 +82,7 @@ def responsable_eventos(request):
         eventos = eventos.filter(fecha__lte=fecha_hasta)
     
     eventos = eventos.order_by('-fecha')
-    
-    # Opciones para filtros
+
     estados = EventoSolicitado.ESTADO_CHOICES
     tipos = EventoSolicitado.TIPO_EVENTO_CHOICES
     
@@ -111,7 +101,6 @@ def responsable_eventos(request):
     
     return render(request, 'catering/responsable_eventos.html', context)
 
-
 @responsable_required
 def responsable_evento_detail(request, pk):
     """
@@ -124,11 +113,9 @@ def responsable_evento_detail(request, pk):
         return redirect('catering:index')
     
     evento = get_object_or_404(EventoSolicitado, pk=pk, id_responsable=responsable)
-    
-    # Obtener menú del evento
+
     menu_items = evento.menuxproducto_set.all()
-    
-    # Obtener personal asignado
+
     servicios = evento.servicio_set.all()
     
     context = {
@@ -139,7 +126,6 @@ def responsable_evento_detail(request, pk):
     }
     
     return render(request, 'catering/responsable_evento_detail.html', context)
-
 
 @responsable_required
 def responsable_crear_evento(request):
@@ -160,12 +146,11 @@ def responsable_crear_evento(request):
         
         if form.is_valid():
             evento = form.save(commit=False)
-            # Forzar el responsable al responsable logueado (ignorar lo que venga del formulario)
+
             evento.id_responsable = responsable
             evento.estado = 'SOLICITADO'
             evento.save()
-            
-            # Procesar trabajadores asignados
+
             trabajadores_data = request.POST.getlist('trabajadores')
             cantidades_data = request.POST.getlist('cantidades')
             
@@ -174,8 +159,7 @@ def responsable_crear_evento(request):
                     try:
                         personal = Personal.objects.get(id_personal=trabajador_id)
                         cantidad = int(cantidades_data[i])
-                        
-                        # Crear servicio
+
                         Servicio.objects.create(
                             id_evento=evento,
                             id_personal=personal,
@@ -190,7 +174,7 @@ def responsable_crear_evento(request):
     else:
         form = EventoForm()
         trabajador_form = TrabajadorEventoForm()
-        # Pre-llenar el responsable
+
         form.fields['id_responsable'].initial = responsable
     
     context = {
@@ -202,7 +186,6 @@ def responsable_crear_evento(request):
     }
     
     return render(request, 'catering/responsable_crear_evento.html', context)
-
 
 @responsable_required
 def responsable_editar_evento(request, pk):
@@ -235,7 +218,6 @@ def responsable_editar_evento(request, pk):
     
     return render(request, 'catering/responsable_editar_evento.html', context)
 
-
 @responsable_required
 def responsable_asignar_personal(request, evento_id):
     """
@@ -260,8 +242,7 @@ def responsable_asignar_personal(request, evento_id):
             return redirect('catering:responsable_evento_detail', pk=evento.pk)
     else:
         form = AsignarPersonalForm()
-    
-    # Obtener personal ya asignado
+
     personal_asignado = Servicio.objects.filter(id_evento=evento)
     
     context = {
@@ -273,7 +254,6 @@ def responsable_asignar_personal(request, evento_id):
     }
     
     return render(request, 'catering/responsable_asignar_personal.html', context)
-
 
 @responsable_required
 def responsable_cambiar_estado_evento(request, evento_id):
@@ -305,7 +285,6 @@ def responsable_cambiar_estado_evento(request, evento_id):
     }
     
     return render(request, 'catering/responsable_cambiar_estado_evento.html', context)
-
 
 @responsable_required
 def eliminar_personal_asignado(request, servicio_id):

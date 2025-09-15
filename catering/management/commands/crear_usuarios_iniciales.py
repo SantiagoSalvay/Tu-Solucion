@@ -3,13 +3,12 @@ from django.contrib.auth.models import User
 from catering.models import Responsable, Personal, Cliente, PerfilUsuario
 from django.db import transaction
 
-
 class Command(BaseCommand):
     help = 'Crear usuarios iniciales para responsables, personal y clientes'
 
     def handle(self, *args, **options):
         with transaction.atomic():
-            # Crear superusuario admin
+
             if not User.objects.filter(username='admin').exists():
                 admin_user = User.objects.create_superuser(
                     username='admin',
@@ -18,7 +17,7 @@ class Command(BaseCommand):
                     first_name='Administrador',
                     last_name='Sistema'
                 )
-                # Crear perfil de admin
+
                 PerfilUsuario.objects.create(
                     usuario=admin_user,
                     tipo_usuario='ADMIN'
@@ -27,7 +26,6 @@ class Command(BaseCommand):
                     self.style.SUCCESS(f'✅ Superusuario admin creado (password: admin123)')
                 )
 
-            # Crear usuarios para responsables
             responsables = Responsable.objects.all()
             for responsable in responsables:
                 if not User.objects.filter(email=responsable.email).exists():
@@ -39,7 +37,7 @@ class Command(BaseCommand):
                         first_name=responsable.nombre_apellido.split()[0],
                         last_name=' '.join(responsable.nombre_apellido.split()[1:]) if len(responsable.nombre_apellido.split()) > 1 else ''
                     )
-                    # Crear perfil de responsable
+
                     PerfilUsuario.objects.create(
                         usuario=user,
                         tipo_usuario='RESPONSABLE'
@@ -48,7 +46,6 @@ class Command(BaseCommand):
                         self.style.SUCCESS(f'✅ Usuario responsable creado: {username} (password: responsable123)')
                     )
 
-            # Crear usuarios para personal
             personal_list = Personal.objects.all()
             for personal in personal_list:
                 if not User.objects.filter(email=personal.email).exists():
@@ -60,7 +57,7 @@ class Command(BaseCommand):
                         first_name=personal.nombre_y_apellido.split()[0],
                         last_name=' '.join(personal.nombre_y_apellido.split()[1:]) if len(personal.nombre_y_apellido.split()) > 1 else ''
                     )
-                    # Crear perfil de empleado
+
                     PerfilUsuario.objects.create(
                         usuario=user,
                         tipo_usuario='EMPLEADO'
@@ -69,7 +66,6 @@ class Command(BaseCommand):
                         self.style.SUCCESS(f'✅ Usuario empleado creado: {username} (password: empleado123)')
                     )
 
-            # Crear usuarios para clientes existentes
             clientes = Cliente.objects.all()
             for cliente in clientes:
                 if not User.objects.filter(email=cliente.email).exists():
@@ -81,12 +77,12 @@ class Command(BaseCommand):
                         first_name=cliente.nombre,
                         last_name=cliente.apellido
                     )
-                    # Crear perfil de cliente
+
                     PerfilUsuario.objects.create(
                         usuario=user,
                         tipo_usuario='CLIENTE'
                     )
-                    # Asociar cliente con usuario
+
                     cliente.usuario = user
                     cliente.save()
                     self.stdout.write(

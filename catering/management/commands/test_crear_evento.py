@@ -4,7 +4,6 @@ from catering.models import Cliente, Responsable, Comprobante, EventoSolicitado
 from django.utils import timezone
 from datetime import date, time
 
-
 class Command(BaseCommand):
     help = 'Probar la creación de eventos'
 
@@ -12,7 +11,7 @@ class Command(BaseCommand):
         self.stdout.write('🔍 Probando creación de eventos...')
         
         try:
-            # Obtener un cliente y responsable existentes
+
             cliente = Cliente.objects.first()
             responsable = Responsable.objects.first()
             
@@ -26,8 +25,7 @@ class Command(BaseCommand):
             
             self.stdout.write(f'✅ Cliente encontrado: {cliente}')
             self.stdout.write(f'✅ Responsable encontrado: {responsable}')
-            
-            # Crear un comprobante
+
             comprobante = Comprobante.objects.create(
                 id_cliente=cliente,
                 fecha_pedido=timezone.now().date(),
@@ -38,8 +36,7 @@ class Command(BaseCommand):
             )
             
             self.stdout.write(f'✅ Comprobante creado: {comprobante}')
-            
-            # Crear un evento
+
             evento = EventoSolicitado.objects.create(
                 id_cliente=cliente,
                 id_responsable=responsable,
@@ -55,8 +52,7 @@ class Command(BaseCommand):
             self.stdout.write(f'✅ Evento creado: {evento}')
             self.stdout.write(f'✅ Evento ID: {evento.id_evento}')
             self.stdout.write(f'✅ Comprobante ID: {evento.id_comprobante.id_comprobante}')
-            
-            # Limpiar
+
             evento.delete()
             comprobante.delete()
             

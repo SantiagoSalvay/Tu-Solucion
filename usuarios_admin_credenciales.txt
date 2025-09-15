@@ -1,0 +1,18 @@
+============================================================
+CREDENCIALES DE USUARIOS ADMINISTRATIVOS
+============================================================
+
+NOTA: Estas son credenciales de prueba para el sistema.
+Cambiar las contraseñas en producción por seguridad.
+
+⚠️  Usuario admin ya existe
+⚠️  Usuario responsable1 ya existe
+Usuario: responsable2
+Contraseña: resp456
+Email: responsable2@tusolucion.com
+Nombre: María García
+Tipo: RESPONSABLE
+------------------------------
+
+⚠️  Usuario empleado1 ya existe
+⚠️  Usuario empleado2 ya existe

@@ -10,7 +10,6 @@ from .models import (
 )
 from .forms import ClienteForm
 
-
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
     form = ClienteForm
@@ -104,7 +103,6 @@ class ClienteAdmin(admin.ModelAdmin):
             self.message_user(request, f"Se reseteó la contraseña de {reseteados} usuarios exitosamente.")
     resetear_password.short_description = "Resetear contraseñas de usuarios"
 
-
 @admin.register(Responsable)
 class ResponsableAdmin(admin.ModelAdmin):
     list_display = ['id_responsable', 'nombre_apellido', 'telefono', 'email']
@@ -121,13 +119,11 @@ class ResponsableAdmin(admin.ModelAdmin):
         }),
     )
 
-
 @admin.register(TipoProducto)
 class TipoProductoAdmin(admin.ModelAdmin):
     list_display = ['id_tipo_producto', 'descripcion']
     search_fields = ['descripcion']
     readonly_fields = ['id_tipo_producto']
-
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
@@ -146,7 +142,6 @@ class ProductoAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-
 
 @admin.register(Comprobante)
 class ComprobanteAdmin(admin.ModelAdmin):
@@ -171,7 +166,6 @@ class ComprobanteAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-
 
 @admin.register(EventoSolicitado)
 class EventoSolicitadoAdmin(admin.ModelAdmin):
@@ -205,7 +199,6 @@ class EventoSolicitadoAdmin(admin.ModelAdmin):
         }),
     )
 
-
 @admin.register(MenuXTipoProducto)
 class MenuXTipoProductoAdmin(admin.ModelAdmin):
     list_display = ['id_menu', 'id_evento', 'id_tipo_producto', 'id_producto', 'cantidad_producto', 'precio_uni', 'precio_total']
@@ -225,7 +218,6 @@ class MenuXTipoProductoAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-
 
 @admin.register(Senia)
 class SeniaAdmin(admin.ModelAdmin):
@@ -248,7 +240,6 @@ class SeniaAdmin(admin.ModelAdmin):
         }),
     )
 
-
 @admin.register(Personal)
 class PersonalAdmin(admin.ModelAdmin):
     list_display = ['id_personal', 'nombre_y_apellido', 'tipo_personal', 'telefono', 'email', 'estado']
@@ -269,7 +260,6 @@ class PersonalAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-
 
 @admin.register(Servicio)
 class ServicioAdmin(admin.ModelAdmin):
@@ -292,14 +282,11 @@ class ServicioAdmin(admin.ModelAdmin):
         }),
     )
 
-
-# Configuración para extender el admin de User
 class PerfilUsuarioInline(admin.StackedInline):
     model = PerfilUsuario
     can_delete = False
     verbose_name_plural = 'Perfil de Usuario'
     fk_name = 'usuario'
-
 
 class UserAdmin(BaseUserAdmin):
     inlines = (PerfilUsuarioInline,)
@@ -327,7 +314,6 @@ class UserAdmin(BaseUserAdmin):
         except:
             return 'Sin perfil'
     get_estado.short_description = 'Estado'
-
 
 @admin.register(PerfilUsuario)
 class PerfilUsuarioAdmin(admin.ModelAdmin):
@@ -361,13 +347,9 @@ class PerfilUsuarioAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('usuario')
 
-
-# Reemplazar el admin de User con el personalizado
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
-
-# Configuración del sitio de administración
 admin.site.site_header = "Tu Solución - Administración"
 admin.site.site_title = "Tu Solución"
 admin.site.index_title = "Panel de Administración"

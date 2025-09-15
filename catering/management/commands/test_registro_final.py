@@ -8,18 +8,15 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.messages.middleware import MessageMiddleware
 from django.utils import timezone
 
-
 class Command(BaseCommand):
     help = 'Probar el formulario de registro final'
 
     def handle(self, *args, **options):
         self.stdout.write('🔍 Probando formulario de registro final...')
-        
-        # Obtener provincia y barrio reales
+
         cordoba = Provincia.objects.get(nombre='Córdoba')
         centro = Barrio.objects.get(nombre='Centro', provincia=cordoba)
-        
-        # Crear una request simulada
+
         factory = RequestFactory()
         request = factory.post('/registro/', {
             'username': 'test_registro_final',
@@ -34,17 +31,14 @@ class Command(BaseCommand):
             'provincia': str(cordoba.id_provincia),
             'barrio': str(centro.id_barrio)
         })
-        
-        # Agregar middleware necesario
+
         middleware = SessionMiddleware(lambda req: None)
         middleware.process_request(request)
         request.session.save()
-        
-        # Agregar middleware de mensajes
+
         messages_middleware = MessageMiddleware(lambda req: None)
         messages_middleware.process_request(request)
-        
-        # Simular exactamente lo que hace la vista
+
         if request.method == 'POST':
             form = RegistroForm(request.POST)
             self.stdout.write(f'Formulario creado con POST data')
@@ -58,7 +52,7 @@ class Command(BaseCommand):
                 self.stdout.write('\n✅ Formulario válido - creando usuario...')
                 
                 try:
-                    # Crear usuario
+
                     user = User.objects.create_user(
                         username=form.cleaned_data['username'],
                         email=form.cleaned_data['email'],
@@ -67,15 +61,13 @@ class Command(BaseCommand):
                         last_name=form.cleaned_data['apellido']
                     )
                     self.stdout.write('✅ Usuario creado')
-                    
-                    # Crear perfil de usuario
+
                     PerfilUsuario.objects.create(
                         usuario=user,
                         tipo_usuario='CLIENTE'
                     )
                     self.stdout.write('✅ Perfil creado')
-                    
-                    # Crear cliente
+
                     cliente = Cliente.objects.create(
                         nombre=form.cleaned_data['nombre'],
                         apellido=form.cleaned_data['apellido'],
@@ -94,8 +86,7 @@ class Command(BaseCommand):
                     self.stdout.write(f'  Usuario: {user.username}')
                     self.stdout.write(f'  Cliente: {cliente}')
                     self.stdout.write(f'  Domicilio: {cliente.domicilio}')
-                    
-                    # Limpiar
+
                     user.delete()
                     
                 except Exception as e:
