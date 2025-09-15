@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Administrador - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1 class="text-gradient mb-2">Dashboard Administrador</h1>
+                    <p class="text-muted">Panel de control para administradores del sistema</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        <i class="bi bi-shield-check me-1"></i>Administrador
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Generales -->
+    <div class="row mb-5">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-people text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h3 class="text-gradient mb-1">{{ total_usuarios }}</h3>
+                    <p class="text-muted mb-0">Total Usuarios</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person text-success" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h3 class="text-gradient mb-1">{{ total_clientes }}</h3>
+                    <p class="text-muted mb-0">Clientes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person-badge text-warning" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h3 class="text-gradient mb-1">{{ total_personal }}</h3>
+                    <p class="text-muted mb-0">Personal</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-calendar-event text-info" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h3 class="text-gradient mb-1">{{ total_eventos }}</h3>
+                    <p class="text-muted mb-0">Eventos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4 class="text-gradient mb-4">
+                <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+            </h4>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person-plus text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <h6 class="card-title">Crear Usuario</h6>
+                    <p class="card-text text-muted small">Crear usuario administrativo</p>
+                    <a href="{% url 'catering:crear_usuario_admin' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus me-1"></i>Crear
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person-badge text-success" style="font-size: 2rem;"></i>
+                    </div>
+                    <h6 class="card-title">Crear Trabajador</h6>
+                    <p class="card-text text-muted small">Crear trabajador con usuario</p>
+                    <a href="{% url 'catering:crear_trabajador' %}" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus me-1"></i>Crear
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person-check text-warning" style="font-size: 2rem;"></i>
+                    </div>
+                    <h6 class="card-title">Crear Responsable</h6>
+                    <p class="card-text text-muted small">Crear responsable con usuario</p>
+                    <a href="{% url 'catering:crear_responsable' %}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-plus me-1"></i>Crear
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person text-info" style="font-size: 2rem;"></i>
+                    </div>
+                    <h6 class="card-title">Crear Cliente</h6>
+                    <p class="card-text text-muted small">Crear cliente con usuario</p>
+                    <a href="{% url 'catering:crear_cliente' %}" class="btn btn-info btn-sm">
+                        <i class="bi bi-plus me-1"></i>Crear
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enlaces de Gestión -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4 class="text-gradient mb-4">
+                <i class="bi bi-gear me-2"></i>Gestión del Sistema
+            </h4>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-people text-primary" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">Gestión de Usuarios</h6>
+                            <p class="card-text text-muted small mb-0">Administrar todos los usuarios</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'catering:gestion_usuarios' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-person text-success" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">Clientes</h6>
+                            <p class="card-text text-muted small mb-0">Gestionar clientes</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'catering:cliente_list' %}" class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-person-badge text-warning" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">Personal</h6>
+                            <p class="card-text text-muted small mb-0">Gestionar personal</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'catering:personal_list' %}" class="btn btn-outline-warning btn-sm">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-calendar-event text-info" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">Eventos</h6>
+                            <p class="card-text text-muted small mb-0">Gestionar eventos</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'catering:evento_list' %}" class="btn btn-outline-info btn-sm">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-box text-secondary" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">Productos</h6>
+                            <p class="card-text text-muted small mb-0">Gestionar productos</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'catering:productos_list' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-calendar-heart text-danger" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">Consulta de Cumpleaños</h6>
+                            <p class="card-text text-muted small mb-0">Ver reporte de cumpleaños</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'catering:consulta_cumpleanos' %}" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usuarios Recientes -->
+    {% if usuarios_recientes %}
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-gradient mb-4">
+                <i class="bi bi-clock me-2"></i>Usuarios Recientes
+            </h4>
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>Fecha de Registro</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in usuarios_recientes %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-circle me-2 text-primary"></i>
+                                            {{ usuario.username }}
+                                        </div>
+                                    </td>
+                                    <td>{{ usuario.email }}</td>
+                                    <td>{{ usuario.date_joined|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        {% if usuario.is_active %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

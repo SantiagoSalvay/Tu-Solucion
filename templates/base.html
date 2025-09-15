@@ -70,11 +70,7 @@
                                 </a>
                             </li>
                         {% elif user_profile.tipo_usuario == 'EMPLEADO' %}
-                            <li class="nav-item">
-                                <a class="nav-link hover-effect" href="{% url 'catering:trabajador_dashboard' %}">
-                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
-                                </a>
-                            </li>
+                            <!-- Los empleados no tienen dashboard, solo "Mis Servicios" -->
                         {% elif user_profile.tipo_usuario == 'CLIENTE' %}
                             <li class="nav-item">
                                 <a class="nav-link hover-effect" href="{% url 'catering:cliente_dashboard' %}">
@@ -154,20 +150,12 @@
                             </li>
                         {% endif %}
                         
-                        <!-- Menú de Reportes (solo Admin) -->
+                        <!-- Menú de Consultas (solo Admin) -->
                         {% if user_profile.tipo_usuario == 'ADMIN' or user.is_superuser %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle hover-effect" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-graph-up me-1"></i>Reportes
+                            <li class="nav-item">
+                                <a class="nav-link hover-effect" href="{% url 'catering:consulta_cumpleanos' %}">
+                                    <i class="bi bi-calendar-heart me-1"></i>Consulta de Cumpleaños
                                 </a>
-                                <ul class="dropdown-menu" style="background-color: #ffffff; border: 1px solid #dee2e6; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);">
-                                    <li><a class="dropdown-item" href="{% url 'catering:consulta_financiera' %}">
-                                        <i class="bi bi-currency-dollar me-2"></i>Consulta Financiera
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'catering:consulta_barrios' %}">
-                                        <i class="bi bi-geo-alt me-2"></i>Análisis de Barrios
-                                    </a></li>
-                                </ul>
                             </li>
                         {% endif %}
                     {% endif %}
@@ -288,8 +276,8 @@
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{% url 'catering:consulta_financiera' %}" class="footer-link">
-                                <i class="bi bi-graph-up me-2"></i>Reportes
+                            <a href="{% url 'catering:consulta_cumpleanos' %}" class="footer-link">
+                                <i class="bi bi-calendar-heart me-2"></i>Consulta de Cumpleaños
                             </a>
                         </li>
                     </ul>
@@ -312,11 +300,6 @@
                         <li class="mb-2">
                             <a href="{% url 'catering:personal_list' %}" class="footer-link">
                                 <i class="bi bi-person-badge me-2"></i>Personal
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'catering:consulta_barrios' %}" class="footer-link">
-                                <i class="bi bi-geo-alt me-2"></i>Análisis
                             </a>
                         </li>
                         <li class="mb-2">

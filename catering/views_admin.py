@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from .models import PerfilUsuario, Cliente, Personal, Responsable
 from .decorators import admin_required, get_user_profile
-from .forms import CrearUsuarioForm, CrearTrabajadorForm, CrearClienteForm
+from .forms import CrearUsuarioForm, CrearTrabajadorForm, CrearClienteForm, CrearResponsableForm
 
 
 @admin_required
@@ -204,6 +204,57 @@ def crear_cliente(request):
     }
     
     return render(request, 'catering/crear_cliente.html', context)
+
+
+@admin_required
+def crear_responsable(request):
+    """
+    Vista para crear responsables con usuario y contraseña
+    """
+    if request.method == 'POST':
+        form = CrearResponsableForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                # Crear usuario
+                user = User.objects.create_user(
+                    username=form.cleaned_data['username'],
+                    email=form.cleaned_data['email'],
+                    password=form.cleaned_data['password'],
+                    first_name=form.cleaned_data['nombre_apellido'].split()[0] if form.cleaned_data['nombre_apellido'] else '',
+                    last_name=' '.join(form.cleaned_data['nombre_apellido'].split()[1:]) if len(form.cleaned_data['nombre_apellido'].split()) > 1 else '',
+                    is_staff=False,
+                    is_superuser=False
+                )
+                
+                # Crear perfil de usuario
+                PerfilUsuario.objects.create(
+                    usuario=user,
+                    tipo_usuario='RESPONSABLE',
+                    estado='ACTIVO',
+                    telefono=form.cleaned_data['telefono'],
+                    direccion=form.cleaned_data.get('direccion', ''),
+                    notas='Responsable creado por administrador'
+                )
+                
+                # Crear registro de responsable
+                Responsable.objects.create(
+                    nombre_apellido=form.cleaned_data['nombre_apellido'],
+                    telefono=form.cleaned_data['telefono'],
+                    email=form.cleaned_data['email'],
+                    usuario=user
+                )
+                
+                messages.success(request, f'Responsable {form.cleaned_data["nombre_apellido"]} creado exitosamente.')
+                return redirect('catering:admin_dashboard')
+    else:
+        form = CrearResponsableForm()
+    
+    context = {
+        'form': form,
+        'title': 'Crear Responsable',
+    }
+    
+    return render(request, 'catering/crear_responsable.html', context)
 
 
 @admin_required

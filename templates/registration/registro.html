@@ -217,6 +217,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const barrioSelect = document.getElementById('id_barrio');
     
     if (provinciaSelect && barrioSelect) {
+        // Asegurar que el campo barrio sea siempre un select
+        barrioSelect.setAttribute('readonly', 'true');
+        barrioSelect.style.pointerEvents = 'auto';
+        
         provinciaSelect.addEventListener('change', function() {
             const provinciaId = this.value;
             
@@ -259,6 +263,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!provinciaSelect.value) {
             barrioSelect.disabled = true;
         }
+        
+        // Prevenir entrada manual en el campo barrio
+        barrioSelect.addEventListener('keydown', function(e) {
+            e.preventDefault();
+        });
+        
+        barrioSelect.addEventListener('paste', function(e) {
+            e.preventDefault();
+        });
     }
 });
 </script>
