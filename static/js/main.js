@@ -315,6 +315,14 @@ function verificarDisponibilidad(fecha) {
 
 function cargarProductos(tipoProducto) {
     return new Promise((resolve, reject) => {
+        // Verificar si existe el elemento antes de hacer la petición
+        const productoSelect = document.getElementById('id_id_producto');
+        if (!productoSelect) {
+            console.log('ℹ️ Elemento id_id_producto no encontrado, saltando carga de productos');
+            resolve({ productos: [] });
+            return;
+        }
+
         const url = `/api/productos-por-tipo/?tipo_id=${tipoProducto}`;
         
         fetch(url)
@@ -325,9 +333,7 @@ function cargarProductos(tipoProducto) {
                 return response.json();
             })
             .then(data => {
-                
                 // Actualizar el select de productos
-                const productoSelect = document.getElementById('id_id_producto');
                 if (productoSelect) {
                     // Limpiar opciones existentes
                     productoSelect.innerHTML = '<option value="">Seleccione un producto</option>';
@@ -346,14 +352,11 @@ function cargarProductos(tipoProducto) {
                         option.textContent = 'No hay productos disponibles para este tipo';
                         productoSelect.appendChild(option);
                     }
-                } else {
-                    console.error('❌ No se encontró el elemento id_id_producto');
                 }
                 resolve(data);
             })
             .catch(error => {
                 console.error('Error al cargar productos:', error);
-                const productoSelect = document.getElementById('id_id_producto');
                 if (productoSelect) {
                     productoSelect.innerHTML = '<option value="">Error al cargar productos</option>';
                 }

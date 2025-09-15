@@ -377,7 +377,8 @@ class MenuForm(forms.ModelForm):
             else:
                 self.fields['id_producto'].queryset = Producto.objects.none()
         else:
-            self.fields['id_producto'].queryset = Producto.objects.none()  # Inicialmente vacío
+            # Inicialmente mostrar todos los productos disponibles para que la validación funcione
+            self.fields['id_producto'].queryset = Producto.objects.filter(disponible=True)
         
         self.fields['cantidad_producto'].initial = 1
     

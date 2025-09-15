@@ -1084,39 +1084,6 @@ def registro_usuario(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         if form.is_valid():
-<<<<<<< HEAD
-            # Crear usuario
-            user = User.objects.create_user(
-                username=form.cleaned_data['username'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password1'],
-                first_name=form.cleaned_data['nombre'],
-                last_name=form.cleaned_data['apellido']
-            )
-            
-            # Crear perfil de usuario
-            PerfilUsuario.objects.create(
-                usuario=user,
-                tipo_usuario='CLIENTE'
-            )
-            
-            # Crear cliente
-            cliente = Cliente.objects.create(
-                nombre=form.cleaned_data['nombre'],
-                apellido=form.cleaned_data['apellido'],
-                tipo_doc=form.cleaned_data['tipo_doc'],
-                num_doc=form.cleaned_data['num_doc'],
-                email=form.cleaned_data['email'],
-                domicilio=form.cleaned_data['domicilio'],
-                provincia=form.cleaned_data.get('provincia'),
-                barrio=form.cleaned_data.get('barrio'),
-                fecha_alta=timezone.now().date(),
-                usuario=user
-            )
-            
-            messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión con tus credenciales.')
-            return redirect('login')
-=======
             try:
                 # Crear usuario
                 user = User.objects.create_user(
@@ -1140,6 +1107,7 @@ def registro_usuario(request):
                     tipo_doc=form.cleaned_data['tipo_doc'],
                     num_doc=form.cleaned_data['num_doc'],
                     email=form.cleaned_data['email'],
+                    domicilio=form.cleaned_data['domicilio'],
                     provincia=form.cleaned_data.get('provincia'),
                     barrio=form.cleaned_data.get('barrio'),
                     fecha_alta=timezone.now().date(),
@@ -1158,7 +1126,6 @@ def registro_usuario(request):
                 for error in errors:
                     messages.error(request, f'Error en {field}: {error}')
             print(f"Errores del formulario: {form.errors}")  # Para debug
->>>>>>> 4da63c5e624036d1f7d24ecf448e4bd080d7ccc1
     else:
         form = RegistroForm()
     
