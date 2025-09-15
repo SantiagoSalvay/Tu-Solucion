@@ -152,7 +152,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const tipoId = this.value;
             if (tipoId) {
                 // Actualizar campo oculto
-                hiddenTipoProducto.value = tipoId;
+                if (hiddenTipoProducto) {
+                    hiddenTipoProducto.value = tipoId;
+                }
                 
                 // Mostrar loading
                 productoSelect.innerHTML = '<option value="">Cargando productos...</option>';
@@ -164,7 +166,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         // Agregar listener para sincronizar con el campo oculto
                         productoSelect.addEventListener('change', function() {
-                            hiddenProducto.value = this.value;
+                            if (hiddenProducto) {
+                                hiddenProducto.value = this.value;
+                            }
                         });
                     })
                     .catch(error => {
@@ -175,8 +179,12 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 productoSelect.innerHTML = '<option value="">Seleccione un tipo de producto primero</option>';
                 productoSelect.disabled = true;
-                hiddenTipoProducto.value = '';
-                hiddenProducto.value = '';
+                if (hiddenTipoProducto) {
+                    hiddenTipoProducto.value = '';
+                }
+                if (hiddenProducto) {
+                    hiddenProducto.value = '';
+                }
             }
         });
     }

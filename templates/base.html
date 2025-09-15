@@ -57,7 +57,13 @@
                         {% get_user_profile user as user_profile %}
                         
                         <!-- Dashboard según rol -->
-                        {% if user_profile.tipo_usuario == 'RESPONSABLE' %}
+                        {% if user_profile.tipo_usuario == 'ADMIN' or user.is_superuser %}
+                            <li class="nav-item">
+                                <a class="nav-link hover-effect" href="{% url 'catering:admin_dashboard' %}">
+                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                                </a>
+                            </li>
+                        {% elif user_profile.tipo_usuario == 'RESPONSABLE' %}
                             <li class="nav-item">
                                 <a class="nav-link hover-effect" href="{% url 'catering:responsable_dashboard' %}">
                                     <i class="bi bi-speedometer2 me-1"></i>Dashboard
@@ -101,6 +107,9 @@
                                         <li><a class="dropdown-item" href="{% url 'catering:evento_list' %}">
                                             <i class="bi bi-list-ul me-2"></i>Ver Eventos
                                         </a></li>
+                                        <li><a class="dropdown-item" href="{% url 'catering:evento_create' %}">
+                                            <i class="bi bi-plus-circle me-2"></i>Crear Evento
+                                        </a></li>
                                     {% endif %}
                                 </ul>
                             </li>
@@ -108,6 +117,12 @@
                             <li class="nav-item">
                                 <a class="nav-link hover-effect" href="{% url 'catering:trabajador_servicios' %}">
                                     <i class="bi bi-calendar-event me-1"></i>Mis Servicios
+                                </a>
+                            </li>
+                        {% elif user_profile.tipo_usuario == 'CLIENTE' %}
+                            <li class="nav-item">
+                                <a class="nav-link hover-effect" href="{% url 'catering:cliente_eventos' %}">
+                                    <i class="bi bi-calendar-event me-1"></i>Mis Eventos
                                 </a>
                             </li>
                         {% endif %}

@@ -299,7 +299,14 @@ def evento_detail(request, pk):
 
 @login_required
 def evento_create(request):
-    """Crear nuevo evento"""
+    """Crear nuevo evento - Solo Admin y Responsables"""
+    # Verificar permisos
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    if not user_profile or user_profile.tipo_usuario not in ['ADMIN', 'RESPONSABLE']:
+        if not request.user.is_superuser:
+            messages.error(request, 'No tienes permisos para crear eventos. Solo administradores y responsables pueden crear eventos.')
+            return redirect('catering:index')
+    
     if request.method == 'POST':
         form = EventoForm(request.POST)
         if form.is_valid():
@@ -318,8 +325,22 @@ def evento_create(request):
 
 @login_required
 def evento_update(request, pk):
-    """Actualizar evento"""
+    """Actualizar evento - Solo Admin y Responsables"""
     evento = get_object_or_404(EventoSolicitado, pk=pk)
+    
+    # Verificar permisos
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    if not user_profile or user_profile.tipo_usuario not in ['ADMIN', 'RESPONSABLE']:
+        if not request.user.is_superuser:
+            messages.error(request, 'No tienes permisos para editar eventos.')
+            return redirect('catering:evento_detail', pk=pk)
+    
+    # Si es responsable, verificar que el evento esté asignado a él
+    if user_profile and user_profile.tipo_usuario == 'RESPONSABLE':
+        if evento.id_responsable and evento.id_responsable.usuario != request.user:
+            messages.error(request, 'No tienes permisos para editar este evento.')
+            return redirect('catering:evento_detail', pk=pk)
+    
     if request.method == 'POST':
         form = EventoForm(request.POST, instance=evento)
         if form.is_valid():
@@ -340,7 +361,14 @@ def evento_update(request, pk):
 # Vistas de Consultas
 @login_required
 def consulta_financiera(request):
-    """Consulta financiera - Análisis financiero detallado"""
+    """Consulta financiera - Análisis financiero detallado - Solo Admin"""
+    # Verificar permisos
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    if not user_profile or user_profile.tipo_usuario != 'ADMIN':
+        if not request.user.is_superuser:
+            messages.error(request, 'No tienes permisos para acceder a consultas financieras.')
+            return redirect('catering:index')
+    
     from django.db.models import Sum, Count, Avg
     from decimal import Decimal
     
@@ -431,7 +459,14 @@ def consulta_financiera(request):
 
 @login_required
 def consulta_barrios(request):
-    """Consulta de marketing - Análisis de barrios más solicitados"""
+    """Consulta de marketing - Análisis de barrios más solicitados - Solo Admin"""
+    # Verificar permisos
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    if not user_profile or user_profile.tipo_usuario != 'ADMIN':
+        if not request.user.is_superuser:
+            messages.error(request, 'No tienes permisos para acceder a consultas de marketing.')
+            return redirect('catering:index')
+    
     from decimal import Decimal
     
     # Filtros
@@ -542,7 +577,14 @@ def consulta_barrios(request):
 
 @login_required
 def consulta_cumpleanos(request):
-    """Consulta de marketing - Reporte de cumpleaños para recordatorios"""
+    """Consulta de marketing - Reporte de cumpleaños para recordatorios - Solo Admin"""
+    # Verificar permisos
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    if not user_profile or user_profile.tipo_usuario != 'ADMIN':
+        if not request.user.is_superuser:
+            messages.error(request, 'No tienes permisos para acceder a consultas de marketing.')
+            return redirect('catering:index')
+    
     from decimal import Decimal
     
     # Filtros
@@ -708,7 +750,14 @@ def personal_detail(request, pk):
 
 @login_required
 def personal_create(request):
-    """Crear nuevo miembro del personal"""
+    """Crear nuevo miembro del personal - Solo Admin"""
+    # Verificar permisos
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    if not user_profile or user_profile.tipo_usuario != 'ADMIN':
+        if not request.user.is_superuser:
+            messages.error(request, 'No tienes permisos para crear personal. Solo administradores pueden gestionar personal.')
+            return redirect('catering:index')
+    
     if request.method == 'POST':
         form = PersonalForm(request.POST)
         if form.is_valid():
@@ -850,7 +899,7 @@ def productos_list(request):
     if tipo_filter:
         productos = productos.filter(id_tipo_producto_id=tipo_filter)
     
-    if disponible_filter is not None:
+    if disponible_filter is not None and disponible_filter != '':
         productos = productos.filter(disponible=disponible_filter == 'true')
     
     tipos_producto = TipoProducto.objects.all()
@@ -858,6 +907,10 @@ def productos_list(request):
     context = {
         'productos': productos,
         'tipos_producto': tipos_producto,
+        'filtros': {
+            'tipo': tipo_filter,
+            'disponible': disponible_filter,
+        },
         'title': 'Lista de Productos'
     }
     return render(request, 'catering/productos_list.html', context)
@@ -865,7 +918,14 @@ def productos_list(request):
 
 @login_required
 def producto_create(request):
-    """Crear un nuevo producto"""
+    """Crear un nuevo producto - Solo Admin y Responsables"""
+    # Verificar permisos
+    user_profile = getattr(request.user, 'perfilusuario', None)
+    if not user_profile or user_profile.tipo_usuario not in ['ADMIN', 'RESPONSABLE']:
+        if not request.user.is_superuser:
+            messages.error(request, 'No tienes permisos para crear productos.')
+            return redirect('catering:index')
+    
     if request.method == 'POST':
         form = ProductoForm(request.POST)
         if form.is_valid():
@@ -1100,36 +1160,42 @@ def editar_menu(request, evento_id):
     if request.method == 'POST':
         form = MenuForm(request.POST)
         if form.is_valid():
-            # Verificar si ya existe un producto del mismo tipo para este evento
-            producto_existente = MenuXTipoProducto.objects.filter(
-                id_evento=evento,
-                id_tipo_producto=form.cleaned_data['id_tipo_producto'],
-                id_producto=form.cleaned_data['id_producto']
-            ).first()
-            
-            if producto_existente:
-                # Si existe, actualizar la cantidad
-                producto_existente.cantidad_producto += form.cleaned_data['cantidad_producto']
-                producto_existente.precio_total = producto_existente.precio_uni * producto_existente.cantidad_producto
-                producto_existente.save()
-                messages.success(request, 'Cantidad del producto actualizada exitosamente.')
-            else:
-                # Si no existe, crear uno nuevo
-                menu_item = form.save(commit=False)
-                menu_item.id_evento = evento
-                menu_item.precio_uni = menu_item.id_producto.precio
-                menu_item.precio_total = menu_item.precio_uni * menu_item.cantidad_producto
-                menu_item.save()
-                messages.success(request, 'Producto agregado al menú exitosamente.')
-            
-            # Actualizar comprobante
-            actualizar_comprobante(evento)
-            return redirect('catering:editar_menu', evento_id=evento_id)
+            try:
+                # Verificar si ya existe un producto del mismo tipo para este evento
+                producto_existente = MenuXTipoProducto.objects.filter(
+                    id_evento=evento,
+                    id_tipo_producto=form.cleaned_data['id_tipo_producto'],
+                    id_producto=form.cleaned_data['id_producto']
+                ).first()
+                
+                if producto_existente:
+                    # Si existe, actualizar la cantidad
+                    producto_existente.cantidad_producto += form.cleaned_data['cantidad_producto']
+                    producto_existente.precio_total = producto_existente.precio_uni * producto_existente.cantidad_producto
+                    producto_existente.save()
+                    messages.success(request, 'Cantidad del producto actualizada exitosamente.')
+                else:
+                    # Si no existe, crear uno nuevo
+                    menu_item = form.save(commit=False)
+                    menu_item.id_evento = evento
+                    menu_item.precio_uni = menu_item.id_producto.precio
+                    menu_item.precio_total = menu_item.precio_uni * menu_item.cantidad_producto
+                    menu_item.save()
+                    messages.success(request, 'Producto agregado al menú exitosamente.')
+                
+                # Actualizar comprobante
+                actualizar_comprobante(evento)
+                return redirect('catering:editar_menu', evento_id=evento_id)
+                
+            except Exception as e:
+                messages.error(request, f'Error al agregar producto al menú: {str(e)}')
+                print(f"Error en editar_menu: {e}")  # Para debug
         else:
             # Si el formulario no es válido, mostrar errores
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f'Error en {field}: {error}')
+            print(f"Errores del formulario: {form.errors}")  # Para debug
     else:
         form = MenuForm()
     

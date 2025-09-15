@@ -380,6 +380,19 @@ class MenuForm(forms.ModelForm):
             self.fields['id_producto'].queryset = Producto.objects.none()  # Inicialmente vacío
         
         self.fields['cantidad_producto'].initial = 1
+    
+    def clean(self):
+        """Validación personalizada del formulario"""
+        cleaned_data = super().clean()
+        id_tipo_producto = cleaned_data.get('id_tipo_producto')
+        id_producto = cleaned_data.get('id_producto')
+        
+        # Verificar que el producto pertenezca al tipo seleccionado
+        if id_tipo_producto and id_producto:
+            if id_producto.id_tipo_producto != id_tipo_producto:
+                raise ValidationError('El producto seleccionado no pertenece al tipo de producto elegido.')
+        
+        return cleaned_data
 
 
 class ComprobanteForm(forms.ModelForm):
